@@ -37,6 +37,7 @@ export default function CategoryList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
   const [form, setForm] = useState({
     category_title: "",
     category_type: "Dynamic Tab",
@@ -153,6 +154,7 @@ export default function CategoryList() {
         status: "active",
       });
     }
+    setFormErrors({});
     setModalOpen(true);
   };
 
@@ -162,11 +164,23 @@ export default function CategoryList() {
       ...prev,
       [name]: name === "sequence" || name === "visibility" ? Number(value) : value,
     }));
+    if (formErrors[name]) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSaveCategory = async (e) => {
     e.preventDefault();
-    if (!form.category_title.trim()) return toast.error("Category Title is required");
+    const newErrors = {};
+    if (!form.category_title.trim()) newErrors.category_title = "Category Title is required";
+    if (Object.keys(newErrors).length > 0) {
+      setFormErrors(newErrors);
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -379,7 +393,7 @@ export default function CategoryList() {
             className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl transform transition-all relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <form onSubmit={handleSaveCategory}>
+            <form onSubmit={handleSaveCategory} noValidate>
               {/* Modal Header */}
               <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white">
@@ -408,7 +422,8 @@ export default function CategoryList() {
                     onChange={handleFormChange}
                     placeholder="e.g. Press Releases"
                     disabled={submitting}
-                    required
+                    error={!!formErrors.category_title}
+                    errorMessage={formErrors.category_title}
                   />
                 </div>
 

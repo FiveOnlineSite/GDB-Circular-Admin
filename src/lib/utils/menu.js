@@ -35,14 +35,16 @@ export const MenuItems = [
     icon: Users,
     url: '/users',
     allowedRoles: [1, 2],
-    module: 'users'
+    module: 'users',
+    action: 'view'
   },
   {
     title: 'Roles & Permissions',
     icon: Shield,
     url: '/role-permissions',
     allowedRoles: [1, 2],
-    module: 'roles'
+    module: 'roles',
+    action: 'view'
   },
   {
     title: 'Global Content',
@@ -57,42 +59,48 @@ export const MenuItems = [
         url: '/global-content/seo',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'globalContent'
+        module: 'globalContent',
+        action: 'seo.view'
       },
       {
         title: 'Contact & Footer',
         icon: Phone,
         url: '/global-content/footer',
         allowedRoles: [1, 2],
-        module: 'globalContent'
+        module: 'globalContent',
+        action: 'footer.view'
       },
       {
         title: 'Certificates',
         icon: Award,
         url: '/global-content/certificates',
         allowedRoles: [1, 2],
-        module: 'globalContent'
+        module: 'globalContent',
+        action: 'certificates.view'
       },
       {
         title: 'Inquiries',
         icon: MessageSquare,
         url: '/global-content/inquiries',
         allowedRoles: [1, 2],
-        module: 'globalContent'
+        module: 'globalContent',
+        action: 'inquiries.view'
       },
       {
         title: 'FAQs',
         icon: HelpCircle,
         url: '/global-content/faqs',
         allowedRoles: [1, 2],
-        module: 'globalContent'
+        module: 'globalContent',
+        action: 'faq.view'
       },
       {
         title: 'Banners',
         icon: Image,
         url: '/global-content/banners',
         allowedRoles: [1, 2],
-        module: 'globalContent'
+        module: 'globalContent',
+        action: 'banner.view'
       },
     ]
   },
@@ -109,7 +117,8 @@ export const MenuItems = [
         url: '/homepage-management/stats',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'homepage'
+        module: 'homepage',
+        action: 'stats.view'
       },
       {
         title: 'Process Section',
@@ -117,7 +126,8 @@ export const MenuItems = [
         url: '/homepage-management/process',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'homepage'
+        module: 'homepage',
+        action: 'process.view'
       },
       {
         title: 'Why Choose Us',
@@ -125,7 +135,8 @@ export const MenuItems = [
         url: '/homepage-management/whychoose',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'homepage'
+        module: 'homepage',
+        action: 'whychoose.view'
       },
     ]
   },
@@ -142,7 +153,8 @@ export const MenuItems = [
         url: '/product-listing/catalogue',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'product'
+        module: 'product',
+        action: 'catalogue.view'
       },
       {
         title: 'Logistics Support',
@@ -150,7 +162,8 @@ export const MenuItems = [
         url: '/product-listing/logistics-support',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'product'
+        module: 'product',
+        action: 'logistics.view'
       },
       {
         title: 'Case Study',
@@ -158,7 +171,8 @@ export const MenuItems = [
         url: '/product-listing/case-study',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'product'
+        module: 'product',
+        action: 'casestudy.view'
       },
     ]
   },
@@ -175,7 +189,8 @@ export const MenuItems = [
         url: '/about-gdb/overview',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'about'
+        module: 'about',
+        action: 'overview.view'
       },
       {
         title: 'Journey Timeline',
@@ -183,7 +198,8 @@ export const MenuItems = [
         url: '/about-gdb/journey-timeline',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'about'
+        module: 'about',
+        action: 'timeline.view'
       },
       {
         title: 'Why Industry Chooses GDB PCR',
@@ -191,7 +207,8 @@ export const MenuItems = [
         url: '/about-gdb/why-industry-chooses-gdb-pcr',
         exact: true,
         allowedRoles: [1, 2],
-        module: 'about'
+        module: 'about',
+        action: 'industry.view'
       },
     ]
   },
@@ -290,7 +307,8 @@ export const MenuItems = [
       icon: Building,
       url: '/facilities',
       allowedRoles: [1, 2],
-      module: 'facilities'
+      module: 'facilities',
+      action: 'view'
     },
   {
     title: 'Settings',

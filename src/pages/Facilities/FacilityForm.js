@@ -16,25 +16,58 @@ export default function FacilityForm() {
 
   const [form, setForm] = useState({ facility_name: "", facility_type: "", address: "", phone: "", state: "", latitude: "", longitude: "", image_url: "", image_alt: "", sequence: 0, status: "active" });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => { if (isEdit || isView) { setLoading(true); getFacility(id).then(r => { setForm(r); }).catch(()=>toast.error('Failed to load')).finally(()=>setLoading(false)); } }, [id, isEdit, isView]);
+
+  const updateField = (field, value) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isView) return;
-    // basic validation
-    if (!form.facility_name || !form.facility_type || !form.address || !form.phone || !form.state || !form.latitude || !form.longitude || !form.image_alt) { toast.error('Please fill required fields'); return; }
+
+    const newErrors = {};
+    if (!form.facility_name.trim()) newErrors.facility_name = "Facility Name is required";
+    if (!form.facility_type.trim()) newErrors.facility_type = "Facility Type is required";
+    if (!form.address.trim()) newErrors.address = "Address is required";
+    if (!form.phone.trim()) newErrors.phone = "Phone is required";
+    if (!form.state.trim()) newErrors.state = "State is required";
+    if (!String(form.latitude).trim()) newErrors.latitude = "Latitude is required";
+    if (!String(form.longitude).trim()) newErrors.longitude = "Longitude is required";
+    if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
+    if (!form.image_url) newErrors.image_url = "Image Upload is required";
+
     const mobileRegex = /^\+?[0-9\s-]{8,15}$/;
-    if (!mobileRegex.test(form.phone.trim())) {
-      toast.error('Please enter a valid phone number');
+    if (form.phone.trim() && !mobileRegex.test(form.phone.trim())) {
+      newErrors.phone = "Please enter a valid phone number";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+
     try {
       setLoading(true);
       if (isEdit) await updateFacility(id, form); else await createFacility(form);
       toast.success('Saved');
       navigate('/facilities');
-    } catch (e) { toast.error(e.response?.data?.message || 'Save failed'); }
+    } catch (e) {
+      const apiErrors = e.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors(apiErrors);
+      }
+      toast.error(e.response?.data?.message || 'Save failed');
+    }
     finally { setLoading(false); }
   };
 
@@ -46,59 +79,64 @@ export default function FacilityForm() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-6 ">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
             <label className="text-sm font-semibold text-slate-600 block mb-1">Facility Name <span className="text-red-500">*</span></label>
-            <Input value={form.facility_name} onChange={e=>setForm(f=>({...f, facility_name: e.target.value}))} required disabled={isView} />
+            <Input value={form.facility_name} onChange={e=>updateField("facility_name", e.target.value)} error={!!errors.facility_name} errorMessage={errors.facility_name} disabled={isView} />
           </div>
 
           <div>
             <label className="text-sm font-semibold text-slate-600 block mb-1">Facility Type <span className="text-red-500">*</span></label>
-            <Input value={form.facility_type} onChange={e=>setForm(f=>({...f, facility_type: e.target.value}))} required disabled={isView} />
+            <Input value={form.facility_type} onChange={e=>updateField("facility_type", e.target.value)} error={!!errors.facility_type} errorMessage={errors.facility_type} disabled={isView} />
           </div>
 
           <div>
             <label className="text-sm font-semibold text-slate-600 block mb-1">Address <span className="text-red-500">*</span></label>
-            <Textarea value={form.address} onChange={e=>setForm(f=>({...f, address: e.target.value}))} required disabled={isView} />
+            <Textarea value={form.address} onChange={e=>updateField("address", e.target.value)} error={!!errors.address} errorMessage={errors.address} disabled={isView} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold text-slate-600 block mb-1">Phone <span className="text-red-500">*</span></label>
-              <Input value={form.phone} onChange={e=>setForm(f=>({...f, phone: e.target.value}))} required disabled={isView} />
+              <Input value={form.phone} onChange={e=>updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 block mb-1">State <span className="text-red-500">*</span></label>
-              <Input value={form.state} onChange={e=>setForm(f=>({...f, state: e.target.value}))} required disabled={isView} />
+              <Input value={form.state} onChange={e=>updateField("state", e.target.value)} error={!!errors.state} errorMessage={errors.state} disabled={isView} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude <span className="text-red-500">*</span></label>
-              <Input value={form.latitude} onChange={e=>setForm(f=>({...f, latitude: e.target.value}))} required disabled={isView} />
+              <Input value={form.latitude} onChange={e=>updateField("latitude", e.target.value)} error={!!errors.latitude} errorMessage={errors.latitude} disabled={isView} />
             </div>
             <div>
                 <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude <span className="text-red-500">*</span></label>
-                <Input value={form.longitude} onChange={e=>setForm(f=>({...f, longitude: e.target.value}))} required disabled={isView} />
+                <Input value={form.longitude} onChange={e=>updateField("longitude", e.target.value)} error={!!errors.longitude} errorMessage={errors.longitude} disabled={isView} />
             </div>
           </div>
 
           <div>
             <label className="text-sm font-semibold text-slate-600 block mb-1">Image Alt Text <span className="text-red-500">*</span></label>
-            <Input value={form.image_alt} onChange={e=>setForm(f=>({...f, image_alt: e.target.value}))} required disabled={isView} />
+            <Input value={form.image_alt} onChange={e=>updateField("image_alt", e.target.value)} error={!!errors.image_alt} errorMessage={errors.image_alt} disabled={isView} />
           </div>
 
           <div>
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image Upload <span className="text-red-500">*</span></label>
             <Upload
               value={form.image_url}
-              onChange={(url) => setForm(f => ({ ...f, image_url: url }))}
+              onChange={(url) => updateField("image_url", url)}
               mediaType="image"
               accept="image/*"
               maxSizeKB={500}
               disabled={isView}
             />
+            {errors.image_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.image_url}
+              </span>
+            )}
           </div>
 
           <div>

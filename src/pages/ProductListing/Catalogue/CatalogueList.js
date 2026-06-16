@@ -106,7 +106,7 @@ export default function CatalogueList() {
           >
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
-          {hasPermission("product", "update") && (
+          {hasPermission("product", "catalogue.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -117,7 +117,7 @@ export default function CatalogueList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("product", "update") && (
+          {hasPermission("product", "catalogue.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -128,7 +128,7 @@ export default function CatalogueList() {
               {row.status === "active" ? <ToggleRight className="h-4 w-4 text-green-600" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
             </Button>
           )}
-          {hasPermission("product", "delete") && (
+          {hasPermission("product", "catalogue.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -151,7 +151,7 @@ export default function CatalogueList() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Product Catalogue</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage products by category — LDPE, HDPE, PP</p>
         </div>
-        {hasPermission("product", "create") && (
+        {hasPermission("product", "catalogue.create") && (
           <Button onClick={() => navigate("/product-listing/catalogue/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add Product
           </Button>

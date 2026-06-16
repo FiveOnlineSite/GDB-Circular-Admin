@@ -20,6 +20,7 @@ export default function NewsFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     category_id: "",
@@ -99,6 +100,13 @@ export default function NewsFormPage() {
           ? Number(value)
           : value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleImageUpload = (url) => {
@@ -106,26 +114,38 @@ export default function NewsFormPage() {
       ...prev,
       image_url: url,
     }));
+    if (errors.image_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.image_url;
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isView) return;
 
-    // Validation
-    if (!form.category_id) return toast.error("Category Selection is required");
-    if (!form.title.trim()) return toast.error("Title is required");
-    if (!form.date) return toast.error("Publish Date is required");
-    if (!form.short_description.trim()) return toast.error("Short Description is required");
-    if (!form.image_url) return toast.error("Cover Image is required");
-    if (!form.image_alt.trim()) return toast.error("Image Alt Text is required");
+    const newErrors = {};
+    if (!form.category_id) newErrors.category_id = "Category Selection is required";
+    if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!form.date) newErrors.date = "Publish Date is required";
+    if (!form.short_description.trim()) newErrors.short_description = "Short Description is required";
+    if (!form.image_url) newErrors.image_url = "Cover Image is required";
+    if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
 
     if (form.external_url) {
       try {
         new URL(form.external_url);
       } catch (_) {
-        return toast.error("External URL format is invalid. Ensure it begins with http:// or https://");
+        newErrors.external_url = "External URL format is invalid. Ensure it begins with http:// or https://";
       }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
     try {
@@ -188,7 +208,7 @@ export default function NewsFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
             Article Specifications
@@ -206,8 +226,7 @@ export default function NewsFormPage() {
                   value={form.category_id}
                   onChange={handleChange}
                   disabled={isView}
-                  className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
-                  required
+                  className={`w-full border ${errors.category_id ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55`}
                 >
                   <option value="">Select Category</option>
                   {categories.map((cat) => (
@@ -216,6 +235,11 @@ export default function NewsFormPage() {
                     </option>
                   ))}
                 </select>
+                {errors.category_id && (
+                  <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                    {errors.category_id}
+                  </span>
+                )}
               </div>
 
               {/* Title */}
@@ -229,7 +253,8 @@ export default function NewsFormPage() {
                   onChange={handleChange}
                   placeholder="e.g. GDB Expands Recycling Plant Capabilities"
                   disabled={isView}
-                  required
+                  error={!!errors.title}
+                  errorMessage={errors.title}
                 />
               </div>
             </div>
@@ -246,7 +271,8 @@ export default function NewsFormPage() {
                   value={form.date}
                   onChange={handleChange}
                   disabled={isView}
-                  required
+                  error={!!errors.date}
+                  errorMessage={errors.date}
                 />
               </div>
 
@@ -261,6 +287,8 @@ export default function NewsFormPage() {
                   onChange={handleChange}
                   placeholder="e.g. https://www.recyclingtoday.com/gdb-circular-press"
                   disabled={isView}
+                  error={!!errors.external_url}
+                  errorMessage={errors.external_url}
                 />
               </div>
             </div>
@@ -278,7 +306,8 @@ export default function NewsFormPage() {
                 disabled={isView}
                 rows={3}
                 className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
-                required
+                error={!!errors.short_description}
+                errorMessage={errors.short_description}
               />
             </div>
 
@@ -377,6 +406,11 @@ export default function NewsFormPage() {
               maxSizeKB={500}
               disabled={isView}
             />
+            {errors.image_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.image_url}
+              </span>
+            )}
           </div>
 
           <div>
@@ -389,7 +423,8 @@ export default function NewsFormPage() {
               onChange={handleChange}
               placeholder="e.g. Front view of GDB Circular office building"
               disabled={isView}
-              required
+              error={!!errors.image_alt}
+              errorMessage={errors.image_alt}
             />
           </div>
         </div>

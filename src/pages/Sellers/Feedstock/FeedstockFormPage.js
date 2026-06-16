@@ -18,6 +18,7 @@ export default function FeedstockFormPage() {
 
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     feedstock_category: "LDPE",
@@ -68,6 +69,13 @@ export default function FeedstockFormPage() {
       ...prev,
       [name]: name === "sequence" ? Number(value) : value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleImageUpload = (url) => {
@@ -75,6 +83,13 @@ export default function FeedstockFormPage() {
       ...prev,
       image_url: url,
     }));
+    if (errors.image_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.image_url;
+        return next;
+      });
+    }
   };
 
   const handlePdfUpload = (url) => {
@@ -82,18 +97,30 @@ export default function FeedstockFormPage() {
       ...prev,
       pdf_url: url,
     }));
+    if (errors.pdf_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.pdf_url;
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isView) return;
 
-    // Validate fields
-    if (!form.material_name.trim()) return toast.error("Material Name is required");
-    if (!form.short_description.trim()) return toast.error("Short Description is required");
-    if (!form.image_url) return toast.error("Material Image is required");
-    if (!form.image_alt.trim()) return toast.error("Image Alt Text is required");
-    if (!form.pdf_url) return toast.error("PDF Specification Document is required");
+    const newErrors = {};
+    if (!form.material_name.trim()) newErrors.material_name = "Material Name is required";
+    if (!form.short_description.trim()) newErrors.short_description = "Short Description is required";
+    if (!form.image_url) newErrors.image_url = "Material Image is required";
+    if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
+    if (!form.pdf_url) newErrors.pdf_url = "PDF Specification Document is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -154,7 +181,7 @@ export default function FeedstockFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
             Material Specification Details
@@ -191,7 +218,8 @@ export default function FeedstockFormPage() {
                   onChange={handleChange}
                   placeholder="e.g. PP Copolymer Regrind"
                   disabled={isView}
-                  required
+                  error={!!errors.material_name}
+                  errorMessage={errors.material_name}
                 />
               </div>
             </div>
@@ -209,7 +237,8 @@ export default function FeedstockFormPage() {
                 disabled={isView}
                 rows={3}
                 className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
-                required
+                error={!!errors.short_description}
+                errorMessage={errors.short_description}
               />
             </div>
 
@@ -267,6 +296,11 @@ export default function FeedstockFormPage() {
               maxSizeKB={500}
               disabled={isView}
             />
+            {errors.image_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.image_url}
+              </span>
+            )}
           </div>
 
           <div>
@@ -279,7 +313,8 @@ export default function FeedstockFormPage() {
               onChange={handleChange}
               placeholder="e.g. Pile of grey PP Copolymer regrind flakes"
               disabled={isView}
-              required
+              error={!!errors.image_alt}
+              errorMessage={errors.image_alt}
             />
           </div>
         </div>
@@ -301,6 +336,11 @@ export default function FeedstockFormPage() {
               accept="application/pdf"
               disabled={isView}
             />
+            {errors.pdf_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.pdf_url}
+              </span>
+            )}
             {form.pdf_url && (
               <div className="mt-2 flex items-center">
                 <FileText size={16} className="text-[#981B1F] mr-1.5" />

@@ -91,7 +91,7 @@ export default function CertificateList() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("globalContent", "update") && (
+          {hasPermission("globalContent", "certificates.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -101,7 +101,7 @@ export default function CertificateList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("globalContent", "delete") && (
+          {hasPermission("globalContent", "certificates.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -123,7 +123,7 @@ export default function CertificateList() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Certificates / Trust Logos</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage trust badges and certifications shown on the site</p>
         </div>
-        {hasPermission("globalContent", "create") && (
+        {hasPermission("globalContent", "certificates.create") && (
           <Button onClick={() => navigate("/global-content/certificates/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add Certificate
           </Button>

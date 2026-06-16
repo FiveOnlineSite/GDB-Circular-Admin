@@ -85,7 +85,7 @@ export default function BannerList() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("globalContent", "update") && (
+          {hasPermission("globalContent", "banner.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -95,7 +95,7 @@ export default function BannerList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("globalContent", "delete") && (
+          {hasPermission("globalContent", "banner.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -117,7 +117,7 @@ export default function BannerList() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Banner Management</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage page banners with images, videos, and CTA buttons</p>
         </div>
-        {hasPermission("globalContent", "create") && (
+        {hasPermission("globalContent", "banner.create") && (
           <Button onClick={() => navigate("/global-content/banners/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add Banner
           </Button>

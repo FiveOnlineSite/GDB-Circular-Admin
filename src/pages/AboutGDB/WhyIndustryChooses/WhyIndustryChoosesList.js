@@ -121,7 +121,7 @@ export default function WhyIndustryChoosesList() {
       width: 120,
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("about", "update") && (
+          {hasPermission("about", "industry.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -131,7 +131,7 @@ export default function WhyIndustryChoosesList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("about", "delete") && (
+          {hasPermission("about", "industry.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -153,7 +153,7 @@ export default function WhyIndustryChoosesList() {
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Why Industry Chooses GDB PCR</h1>
           <p className="text-slate-500 text-sm mt-1">Manage the reasons why the industry chooses GDB PCR</p>
         </div>
-        {hasPermission("about", "create") && (
+        {hasPermission("about", "industry.create") && (
           <Button
             onClick={() => navigate("/about-gdb/why-industry-chooses-gdb-pcr/create")}
             className="bg-[#981B1F] hover:bg-[#7a1619] text-white gap-2"
@@ -165,7 +165,7 @@ export default function WhyIndustryChoosesList() {
       </div>
 
       {/* Section Edit Panel */}
-      {hasPermission("about", "update") && !sectionLoading && (
+      {hasPermission("about", "industry.update") && !sectionLoading && (
         !isEditingSection && (section.section_title || section.section_description) ? (
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">

@@ -48,16 +48,18 @@ const Sidebar = () => {
       return item.allowedRoles.includes(1);
     }
 
-    // 4. Role-based check (System Roles: Builder=2, User=3)
-    if (roleId && item.allowedRoles.includes(roleId)) {
-      return true;
-    }
-
-    // 5. Dynamic/Custom Roles: Check module permissions
+    // 4. Non-Super Admin roles are controlled by assigned permissions
     if (item.module) {
       // If we have a hasPermission function, use it
       if (typeof hasPermission === 'function') {
-        return hasPermission(item.module, "view");
+        if (item.subItems && item.subItems.length > 0) {
+          return item.subItems.some((subItem) =>
+            subItem.module && subItem.action
+              ? hasPermission(subItem.module, subItem.action)
+              : hasPermission(subItem.module || item.module)
+          );
+        }
+        return hasPermission(item.module, item.action || "view");
       }
     }
 
@@ -98,19 +100,17 @@ const Sidebar = () => {
         {/* Logo Header */}
         <Link
           to='/dashboard'
-          className={`flex items-center ${isOpen ? 'px-4 pt-4' : 'p-2 '} hover:opacity-80 transition-opacity cursor-pointer border-b border-slate-100 `}
+          className={`flex items-center ${isOpen ? 'px-4 pt-4' : 'p-2 '} hover:opacity-80  justify-center transition-opacity cursor-pointer border-b border-slate-100 `}
         >
           {isOpen ? (
             <div className="flex items-center gap-2 overflow-hidden">
               <img
                 src={theme.logo_url}
                 alt={theme.company_name}
-                className={`h-auto max-h-[60px] ${theme.company_name !== 'BuilderSaaS' ? 'w-fit' : 'w-full'} object-contain max-w-[200px]`}
+                className={`h-auto max-h-[60px] w-full object-contain max-w-[200px]`}
                 onError={(e) => { e.target.src = '/logo.svg'; }}
               />
-              {theme.company_name !== 'BuilderSaaS' && (
-                <span className="text-sm font-black text-slate-800 truncate">{theme.company_name}</span>
-              )}
+             
             </div>
           ) : (
             <img

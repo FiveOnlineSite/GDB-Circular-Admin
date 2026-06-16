@@ -81,7 +81,7 @@ export default function CaseStudyList() {
           >
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
-          {hasPermission("product", "update") && (
+          {hasPermission("product", "casestudy.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -92,7 +92,7 @@ export default function CaseStudyList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("product", "delete") && (
+          {hasPermission("product", "casestudy.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -115,7 +115,7 @@ export default function CaseStudyList() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Case Studies</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage customer case studies and success stories</p>
         </div>
-        {hasPermission("product", "create") && (
+        {hasPermission("product", "casestudy.create") && (
           <Button onClick={() => navigate("/product-listing/case-study/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add Case Study
           </Button>

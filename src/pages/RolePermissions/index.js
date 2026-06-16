@@ -131,6 +131,9 @@ export default function RolePermissions() {
   };
 
   const handleOpenPermissionsModal = (role) => {
+    if (role.name === "Super Admin") {
+      return;
+    }
     setSelectedRole(role);
     setSelectedPermissionIds(role.permissionIds || []);
     setPermissionModalOpen(true);
@@ -215,10 +218,12 @@ export default function RolePermissions() {
                 variant="outline"
                 size="sm"
                 className="h-8 px-2 border-slate-200 text-slate-700"
+                disabled={isSuperAdmin}
                 onClick={() => handleOpenPermissionsModal(role)}
+                title={isSuperAdmin ? "Super Admin has all permissions by default" : "Manage permissions"}
               >
                 <Key className="h-4 w-4 mr-1 text-[#C3662D]" />
-                Permissions
+                {isSuperAdmin ? "Full Access" : "Permissions"}
               </Button>
             )}
             {!isSuperAdmin && hasPermission("role.update") && (

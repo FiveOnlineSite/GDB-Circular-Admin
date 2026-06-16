@@ -78,7 +78,7 @@ export default function FaqList() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("globalContent", "update") && (
+          {hasPermission("globalContent", "faq.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -88,7 +88,7 @@ export default function FaqList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("globalContent", "delete") && (
+          {hasPermission("globalContent", "faq.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -110,7 +110,7 @@ export default function FaqList() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">FAQ Management</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage frequently asked questions by page</p>
         </div>
-        {hasPermission("globalContent", "create") && (
+        {hasPermission("globalContent", "faq.create") && (
           <Button onClick={() => navigate("/global-content/faqs/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add FAQ
           </Button>

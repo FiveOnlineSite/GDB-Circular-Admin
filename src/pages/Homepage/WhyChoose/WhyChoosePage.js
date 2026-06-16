@@ -96,7 +96,7 @@ export default function WhyChoosePage() {
       field: "actions", headerName: "Actions", sortable: false, sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("homepage", "update") && (
+          {hasPermission("homepage", "whychoose.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -107,7 +107,7 @@ export default function WhyChoosePage() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("homepage", "delete") && (
+          {hasPermission("homepage", "whychoose.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -148,7 +148,7 @@ export default function WhyChoosePage() {
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Description</label>
               <Textarea value={section.section_description} onChange={e => setSection(p => ({ ...p, section_description: e.target.value }))} rows={3} placeholder="What makes you the best choice..." />
             </div>
-            {hasPermission("homepage", "update") && (
+            {hasPermission("homepage", "whychoose.update") && (
               <div className="flex justify-end">
                 <Button type="submit" disabled={sectionSaving} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
                   {sectionSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save Section</>}
@@ -163,7 +163,7 @@ export default function WhyChoosePage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white">Why Choose Cards</h2>
-          {hasPermission("homepage", "create") && (
+          {hasPermission("homepage", "whychoose.create") && (
             <Button onClick={() => navigate("/homepage-management/whychoose/cards/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" size="sm">
               <Plus className="w-4 h-4 mr-2" />Add Card
             </Button>

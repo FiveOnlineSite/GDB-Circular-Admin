@@ -14,6 +14,7 @@ export default function AlwaysBuyingFormPage() {
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     section_title: "",
@@ -54,6 +55,13 @@ export default function AlwaysBuyingFormPage() {
       ...prev,
       [name]: value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleMediaUpload = (url) => {
@@ -68,6 +76,13 @@ export default function AlwaysBuyingFormPage() {
       file_url: url,
       media_type: isVideo ? "video" : "image",
     }));
+    if (errors.file_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.file_url;
+        return next;
+      });
+    }
   };
 
   // Points CRUD operations locally
@@ -83,6 +98,13 @@ export default function AlwaysBuyingFormPage() {
         },
       ],
     }));
+    if (errors.points) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.points;
+        return next;
+      });
+    }
   };
 
   const handleRemovePoint = (index) => {
@@ -104,23 +126,36 @@ export default function AlwaysBuyingFormPage() {
         points: updatedPoints,
       };
     });
+    const errorKey = `points.${index}.point_title`;
+    if (errors[errorKey]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[errorKey];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canUpdate) return toast.error("You do not have permission to update this section.");
 
-    // Validation
-    if (!form.section_title.trim()) return toast.error("Section Title is required");
-    if (!form.section_description.trim()) return toast.error("Section Description is required");
-    if (!form.file_url) return toast.error("Media file is required");
-    if (!form.alt_text.trim()) return toast.error("Media Alt Text is required");
-    if (form.points.length === 0) return toast.error("At least one purchasing requirement point is required");
+    const newErrors = {};
+    if (!form.section_title.trim()) newErrors.section_title = "Section Title is required";
+    if (!form.section_description.trim()) newErrors.section_description = "Section Description is required";
+    if (!form.file_url) newErrors.file_url = "Media file is required";
+    if (!form.alt_text.trim()) newErrors.alt_text = "Media Alt Text is required";
+    if (form.points.length === 0) newErrors.points = "At least one purchasing requirement point is required";
 
     for (let i = 0; i < form.points.length; i++) {
       if (!form.points[i].point_title.trim()) {
-        return toast.error(`Requirement Point #${i + 1} text cannot be empty`);
+        newErrors[`points.${i}.point_title`] = `Requirement Point #${i + 1} text cannot be empty`;
       }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
     try {
@@ -181,7 +216,7 @@ export default function AlwaysBuyingFormPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Section Main Information */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3 flex items-center gap-2">
@@ -201,7 +236,8 @@ export default function AlwaysBuyingFormPage() {
                 onChange={handleChange}
                 placeholder="e.g. We're Always Buying"
                 disabled={!canUpdate}
-                required
+                error={!!errors.section_title}
+                errorMessage={errors.section_title}
               />
             </div>
 
@@ -218,7 +254,8 @@ export default function AlwaysBuyingFormPage() {
                 disabled={!canUpdate}
                 rows={4}
                 className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
-                required
+                error={!!errors.section_description}
+                errorMessage={errors.section_description}
               />
             </div>
           </div>
@@ -243,6 +280,11 @@ export default function AlwaysBuyingFormPage() {
               maxSizeMB={50}
               disabled={!canUpdate}
             />
+            {errors.file_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.file_url}
+              </span>
+            )}
             {form.file_url && (
               <p className="text-xs text-indigo-600 font-semibold mt-2 capitalize">
                 Detected Media Type: {form.media_type}
@@ -260,7 +302,8 @@ export default function AlwaysBuyingFormPage() {
               onChange={handleChange}
               placeholder="Alt text for screen readers"
               disabled={!canUpdate}
-              required
+              error={!!errors.alt_text}
+              errorMessage={errors.alt_text}
             />
           </div>
         </div>
@@ -287,6 +330,11 @@ export default function AlwaysBuyingFormPage() {
           {form.points.length === 0 ? (
             <div className="text-center py-6 text-slate-400 text-sm">
               No purchasing requirements added. Add at least one requirement.
+              {errors.points && (
+                <span className="text-red-500 text-xs font-semibold mt-1.5 block">
+                  {errors.points}
+                </span>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -307,8 +355,13 @@ export default function AlwaysBuyingFormPage() {
                       onChange={(e) => handlePointChange(index, "point_title", e.target.value)}
                       placeholder="e.g. Contamination: Max 2% total paper/label content allowed."
                       disabled={!canUpdate}
-                      className="w-full border border-[#E6E6E6] rounded-lg px-3 py-2 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-1 focus:ring-[#981B1F]/15 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
+                      className={`w-full border ${errors[`points.${index}.point_title`] ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 dark:bg-gray-900 dark:border-gray-600 dark:text-white`}
                     />
+                    {errors[`points.${index}.point_title`] && (
+                      <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                        {errors[`points.${index}.point_title`]}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">

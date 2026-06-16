@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Eye, Check, X } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, Check, X, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import ConfirmationModal from "../../../components/common/DeleteConfirmationModal";
@@ -369,9 +369,8 @@ export default function NewsList() {
                 placeholder="Search by title..."
                 className="border border-[#E6E6E6] rounded-lg px-3 py-2 text-sm placeholder-slate-400 focus:border-[#981B1F] focus:outline-none w-full h-9"
               />
-              <Button type="submit" size="icon" className="bg-[#981B1F] shrink-0 h-9 w-9">
-                <Plus size={14} className="hidden" />
-                <span>Go</span>
+              <Button type="submit" size="icon" className="bg-[#981B1F] hover:bg-[#C3662D] text-white transition-colors duration-200 shrink-0 h-9 w-9 flex items-center justify-center">
+                <Search size={14} className="text-white" />
               </Button>
             </form>
           </div>

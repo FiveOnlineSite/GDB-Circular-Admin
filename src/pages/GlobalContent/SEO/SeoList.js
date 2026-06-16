@@ -104,7 +104,7 @@ export default function SeoList() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("globalContent", "update") && (
+          {hasPermission("globalContent", "seo.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -114,7 +114,7 @@ export default function SeoList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("globalContent", "delete") && (
+          {hasPermission("globalContent", "seo.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -144,7 +144,7 @@ export default function SeoList() {
             Manage meta tags and SEO settings for each page
           </p>
         </div>
-        {hasPermission("globalContent", "create") && (
+        {hasPermission("globalContent", "seo.create") && (
           <Button onClick={() => navigate("/global-content/seo/create")}>
             <Plus className="w-4 h-4 mr-2" />
             Add New

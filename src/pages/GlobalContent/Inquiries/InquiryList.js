@@ -153,7 +153,7 @@ export default function InquiryList() {
           >
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
-          {hasPermission("globalContent", "delete") && (
+          {hasPermission("globalContent", "inquiries.delete") && (
             <Button
               variant="outline"
               size="sm"

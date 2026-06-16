@@ -124,7 +124,7 @@ export default function ProcessPage() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("homepage", "update") && (
+          {hasPermission("homepage", "process.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -134,7 +134,7 @@ export default function ProcessPage() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("homepage", "delete") && (
+          {hasPermission("homepage", "process.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -175,7 +175,7 @@ export default function ProcessPage() {
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Description</label>
               <Textarea value={section.section_description} onChange={e => setSection(p => ({ ...p, section_description: e.target.value }))} rows={3} placeholder="Brief description of the process..." />
             </div>
-            {hasPermission("homepage", "update") && (
+            {hasPermission("homepage", "process.update") && (
               <div className="flex justify-end">
                 <Button type="submit" disabled={sectionSaving} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
                   {sectionSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save Section</>}
@@ -190,7 +190,7 @@ export default function ProcessPage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white">Process Steps</h2>
-          {hasPermission("homepage", "create") && (
+          {hasPermission("homepage", "process.create") && (
             <Button onClick={() => navigate("/homepage-management/process/steps/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" size="sm">
               <Plus className="w-4 h-4 mr-2" />Add Step
             </Button>

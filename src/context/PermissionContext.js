@@ -10,6 +10,36 @@ import api from "../lib/utils/apiConfig";
 
 const PermissionContext = createContext();
 
+const modulePermissionPrefixes = {
+  users: ["user"],
+  user: ["user"],
+  roles: ["role"],
+  role: ["role"],
+  globalContent: ["global"],
+  homepage: ["homepage"],
+  product: ["product"],
+  about: ["about"],
+  facilities: ["facilities"],
+  team: ["team"],
+  sellers: ["seller"],
+  seller: ["seller"],
+  news: ["news"],
+  settings: ["media"],
+};
+
+const getPermissionNames = (moduleOrPerm, action) => {
+  if (action === undefined) {
+    return [moduleOrPerm];
+  }
+
+  const prefixes = modulePermissionPrefixes[moduleOrPerm] || [moduleOrPerm];
+  const actions = action === "view" && (moduleOrPerm === "users" || moduleOrPerm === "user" || moduleOrPerm === "roles" || moduleOrPerm === "role")
+    ? ["read"]
+    : [action];
+
+  return prefixes.flatMap((prefix) => actions.map((item) => `${prefix}.${item}`));
+};
+
 export const usePermissionContext = () => {
   const context = useContext(PermissionContext);
   if (!context) {
@@ -74,46 +104,15 @@ export const PermissionProvider = ({ children }) => {
         return true;
       }
 
-      if (action === undefined) {
-        if (moduleOrPerm.includes(".")) {
-          return permissions.some((perm) => perm.name === moduleOrPerm);
-        }
-        // Check if user has any permission in this module
-        const searchMod = moduleOrPerm === "users" ? "users" : (moduleOrPerm === "roles" ? "roles" : moduleOrPerm);
-        return permissions.some(
-          (perm) => 
-            perm.module === searchMod || 
-            perm.name.startsWith(searchMod + ".") ||
-            (searchMod === "users" && (perm.module === "user" || perm.name.startsWith("user."))) ||
-            (searchMod === "roles" && (perm.module === "role" || perm.name.startsWith("role.")))
+      const permissionNames = getPermissionNames(moduleOrPerm, action);
+      if (action === undefined && !moduleOrPerm.includes(".")) {
+        const prefixes = modulePermissionPrefixes[moduleOrPerm] || [moduleOrPerm];
+        return permissions.some((perm) =>
+          prefixes.some((prefix) => perm.name.startsWith(`${prefix}.`))
         );
       }
 
-      let searchModule = moduleOrPerm;
-      let searchAction = action;
-
-      if (searchModule === "users") searchModule = "user";
-      if (searchModule === "roles") searchModule = "role";
-      
-      // Map view -> read only for user/users module
-      if (searchAction === "view" && (searchModule === "user" || searchModule === "users")) {
-        searchAction = "read";
-      }
-
-      return permissions.some((perm) => {
-        // Match exact name, e.g. "facilities.view" or "user.read"
-        const targetName1 = `${searchModule}.${searchAction}`;
-        if (perm.name === targetName1) return true;
-
-        // Match normalized module and action
-        const normPermModule = perm.module === "user" ? "users" : (perm.module === "role" ? "roles" : perm.module);
-        const normSearchModule = moduleOrPerm === "user" ? "users" : (moduleOrPerm === "role" ? "roles" : moduleOrPerm);
-        if (normPermModule === normSearchModule && perm.action === searchAction) {
-          return true;
-        }
-
-        return false;
-      });
+      return permissions.some((perm) => permissionNames.includes(perm.name));
     },
     [user, permissions],
   );

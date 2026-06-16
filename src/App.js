@@ -188,56 +188,56 @@ function App() {
 
           {/* SEO */}
           <Route path="/global-content/seo" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="view"><SeoList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="seo.view"><SeoList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/seo/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="create"><SeoFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="seo.create"><SeoFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/seo/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="update"><SeoFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="seo.update"><SeoFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Footer */}
           <Route path="/global-content/footer" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="view"><FooterPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="footer.view"><FooterPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Certificates */}
           <Route path="/global-content/certificates" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="view"><CertificateList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="certificates.view"><CertificateList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/certificates/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="create"><CertificateFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="certificates.create"><CertificateFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/certificates/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="update"><CertificateFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="certificates.update"><CertificateFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Inquiries */}
           <Route path="/global-content/inquiries" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="view"><InquiryList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="inquiries.view"><InquiryList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* FAQs */}
           <Route path="/global-content/faqs" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="view"><FaqList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="faq.view"><FaqList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/faqs/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="create"><FaqFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="faq.create"><FaqFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/faqs/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="update"><FaqFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="faq.update"><FaqFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Banners */}
           <Route path="/global-content/banners" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="view"><BannerList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="banner.view"><BannerList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/banners/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="create"><BannerFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="banner.create"><BannerFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/banners/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="update"><BannerFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="banner.update"><BannerFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* ===== HOMEPAGE MANAGEMENT ROUTES ===== */}
@@ -245,35 +245,35 @@ function App() {
           {/* Stats */}
           <Route path="/homepage-management" element={<Navigate to="/homepage-management/stats" replace />} />
           <Route path="/homepage-management/stats" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="view"><StatsList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="stats.view"><StatsList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/homepage-management/stats/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="create"><StatsFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="stats.create"><StatsFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/homepage-management/stats/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="update"><StatsFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="stats.update"><StatsFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Process */}
           <Route path="/homepage-management/process" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="view"><ProcessPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="process.view"><ProcessPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/homepage-management/process/steps/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="create"><ProcessStepFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="process.create"><ProcessStepFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/homepage-management/process/steps/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="update"><ProcessStepFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="process.update"><ProcessStepFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Why Choose */}
           <Route path="/homepage-management/whychoose" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="view"><WhyChoosePage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="whychoose.view"><WhyChoosePage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/homepage-management/whychoose/cards/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="create"><WhyChooseCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="whychoose.create"><WhyChooseCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/homepage-management/whychoose/cards/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="update"><WhyChooseCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="homepage" action="whychoose.update"><WhyChooseCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* ===== PRODUCT LISTING ROUTES ===== */}
@@ -281,41 +281,41 @@ function App() {
           {/* Catalogue */}
           <Route path="/product-listing" element={<Navigate to="/product-listing/catalogue" replace />} />
           <Route path="/product-listing/catalogue" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="view"><CatalogueList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="catalogue.view"><CatalogueList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/catalogue/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="create"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="catalogue.create"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/catalogue/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="update"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="catalogue.update"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/catalogue/view/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="view"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="catalogue.view"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Logistics Support */}
           <Route path="/product-listing/logistics-support" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="view"><LogisticsPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="logistics.view"><LogisticsPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/logistics-support/cards/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="create"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="logistics.create"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/logistics-support/cards/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="update"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="logistics.update"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Case Study */}
           <Route path="/product-listing/case-study" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="view"><CaseStudyList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="casestudy.view"><CaseStudyList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/case-study/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="create"><CaseStudyFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="casestudy.create"><CaseStudyFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/case-study/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="update"><CaseStudyFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="casestudy.update"><CaseStudyFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/product-listing/case-study/view/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="view"><CaseStudyFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="casestudy.view"><CaseStudyFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* ===== ABOUT GDB ROUTES ===== */}
@@ -337,29 +337,29 @@ function App() {
           {/* Overview */}
           <Route path="/about-gdb" element={<Navigate to="/about-gdb/overview" replace />} />
           <Route path="/about-gdb/overview" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="view"><OverviewPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="overview.view"><OverviewPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Journey Timeline */}
           <Route path="/about-gdb/journey-timeline" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="view"><JourneyTimelineList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="timeline.view"><JourneyTimelineList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/about-gdb/journey-timeline/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="create"><JourneyTimelineFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="timeline.create"><JourneyTimelineFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/about-gdb/journey-timeline/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="update"><JourneyTimelineFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="timeline.update"><JourneyTimelineFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Why Industry Chooses */}
           <Route path="/about-gdb/why-industry-chooses-gdb-pcr" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="view"><WhyIndustryChoosesList /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="industry.view"><WhyIndustryChoosesList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/about-gdb/why-industry-chooses-gdb-pcr/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="create"><WhyIndustryChoosesFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="industry.create"><WhyIndustryChoosesFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/about-gdb/why-industry-chooses-gdb-pcr/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="update"><WhyIndustryChoosesFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+            <ProtectedRoute><MainLayout><PermissionRoute module="about" action="industry.update"><WhyIndustryChoosesFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* ===== GDB TEAM MANAGEMENT ROUTES ===== */}

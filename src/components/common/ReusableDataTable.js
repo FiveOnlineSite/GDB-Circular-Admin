@@ -217,6 +217,17 @@ export default function ReusableDataTable({
 
   const isAllSelected = rows.length > 0 && selected.length === rows.length;
   const isSomeSelected = selected.length > 0 && selected.length < rows.length;
+  const getColumnStyle = (column) => {
+    if (column.sticky === 'right') {
+      const stickyWidth = column.minWidth || column.width || 180;
+      return {
+        width: column.width || stickyWidth,
+        minWidth: stickyWidth,
+      };
+    }
+
+    return { width: column.width };
+  };
 
   return (
     <div className='w-full p-3'>
@@ -265,12 +276,12 @@ export default function ReusableDataTable({
                       column.align === 'right' && 'text-right',
                       column.align === 'center' && 'text-center',
                       column.sticky === 'right' &&
-                        'sticky right-0 z-20 bg-background shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]',
+                        'sticky right-0 z-40 bg-white dark:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
                       'whitespace-nowrap',
                       column.cellClassName,
                       column.headerClassName,
                     )}
-                    style={{ width: column.width }}
+                    style={getColumnStyle(column)}
                   >
                     {column.sortable !== false ? (
                       <Button
@@ -332,9 +343,11 @@ export default function ReusableDataTable({
                             column.align === 'right' && 'text-right',
                             column.align === 'center' && 'text-center',
                             column.sticky === 'right' &&
-                              'sticky right-0 z-10 bg-background group-hover:bg-muted/40 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors',
+                              'sticky right-0 z-30 bg-white dark:bg-gray-900 group-hover:bg-white dark:group-hover:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
+                            column.field === 'actions' && 'whitespace-nowrap',
                             column.cellClassName,
                           )}
+                          style={getColumnStyle(column)}
                         >
                           {column.renderCell
                             ? column.renderCell({

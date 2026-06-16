@@ -136,7 +136,7 @@ export default function JourneyTimelineList() {
       width: 120,
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("about", "update") && (
+          {hasPermission("about", "timeline.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -146,7 +146,7 @@ export default function JourneyTimelineList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("about", "delete") && (
+          {hasPermission("about", "timeline.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -168,7 +168,7 @@ export default function JourneyTimelineList() {
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Journey Timeline</h1>
           <p className="text-slate-500 text-sm mt-1">Manage the company journey timeline</p>
         </div>
-        {hasPermission("about", "create") && (
+        {hasPermission("about", "timeline.create") && (
           <Button
             onClick={() => navigate("/about-gdb/journey-timeline/create")}
             className="bg-[#981B1F] hover:bg-[#7a1619] text-white gap-2"
@@ -180,7 +180,7 @@ export default function JourneyTimelineList() {
       </div>
 
       {/* Section Edit Panel */}
-      {hasPermission("about", "update") && !sectionLoading && (
+      {hasPermission("about", "timeline.update") && !sectionLoading && (
         !isEditingSection && (section.section_title || section.section_description) ? (
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">

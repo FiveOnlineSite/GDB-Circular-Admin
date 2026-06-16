@@ -19,6 +19,7 @@ export default function TeamMemberFormPage() {
 
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     group_name: "",
@@ -71,6 +72,24 @@ export default function TeamMemberFormPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : name === "sequence" ? Number(value) : value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const handlePhotoUpload = (url) => {
+    setForm((prev) => ({ ...prev, photo_url: url }));
+    if (errors.photo_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.photo_url;
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -78,20 +97,25 @@ export default function TeamMemberFormPage() {
 
     if (isView) return;
 
-    // Validate fields
-    if (!form.group_name) return toast.error("Group is required");
-    if (!form.name.trim()) return toast.error("Name is required");
-    if (!form.designation.trim()) return toast.error("Designation is required");
-    if (!form.photo_url) return toast.error("Profile photo is required");
-    if (!form.photo_alt.trim()) return toast.error("Photo alt text is required");
+    const newErrors = {};
+    if (!form.group_name) newErrors.group_name = "Group is required";
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.designation.trim()) newErrors.designation = "Designation is required";
+    if (!form.photo_url) newErrors.photo_url = "Profile photo is required";
+    if (!form.photo_alt.trim()) newErrors.photo_alt = "Photo alt text is required";
 
     // Validate URL format if provided
     if (form.linkedin_url.trim()) {
       try {
         new URL(form.linkedin_url.trim());
       } catch (_) {
-        return toast.error("Please enter a valid LinkedIn URL format (including http/https)");
+        newErrors.linkedin_url = "Please enter a valid LinkedIn URL format (including http/https)";
       }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
     try {
@@ -155,7 +179,7 @@ export default function TeamMemberFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-6">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
             Profile Details
@@ -172,8 +196,7 @@ export default function TeamMemberFormPage() {
                 value={form.group_name}
                 onChange={handleChange}
                 disabled={isView}
-                required
-                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
+                className={`w-full border ${errors.group_name ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55`}
               >
                 <option value="">Select Group</option>
                 {GROUP_OPTIONS.map((g) => (
@@ -182,6 +205,11 @@ export default function TeamMemberFormPage() {
                   </option>
                 ))}
               </select>
+              {errors.group_name && (
+                <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                  {errors.group_name}
+                </span>
+              )}
             </div>
 
             {/* Name */}
@@ -195,7 +223,8 @@ export default function TeamMemberFormPage() {
                 onChange={handleChange}
                 placeholder="e.g. John Doe"
                 disabled={isView}
-                required
+                error={!!errors.name}
+                errorMessage={errors.name}
               />
             </div>
 
@@ -210,7 +239,8 @@ export default function TeamMemberFormPage() {
                 onChange={handleChange}
                 placeholder="e.g. Chief Executive Officer"
                 disabled={isView}
-                required
+                error={!!errors.designation}
+                errorMessage={errors.designation}
               />
             </div>
 
@@ -225,6 +255,8 @@ export default function TeamMemberFormPage() {
                 onChange={handleChange}
                 placeholder="https://linkedin.com/in/username"
                 disabled={isView}
+                error={!!errors.linkedin_url}
+                errorMessage={errors.linkedin_url}
               />
             </div>
 
@@ -292,12 +324,17 @@ export default function TeamMemberFormPage() {
             </label>
             <Upload
               value={form.photo_url}
-              onChange={(url) => setForm((prev) => ({ ...prev, photo_url: url }))}
+              onChange={handlePhotoUpload}
               mediaType="image"
               accept="image/*"
               maxSizeKB={500}
               disabled={isView}
             />
+            {errors.photo_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.photo_url}
+              </span>
+            )}
           </div>
 
           <div>
@@ -310,7 +347,8 @@ export default function TeamMemberFormPage() {
               onChange={handleChange}
               placeholder="Provide alt text describing profile photo"
               disabled={isView}
-              required
+              error={!!errors.photo_alt}
+              errorMessage={errors.photo_alt}
             />
           </div>
         </div>

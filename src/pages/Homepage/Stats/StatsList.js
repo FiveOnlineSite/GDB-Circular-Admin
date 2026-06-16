@@ -83,7 +83,7 @@ export default function StatsList() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("homepage", "update") && (
+          {hasPermission("homepage", "stats.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -94,7 +94,7 @@ export default function StatsList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("homepage", "delete") && (
+          {hasPermission("homepage", "stats.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -122,7 +122,7 @@ export default function StatsList() {
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage homepage statistics and value highlights</p>
           </div>
         </div>
-        {hasPermission("homepage", "create") && (
+        {hasPermission("homepage", "stats.create") && (
           <Button onClick={() => navigate("/homepage-management/stats/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add Stat
           </Button>

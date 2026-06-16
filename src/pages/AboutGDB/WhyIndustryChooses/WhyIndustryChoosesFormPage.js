@@ -19,6 +19,7 @@ export default function WhyIndustryChoosesFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [maxSequence, setMaxSequence] = useState(0);
+  const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     stat_value: "",
     title: "",
@@ -80,14 +81,27 @@ export default function WhyIndustryChoosesFormPage() {
       ...p,
       [name]: name === "sequence" ? Number(value) : value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.stat_value.trim()) return toast.error("Stat / Value is required");
-    if (!form.title.trim()) return toast.error("Title is required");
-    if (!form.description.trim()) return toast.error("Description is required");
+    const newErrors = {};
+    if (!form.stat_value.trim()) newErrors.stat_value = "Stat / Value is required";
+    if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!form.description.trim()) newErrors.description = "Description is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -146,7 +160,7 @@ export default function WhyIndustryChoosesFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Details Section */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Item Details</h2>
@@ -161,7 +175,8 @@ export default function WhyIndustryChoosesFormPage() {
                 value={form.stat_value}
                 onChange={handleChange}
                 placeholder="e.g., 25+"
-                required
+                error={!!errors.stat_value}
+                errorMessage={errors.stat_value}
               />
             </div>
 
@@ -174,7 +189,8 @@ export default function WhyIndustryChoosesFormPage() {
                 value={form.title}
                 onChange={handleChange}
                 placeholder="e.g., Years Experience"
-                required
+                error={!!errors.title}
+                errorMessage={errors.title}
               />
             </div>
 
@@ -219,6 +235,8 @@ export default function WhyIndustryChoosesFormPage() {
               placeholder="Enter short description about this reason"
               rows={4}
               className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              error={!!errors.description}
+              errorMessage={errors.description}
             />
           </div>
         </div>

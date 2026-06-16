@@ -18,6 +18,7 @@ export default function LifeAtGdbFormPage() {
 
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     section_title: "",
@@ -66,6 +67,13 @@ export default function LifeAtGdbFormPage() {
       ...prev,
       [name]: name === "sequence" ? Number(value) : value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleMediaUpload = (url) => {
@@ -80,6 +88,13 @@ export default function LifeAtGdbFormPage() {
       file_url: url,
       media_type: isVideo ? "video" : "image",
     }));
+    if (errors.file_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.file_url;
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -87,10 +102,15 @@ export default function LifeAtGdbFormPage() {
 
     if (isView) return;
 
-    // Validate fields
-    if (!form.section_title.trim()) return toast.error("Section Title is required");
-    if (!form.file_url) return toast.error("Media file is required");
-    if (!form.alt_text.trim()) return toast.error("Media Alt Text is required");
+    const newErrors = {};
+    if (!form.section_title.trim()) newErrors.section_title = "Section Title is required";
+    if (!form.file_url) newErrors.file_url = "Media file is required";
+    if (!form.alt_text.trim()) newErrors.alt_text = "Media Alt Text is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -151,7 +171,7 @@ export default function LifeAtGdbFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
             Item Details
@@ -169,7 +189,8 @@ export default function LifeAtGdbFormPage() {
                 onChange={handleChange}
                 placeholder="e.g. Dynamic Work Culture"
                 disabled={isView}
-                required
+                error={!!errors.section_title}
+                errorMessage={errors.section_title}
               />
             </div>
 
@@ -244,6 +265,11 @@ export default function LifeAtGdbFormPage() {
               maxSizeMB={50}
               disabled={isView}
             />
+            {errors.file_url && (
+              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                {errors.file_url}
+              </span>
+            )}
             {form.file_url && (
               <p className="text-xs text-indigo-600 font-semibold mt-2 capitalize">
                 Detected Media Type: {form.media_type}
@@ -261,7 +287,8 @@ export default function LifeAtGdbFormPage() {
               onChange={handleChange}
               placeholder="Provide alt text for screen readers"
               disabled={isView}
-              required
+              error={!!errors.alt_text}
+              errorMessage={errors.alt_text}
             />
           </div>
         </div>

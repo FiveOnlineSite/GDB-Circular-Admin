@@ -95,7 +95,7 @@ export default function LogisticsPage() {
       field: "actions", headerName: "Actions", sortable: false, sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {hasPermission("product", "update") && (
+          {hasPermission("product", "logistics.update") && (
             <Button
               variant="outline"
               size="sm"
@@ -106,7 +106,7 @@ export default function LogisticsPage() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("product", "delete") && (
+          {hasPermission("product", "logistics.delete") && (
             <Button
               variant="outline"
               size="sm"
@@ -139,7 +139,7 @@ export default function LogisticsPage() {
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between border-b pb-3">
             <h2 className="text-base font-semibold text-slate-700 dark:text-white">Section Header</h2>
-            {hasPermission("product", "update") && (
+            {hasPermission("product", "logistics.update") && (
               <Button
                 variant="outline"
                 className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5 gap-2"
@@ -170,7 +170,7 @@ export default function LogisticsPage() {
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Description</label>
               <Textarea value={section.section_description} onChange={e => setSection(p => ({ ...p, section_description: e.target.value }))} rows={3} placeholder="Section subtitle or description..." />
             </div>
-            {hasPermission("product", "update") && (
+            {hasPermission("product", "logistics.update") && (
               <div className="flex justify-end gap-3">
                 {(section.section_title || section.section_description) && (
                   <Button type="button" variant="outline" onClick={() => setIsEditingSection(false)}>Cancel</Button>
@@ -188,7 +188,7 @@ export default function LogisticsPage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white">Support Cards</h2>
-          {hasPermission("product", "create") && (
+          {hasPermission("product", "logistics.create") && (
             <Button onClick={() => navigate("/product-listing/logistics-support/cards/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" size="sm">
               <Plus className="w-4 h-4 mr-2" />Add Card
             </Button>

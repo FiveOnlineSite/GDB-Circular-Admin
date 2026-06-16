@@ -41,7 +41,19 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (
+      response.config?.method?.toLowerCase() === "delete" &&
+      (response.data === "" || response.data === null || response.data === undefined)
+    ) {
+      response.data = {
+        success: true,
+        message: "Deleted successfully",
+      };
+    }
+
+    return response;
+  },
   (error) => {
     if (error.response && [401].includes(error.response.status)) {
       // Clear local storage and redirect to login if token is invalid or access is forbidden (e.g., inactive user)

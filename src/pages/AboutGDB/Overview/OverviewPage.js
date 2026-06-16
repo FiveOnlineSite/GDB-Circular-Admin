@@ -149,7 +149,7 @@ export default function OverviewPage() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
             <div className="flex items-center justify-between border-b pb-3">
               <h2 className="text-base font-semibold text-slate-700 dark:text-white">Overview Details</h2>
-              {hasPermission("about", "update") && (
+              {hasPermission("about", "overview.update") && (
                 <Button
                   variant="outline"
                   className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5 gap-2"
@@ -308,7 +308,7 @@ export default function OverviewPage() {
             )}
             <Button
               type="submit"
-              disabled={submitting || !hasPermission("about", "update")}
+              disabled={submitting || !hasPermission("about", "overview.update")}
               style={{ backgroundColor: "#981B1F" }}
               className="text-white gap-2 hover:opacity-90"
             >

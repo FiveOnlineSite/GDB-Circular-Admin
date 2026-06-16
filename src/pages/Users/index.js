@@ -228,7 +228,7 @@ export default function UserManagement() {
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 bg-white"
           />
-          <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#981B1F] cursor-pointer transition-colors duration-200">
             <Search className="h-4 w-4" />
           </button>
         </form>
