@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* --- BRAND COLOR THEME OVERRIDES --- */
+:root {
+  --primary-color: #981B1F;
+  --primary-hover-color: #C3662D;
+  --secondary-color: #C3662D;
+  --secondary-hover-color: #981B1F;
+  --primary-color-rgb: 152, 27, 31;
+  --secondary-color-rgb: 195, 102, 45;
+}
+
+/* Primary Color Class Overrides */
+.bg-\[\#3a5f9e\] {
+  background-color: var(--primary-color) !important;
+}
+.bg-\[\#3a5f9e\]\/80 {
+  background-color: rgba(var(--primary-color-rgb), 0.8) !important;
+}
+.bg-\[\#3a5f9e\]\/20 {
+  background-color: rgba(var(--primary-color-rgb), 0.2) !important;
+}
+.bg-\[\#3a5f9e\]\/10 {
+  background-color: rgba(var(--primary-color-rgb), 0.1) !important;
+}
+.text-\[\#3a5f9e\] {
+  color: var(--primary-color) !important;
+}
+.hover\:text-\[\#3a5f9e\]:hover {
+  color: var(--primary-color) !important;
+}
+.group-hover\:text-\[\#3a5f9e\]:hover {
+  color: var(--primary-color) !important;
+}
+.hover\:bg-\[\#325186\]:hover {
+  background-color: var(--primary-hover-color) !important;
+}
+.border-\[\#3a5f9e\] {
+  border-color: var(--primary-color) !important;
+}
+.border-\[\#3a5f9e\]\/20 {
+  border-color: rgba(var(--primary-color-rgb), 0.2) !important;
+}
+.border-\[\#3a5f9e\]\/10 {
+  border-color: rgba(var(--primary-color-rgb), 0.1) !important;
+}
+.focus\:border-\[\#3a5f9e\]:focus {
+  border-color: var(--primary-color) !important;
+}
+.focus-visible\:ring-\[\#3a5f9e\]:focus-visible {
+  --tw-ring-color: var(--primary-color) !important;
+}
+.focus\:ring-\[\#3a5f9e\]\/10:focus {
+  --tw-ring-color: rgba(var(--primary-color-rgb), 0.1) !important;
+}
+.shadow-blue-900\/10 {
+  --tw-shadow-color: rgba(var(--primary-color-rgb), 0.1) !important;
+}
+.from-\[\#3a5f9e\] {
+  --tw-gradient-from: var(--primary-color) !important;
+  --tw-gradient-to: var(--primary-hover-color, #C3662D) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+/* Secondary Color Utility Classes */
+.bg-secondary {
+  background-color: var(--secondary-color) !important;
+}
+.text-secondary {
+  color: var(--secondary-color) !important;
+}
+.border-secondary {
+  border-color: var(--secondary-color) !important;
+}
+.hover\:bg-secondary:hover {
+  background-color: var(--secondary-hover-color) !important;
+}
+.hover\:text-secondary:hover {
+  color: var(--secondary-color) !important;
+}
+
+/* --- CUSTOM UI COMPONENT STYLE OVERRIDES --- */
+
+/* Inputs & Form Fields */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], textarea, select {
+  border-color: #E6E6E6 !important;
+  color: #111111 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #981B1F !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(152, 27, 31, 0.15) !important;
+}
+
+/* Tables */
+thead tr th, .bg-muted\/50 {
+  background-color: #F7F7F7 !important;
+  color: #111111 !important;
+  font-weight: 600 !important;
+}
+tr:hover {
+  background-color: rgba(152, 27, 31, 0.04) !important;
+}
+tr.active-row, tr[data-state="selected"] {
+  background-color: rgba(152, 27, 31, 0.08) !important;
+}
+
+/* Actions */
+.text-\[\#C3662D\], .edit-icon-class {
+  color: #C3662D !important;
+}
+
+/* Sidebar Overrides */
+.hover\:bg-slate-50:hover {
+  background-color: rgba(152, 27, 31, 0.08) !important;
+}
+
+/* Checkbox & Radio Checked State */
+input[type="checkbox"]:checked, [data-state="checked"] {
+  background-color: #981B1F !important;
+  border-color: #981B1F !important;
+}
+
+/* Cards */
+.bg-white.border.rounded-xl, .card-style, .rounded-3xl {
+  background-color: #FFFFFF !important;
+  border-color: #E6E6E6 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Badges */
+.bg-green-100 {
+  background-color: #DCFCE7 !important;
+  color: #15803D !important;
+}
+.bg-gray-100 {
+  background-color: #F3F4F6 !important;
+  color: #4B5563 !important;
+}
+.bg-yellow-100 {
+  background-color: #FEF3C7 !important;
+  color: #D97706 !important;
+}

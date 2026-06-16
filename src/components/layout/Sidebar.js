@@ -1,0 +1,317 @@
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { LogOut, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'sonner';
+import { cn } from '../../lib/utils/utils';
+import { MenuItems } from '../../lib/utils/menu';
+import { useAuth } from '../../context/AuthContext';
+import { useLayout } from '../../context/LayoutContext';
+import { useUserPermissions } from '../../hooks/usePermission';
+import { Button } from 'components/ui/button';
+import { useTheme } from '../../context/ThemeContext';
+
+
+const Sidebar = () => {
+  const { isOpen, setIsOpen } = useLayout();
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const [expandedMenus, setExpandedMenus] = useState({});
+
+
+
+
+  // Get user permissions from database
+  const { hasPermission } = useUserPermissions();
+
+  const toggleMenu = (title) => {
+    setExpandedMenus((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
+
+
+  // Filter menu items based on user role_id or module permissions
+  const visibleItems = MenuItems.filter((item) => {
+    // 1. Dashboard is ALWAYS visible to everyone logged in
+    if (item.url === "/dashboard" || item.title === "Dashboard") return true;
+
+    // 2. If no role restrictions, show it
+    if (!item.allowedRoles || item.allowedRoles.length === 0) return true;
+
+    const roleId = user?.role_id ? parseInt(user.role_id) : null;
+
+    // 3. SuperAdmin (1) sees only if allowedRoles includes 1
+    if (roleId === 1) {
+      return item.allowedRoles.includes(1);
+    }
+
+    // 4. Role-based check (System Roles: Builder=2, User=3)
+    if (roleId && item.allowedRoles.includes(roleId)) {
+      return true;
+    }
+
+    // 5. Dynamic/Custom Roles: Check module permissions
+    if (item.module) {
+      // If we have a hasPermission function, use it
+      if (typeof hasPermission === 'function') {
+        return hasPermission(item.module, "view");
+      }
+    }
+
+    // Default to false for custom roles without explicit permission
+    return false;
+  });
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    toast.success('Logged out successfully');
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
+
+  const isLinkActive = (url, exact = false) => {
+    if (url === '/dashboard' || exact) {
+      return location.pathname === url;
+    }
+    return location.pathname === url || location.pathname.startsWith(`${url}/`);
+  };
+
+  return (
+    <>
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 h-[100dvh] transition-all duration-300 z-50 flex flex-col bg-white border-r border-slate-200 shadow-sm',
+          // Mobile: fixed width, slide in/out
+          'w-64',
+          isOpen ? 'translate-x-0' : '-translate-x-full',
+          // Desktop: translate-0 always, width toggles
+          'md:translate-x-0',
+          isOpen ? 'md:w-64' : 'md:w-20',
+        )}
+      >
+        {/* Logo Header */}
+        <Link
+          to='/dashboard'
+          className={`flex items-center ${isOpen ? 'px-4 pt-4' : 'p-2 '} hover:opacity-80 transition-opacity cursor-pointer border-b border-slate-100 `}
+        >
+          {isOpen ? (
+            <div className="flex items-center gap-2 overflow-hidden">
+              <img
+                src={theme.logo_url}
+                alt={theme.company_name}
+                className={`h-auto max-h-[60px] ${theme.company_name !== 'BuilderSaaS' ? 'w-fit' : 'w-full'} object-contain max-w-[200px]`}
+                onError={(e) => { e.target.src = '/logo.svg'; }}
+              />
+              {theme.company_name !== 'BuilderSaaS' && (
+                <span className="text-sm font-black text-slate-800 truncate">{theme.company_name}</span>
+              )}
+            </div>
+          ) : (
+            <img
+              src={theme.logo_url}
+              alt={theme.company_name}
+              className="h-10 w-10 object-contain"
+              onError={(e) => { e.target.src = '/logo.svg'; }}
+            />
+          )}
+        </Link>
+
+        {/* Menu Items */}
+        <nav className='flex-1 overflow-y-auto py-4 px-3 space-y-1'>
+          {visibleItems.map((item) => {
+            const Icon = item.icon;
+            const hasSubItems = item.subItems && item.subItems.length > 0;
+            const isExpanded = expandedMenus[item.title];
+            const isParentActive =
+              hasSubItems &&
+              item.subItems.some((sub) => isLinkActive(sub.url, sub.exact));
+            const isActive = !hasSubItems && isLinkActive(item.url, item.exact);
+
+            const handleNavClick = () => {
+              if (window.innerWidth < 768 && !hasSubItems) {
+                setIsOpen(false);
+              }
+            };
+
+            return (
+              <div key={item.title}>
+                {hasSubItems ? (
+                  <>
+                    <div
+                      onClick={() => {
+                        if (!isOpen) setIsOpen(true);
+                        toggleMenu(item.title);
+                      }}
+                      className={cn(
+                        'flex items-center py-2 rounded-lg transition-all duration-200 group relative cursor-pointer select-none',
+                        isOpen
+                          ? 'px-4 gap-3 justify-between'
+                          : 'justify-center',
+                        isActive || isParentActive
+                          ? 'text-[#3a5f9e] hover:bg-slate-50'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-[#3a5f9e]',
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'flex items-center gap-3',
+                          !isOpen && 'justify-center',
+                        )}
+                      >
+                        {Icon && (
+                          <Icon
+                            className='transition-all duration-200 shrink-0'
+                            size={22}
+                          />
+                        )}
+                        {isOpen && (
+                          <span className='text-sm font-medium transition-all duration-200 whitespace-nowrap'>
+                            {item.title}
+                          </span>
+                        )}
+                      </div>
+                      {isOpen && (
+                        <div className='text-slate-900'>
+                          {isExpanded ? (
+                            <ChevronUp size={16} />
+                          ) : (
+                            <ChevronDown size={16} />
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Submenu Items */}
+                    {isOpen && isExpanded && (
+                      <div className='mt-1 space-y-1 mb-2'>
+                        {item.subItems.map((subItem) => {
+                          if (
+                            subItem.module &&
+                            subItem.action &&
+                            !hasPermission(subItem.module, subItem.action)
+                          ) {
+                            return null;
+                          }
+
+                          const isSubActive = isLinkActive(
+                            subItem.url,
+                            subItem.exact,
+                          );
+                          const SubIcon = subItem.icon;
+
+                          return (
+                            <Link
+                              key={subItem.title}
+                              to={subItem.url}
+                              onClick={() => {
+                                if (window.innerWidth < 768) setIsOpen(false);
+                              }}
+                              className={cn(
+                                'flex items-center py-2.5 rounded-lg transition-all duration-200 pl-12 text-sm w-full group relative',
+                                isSubActive
+                                  ? 'bg-[#3a5f9e] text-white shadow-md shadow-blue-900/10 font-semibold'
+                                  : 'text-slate-600 hover:text-[#3a5f9e] hover:bg-slate-50 font-medium',
+                              )}
+                            >
+                              {SubIcon && (
+                                <SubIcon
+                                  size={18}
+                                  className={cn(
+                                    'mr-3 shrink-0 -ml-4',
+                                    isSubActive
+                                      ? 'text-white'
+                                      : 'group-hover:text-[#3a5f9e]',
+                                  )}
+                                />
+                              )}
+                              <span className='whitespace-nowrap truncate'>
+                                {subItem.title}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    to={item.url}
+                    onClick={handleNavClick}
+                    className={cn(
+                      'flex items-center py-2 rounded-lg transition-all duration-200 group relative',
+                      isOpen ? 'px-4 gap-3 justify-start' : 'justify-center',
+                      isActive
+                        ? 'bg-[#3a5f9e] text-white shadow-md shadow-blue-900/10'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-[#3a5f9e]',
+                    )}
+                  >
+                    {Icon && (
+                      <Icon
+                        className={cn(
+                          'transition-all duration-200 shrink-0',
+                          isActive
+                            ? 'text-white'
+                            : 'text-slate-500 group-hover:text-[#3a5f9e]',
+                        )}
+                        size={22}
+                      />
+                    )}
+                    {isOpen && (
+                      <span
+                        className={cn(
+                          'text-sm transition-all duration-200 whitespace-nowrap',
+                          isActive ? 'font-semibold' : 'font-medium',
+                        )}
+                      >
+                        {item.title}
+                      </span>
+                    )}
+                  </Link>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* Logout Button */}
+        <div className='p-4 border-t border-slate-100 mt-auto'>
+          <Button
+            variant='ghost'
+            onClick={handleLogout}
+            className={cn(
+              'flex items-center py-2.5 rounded-lg transition-all duration-200 w-full group',
+              isOpen ? 'px-4 gap-3 justify-start' : 'justify-center',
+              'text-slate-500 hover:bg-red-50 hover:text-red-600',
+            )}
+          >
+            <LogOut
+              className='text-slate-500 group-hover:text-red-500 transition-colors shrink-0'
+              size={20}
+            />
+            {isOpen && (
+              <span className='font-medium text-sm transition-colors whitespace-nowrap'>
+                Log Out
+              </span>
+            )}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className='fixed inset-0 bg-black/50 z-40 md:hidden'
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
+  );
+};
+
+export default Sidebar;
