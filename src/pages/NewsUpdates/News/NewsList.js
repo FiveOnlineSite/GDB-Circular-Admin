@@ -1,13 +1,21 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Eye, Check, X, Search } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, Check, X, Search, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import ConfirmationModal from "../../../components/common/DeleteConfirmationModal";
 import { getNews, deleteNews, toggleNewsPublish } from "../../../services/news/newsService";
 import { getCategories } from "../../../services/news/newsCategoryService";
 import { usePermissionContext } from "../../../context/PermissionContext";
+
+function formatDisplayDate(value) {
+  if (!value) return "";
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return "";
+  return `${day}-${month}-${year}`;
+}
 
 export default function NewsList() {
   const { hasPermission } = usePermissionContext();
@@ -86,42 +94,33 @@ export default function NewsList() {
 
   useEffect(() => {
     fetchNewsList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current_page, pagination.per_page]);
+  }, [fetchNewsList]);
 
   const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    const value = e.target.value;
+    setSearch(value);
     setPagination((p) => ({ ...p, current_page: 1 }));
-    fetchNewsList({ page: 1 });
   };
 
   const handleCategoryFilterChange = (e) => {
     const catId = e.target.value;
     setSelectedCategory(catId);
     setPagination((p) => ({ ...p, current_page: 1 }));
-    fetchNewsList({ page: 1, category_id: catId });
   };
 
   const handleStatusFilterChange = (e) => {
     const status = e.target.value;
     setSelectedStatus(status);
     setPagination((p) => ({ ...p, current_page: 1 }));
-    fetchNewsList({ page: 1, publish_status: status });
   };
 
   const handleDateChange = (type, val) => {
     if (type === "start") {
       setStartDate(val);
       setPagination((p) => ({ ...p, current_page: 1 }));
-      fetchNewsList({ page: 1, startDate: val });
     } else {
       setEndDate(val);
       setPagination((p) => ({ ...p, current_page: 1 }));
-      fetchNewsList({ page: 1, endDate: val });
     }
   };
 
@@ -361,18 +360,16 @@ export default function NewsList() {
           {/* Keyword Search */}
           <div className="col-span-1 md:col-span-2">
             <label className="text-xs font-semibold text-slate-500 block mb-1">Search Article Title</label>
-            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-              <input
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
                 placeholder="Search by title..."
-                className="border border-[#E6E6E6] rounded-lg px-3 py-2 text-sm placeholder-slate-400 focus:border-[#981B1F] focus:outline-none w-full h-9"
+                className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
               />
-              <Button type="submit" size="icon" className="bg-[#981B1F] hover:bg-[#C3662D] text-white transition-colors duration-200 shrink-0 h-9 w-9 flex items-center justify-center">
-                <Search size={14} className="text-white" />
-              </Button>
-            </form>
+            </div>
           </div>
 
           {/* Category Selector */}
@@ -381,7 +378,7 @@ export default function NewsList() {
             <select
               value={selectedCategory}
               onChange={handleCategoryFilterChange}
-              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 h-9"
+              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 h-10 cursor-pointer"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -398,7 +395,7 @@ export default function NewsList() {
             <select
               value={selectedStatus}
               onChange={handleStatusFilterChange}
-              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 h-9"
+              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 h-10 cursor-pointer"
             >
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
@@ -409,12 +406,21 @@ export default function NewsList() {
           {/* Date boundaries */}
           <div>
             <label className="text-xs font-semibold text-slate-500 block mb-1">Date Published</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => handleDateChange("start", e.target.value)}
-              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none text-slate-700 h-9"
-            />
+            <div className="relative">
+              <div className="flex h-10 w-full items-center rounded-lg border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
+                <span className={startDate ? "text-[#111111]" : "text-slate-500"}>
+                  {startDate ? formatDisplayDate(startDate) : "DD-MM-YYYY"}
+                </span>
+              </div>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => handleDateChange("start", e.target.value)}
+                aria-label="Date Published"
+                className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+              />
+              <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            </div>
           </div>
         </div>
 

@@ -39,7 +39,7 @@ const SCHEMA_TYPES = [
 ];
 
 const formStyle =
-  "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+  "w-full cursor-pointer border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
 
 export default function SeoFormPage() {
   const navigate = useNavigate();
@@ -127,6 +127,23 @@ export default function SeoFormPage() {
     if (!form.page) {
       newErrors.page = "Page is required";
     }
+    if (form.canonical_url.trim()) {
+      try {
+        new URL(form.canonical_url.trim());
+      } catch (_) {
+        newErrors.canonical_url = "Please enter a valid canonical URL";
+      }
+    }
+    if (form.og_image && !form.og_image_alt.trim()) {
+      newErrors.og_image_alt = "OG image alt text is required when an image is uploaded";
+    }
+    if (form.schema_json.trim()) {
+      try {
+        JSON.parse(form.schema_json);
+      } catch (_) {
+        newErrors.schema_json = "Schema JSON must be valid JSON";
+      }
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -136,8 +153,18 @@ export default function SeoFormPage() {
     try {
       setSubmitting(true);
       const res = isEdit
-        ? await updateSeo(id, form)
-        : await createSeo(form);
+        ? await updateSeo(id, {
+            ...form,
+            canonical_url: form.canonical_url.trim(),
+            og_image_alt: form.og_image_alt.trim(),
+            schema_json: form.schema_json.trim(),
+          })
+        : await createSeo({
+            ...form,
+            canonical_url: form.canonical_url.trim(),
+            og_image_alt: form.og_image_alt.trim(),
+            schema_json: form.schema_json.trim(),
+          });
       if (res.success) {
         toast.success(isEdit ? "SEO entry updated successfully" : "SEO entry created successfully");
         navigate("/global-content/seo");
@@ -145,6 +172,10 @@ export default function SeoFormPage() {
         toast.error(res.message || "Operation failed");
       }
     } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors((prev) => ({ ...prev, ...apiErrors }));
+      }
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setSubmitting(false);
@@ -187,7 +218,7 @@ export default function SeoFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Basic SEO */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
@@ -204,6 +235,7 @@ export default function SeoFormPage() {
                 name="page"
                 value={form.page}
                 onChange={handleChange}
+                aria-invalid={errors.page ? "true" : "false"}
                 className={`${formStyle} ${errors.page ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : ''}`}
               >
                 <option value="">Select Page</option>
@@ -229,6 +261,7 @@ export default function SeoFormPage() {
                 name="status"
                 value={form.status}
                 onChange={handleChange}
+                aria-invalid="false"
                 className={formStyle}
               >
                 <option value="active">Active</option>
@@ -274,6 +307,8 @@ export default function SeoFormPage() {
                 value={form.canonical_url}
                 onChange={handleChange}
                 placeholder="https://example.com/page"
+                error={!!errors.canonical_url}
+                errorMessage={errors.canonical_url}
               />
             </div>
             <div>
@@ -284,6 +319,7 @@ export default function SeoFormPage() {
                 name="robots_tag"
                 value={form.robots_tag}
                 onChange={handleChange}
+                aria-invalid="false"
                 className={formStyle}
               >
                 {ROBOTS_OPTIONS.map((o) => (
@@ -318,7 +354,16 @@ export default function SeoFormPage() {
               </label>
               <Upload
                 value={form.og_image}
-                onChange={(url) => setForm((prev) => ({ ...prev, og_image: url }))}
+                onChange={(url) => {
+                  setForm((prev) => ({ ...prev, og_image: url }));
+                  if (errors.og_image_alt) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.og_image_alt;
+                      return next;
+                    });
+                  }
+                }}
                 mediaType="image"
                 accept="image/*"
                 maxSizeKB={500}
@@ -343,12 +388,14 @@ export default function SeoFormPage() {
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
               OG Image Alt Text
             </label>
-            <Input
-              name="og_image_alt"
-              value={form.og_image_alt}
-              onChange={handleChange}
-              placeholder="Alt text for OG image"
-            />
+              <Input
+                name="og_image_alt"
+                value={form.og_image_alt}
+                onChange={handleChange}
+                placeholder="Alt text for OG image"
+                error={!!errors.og_image_alt}
+                errorMessage={errors.og_image_alt}
+              />
           </div>
         </div>
 
@@ -408,12 +455,13 @@ export default function SeoFormPage() {
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
               Schema Type
             </label>
-            <select
-              name="schema_type"
-              value={form.schema_type}
-              onChange={handleChange}
-              className={formStyle}
-            >
+              <select
+                name="schema_type"
+                value={form.schema_type}
+                onChange={handleChange}
+                aria-invalid="false"
+                className={formStyle}
+              >
               <option value="">Select Schema Type</option>
               {SCHEMA_TYPES.map((s) => (
                 <option key={s} value={s}>{s}</option>
@@ -432,6 +480,8 @@ export default function SeoFormPage() {
               placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Organization"\n}'}
               rows={6}
               className="font-mono text-xs"
+              error={!!errors.schema_json}
+              errorMessage={errors.schema_json}
             />
           </div>
         </div>

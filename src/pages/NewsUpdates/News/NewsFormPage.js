@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
 import { getNewsById, createNews, updateNews } from "../../../services/news/newsService";
 import { getCategories } from "../../../services/news/newsCategoryService";
+
+function formatDisplayDate(value) {
+  if (!value) return "";
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return "";
+  return `${day}-${month}-${year}`;
+}
 
 export default function NewsFormPage() {
   const navigate = useNavigate();
@@ -134,6 +141,9 @@ export default function NewsFormPage() {
     if (!form.short_description.trim()) newErrors.short_description = "Short Description is required";
     if (!form.image_url) newErrors.image_url = "Cover Image is required";
     if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
+    if (!Number.isInteger(Number(form.sequence)) || Number(form.sequence) < 0) {
+      newErrors.sequence = "Sequence must be a non-negative integer";
+    }
 
     if (form.external_url) {
       try {
@@ -170,6 +180,10 @@ export default function NewsFormPage() {
         toast.error(res.message || "Operation failed");
       }
     } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors((prev) => ({ ...prev, ...apiErrors }));
+      }
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setSubmitting(false);
@@ -226,6 +240,7 @@ export default function NewsFormPage() {
                   value={form.category_id}
                   onChange={handleChange}
                   disabled={isView}
+                  aria-invalid={errors.category_id ? "true" : "false"}
                   className={`w-full border ${errors.category_id ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55`}
                 >
                   <option value="">Select Category</option>
@@ -265,15 +280,32 @@ export default function NewsFormPage() {
                 <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
                   Publish Date <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  disabled={isView}
-                  error={!!errors.date}
-                  errorMessage={errors.date}
-                />
+                <div className="relative">
+                  <div
+                    className={`flex h-10 w-full items-center rounded-md border bg-white px-3 pr-11 text-sm dark:bg-gray-800 ${
+                      errors.date ? "border-red-500" : "border-[#E6E6E6]"
+                    }`}
+                  >
+                    <span className={form.date ? "text-[#111111] dark:text-white" : "text-slate-500"}>
+                      {form.date ? formatDisplayDate(form.date) : "DD-MM-YYYY"}
+                    </span>
+                  </div>
+                  <input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                    disabled={isView}
+                    aria-label="Publish Date"
+                    className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                  />
+                  <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                </div>
+                {errors.date && (
+                  <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                    {errors.date}
+                  </span>
+                )}
               </div>
 
               {/* External URL */}
@@ -324,6 +356,8 @@ export default function NewsFormPage() {
                   onChange={handleChange}
                   placeholder="0"
                   disabled={isView}
+                  error={!!errors.sequence}
+                  errorMessage={errors.sequence}
                 />
               </div>
 
@@ -337,7 +371,7 @@ export default function NewsFormPage() {
                   value={form.publish_status}
                   onChange={handleChange}
                   disabled={isView}
-                  className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
+                  className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55 cursor-pointer"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>

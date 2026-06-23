@@ -58,7 +58,9 @@ export default function CatalogueFormPage() {
     const newErrors = {};
     if (!form.product_category) newErrors.product_category = "Product category is required";
     if (!form.product_name.trim()) newErrors.product_name = "Product name is required";
+    if (!form.image_url) newErrors.image_url = "Product image is required";
     if (!Number.isInteger(Number(form.sequence)) || Number(form.sequence) < 0) newErrors.sequence = "Sequence must be a non-negative integer";
+    if (form.pdf_url && !String(form.pdf_url).toLowerCase().includes(".pdf")) newErrors.pdf_url = "Please upload a valid PDF file";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -67,11 +69,25 @@ export default function CatalogueFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, sequence: Number(form.sequence), show_on_homepage: form.show_on_homepage ? 1 : 0 };
+      const payload = {
+        ...form,
+        product_name: form.product_name.trim(),
+        short_description: form.short_description.trim(),
+        image_alt: form.image_alt.trim(),
+        pdf_url: form.pdf_url.trim(),
+        sequence: Number(form.sequence),
+        show_on_homepage: form.show_on_homepage ? 1 : 0,
+      };
       const res = isEdit ? await updateProduct(id, payload) : await createProduct(payload);
       if (res.success) { toast.success(isEdit ? "Product updated" : "Product created"); navigate("/product-listing/catalogue"); }
       else toast.error(res.message || "Operation failed");
-    } catch (err) { toast.error(err.response?.data?.message || "Operation failed"); }
+    } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors(prev => ({ ...prev, ...apiErrors }));
+      }
+      toast.error(err.response?.data?.message || "Operation failed");
+    }
     finally { setSubmitting(false); }
   };
 
@@ -102,6 +118,7 @@ export default function CatalogueFormPage() {
                 name="product_category"
                 value={form.product_category}
                 onChange={handle}
+                aria-invalid={errors.product_category ? "true" : "false"}
                 className={`${ss} ${errors.product_category ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : ''}`}
                 disabled={isView}
               >
@@ -128,7 +145,15 @@ export default function CatalogueFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
-              <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the product image" disabled={isView} />
+              <Input
+                name="image_alt"
+                value={form.image_alt}
+                onChange={handle}
+                placeholder="Describe the product image"
+                disabled={isView}
+                error={!!errors.image_alt}
+                errorMessage={errors.image_alt}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
@@ -145,13 +170,13 @@ export default function CatalogueFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
-              <select name="status" value={form.status} onChange={handle} className={ss} disabled={isView}>
+              <select name="status" value={form.status} onChange={handle} className={`${ss} cursor-pointer`} disabled={isView}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
             <div className="flex items-center gap-3 mt-6">
-              <input type="checkbox" id="show_on_homepage" name="show_on_homepage" checked={form.show_on_homepage} onChange={handle} disabled={isView} className="w-4 h-4 accent-[#981B1F]" />
+              <input type="checkbox" id="show_on_homepage" name="show_on_homepage" checked={form.show_on_homepage} onChange={handle} disabled={isView} className="w-4 h-4 cursor-pointer accent-[#981B1F]" />
               <label htmlFor="show_on_homepage" className="text-sm font-semibold text-slate-600 dark:text-gray-300 cursor-pointer">Show on Homepage</label>
             </div>
           </div>
@@ -164,16 +189,30 @@ export default function CatalogueFormPage() {
         {/* Image Upload */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
-            Product Image
+            Product Image <span className="text-red-500">*</span>
           </h2>
           <Upload
             value={form.image_url}
-            onChange={(url) => setForm((p) => ({ ...p, image_url: url }))}
+            onChange={(url) => {
+              setForm((p) => ({ ...p, image_url: url }));
+              if (errors.image_url) {
+                setErrors(prev => {
+                  const next = { ...prev };
+                  delete next.image_url;
+                  return next;
+                });
+              }
+            }}
             mediaType="image"
             accept="image/*"
             maxSizeKB={500}
             disabled={isView}
           />
+          {errors.image_url && (
+            <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+              {errors.image_url}
+            </span>
+          )}
         </div>
 
         {/* PDF Upload */}
@@ -183,12 +222,26 @@ export default function CatalogueFormPage() {
           </h2>
           <Upload
             value={form.pdf_url}
-            onChange={(url) => setForm((p) => ({ ...p, pdf_url: url }))}
+            onChange={(url) => {
+              setForm((p) => ({ ...p, pdf_url: url }));
+              if (errors.pdf_url) {
+                setErrors(prev => {
+                  const next = { ...prev };
+                  delete next.pdf_url;
+                  return next;
+                });
+              }
+            }}
             mediaType="document"
             accept="application/pdf"
             compressBeforeUpload={false}
             disabled={isView}
           />
+          {errors.pdf_url && (
+            <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+              {errors.pdf_url}
+            </span>
+          )}
         </div>
 
         {!isView && (

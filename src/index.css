@@ -123,10 +123,40 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
   border-radius: 8px !important;
   transition: all 0.2s ease-in-out !important;
 }
+input[type="date"] {
+  cursor: pointer !important;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer !important;
+}
+.inquiry-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0 !important;
+  width: 100% !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  cursor: pointer !important;
+}
+.inquiry-date-input::-webkit-inner-spin-button,
+.inquiry-date-input::-webkit-clear-button {
+  display: none !important;
+}
+select, option {
+  cursor: pointer !important;
+}
 input:focus, textarea:focus, select:focus {
   border-color: #981B1F !important;
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(152, 27, 31, 0.15) !important;
+}
+input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"] {
+  border-color: #ef4444 !important;
+}
+input[aria-invalid="true"]:focus, textarea[aria-invalid="true"]:focus, select[aria-invalid="true"]:focus,
+input[aria-invalid="true"]:focus-visible, textarea[aria-invalid="true"]:focus-visible, select[aria-invalid="true"]:focus-visible {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
 }
 
 /* Tables */

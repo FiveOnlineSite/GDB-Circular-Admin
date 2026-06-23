@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Video, Image as ImageIcon, Eye } from "lucide-react";
+import { Plus, Edit2, Trash2, Video, Image as ImageIcon, Eye, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import { getLifeItems, deleteLifeItem, toggleLifeItemStatus } from "../../../services/team/lifeAtGdbService";
@@ -60,31 +61,24 @@ export default function LifeAtGdbList() {
 
   useEffect(() => {
     fetchLifeGallery();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current_page, pagination.per_page]);
+  }, [fetchLifeGallery]);
 
   const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setPagination(p => ({ ...p, current_page: 1 }));
-    fetchLifeGallery({ page: 1 });
+    const value = e.target.value;
+    setSearch(value);
+    setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
   const handleMediaTypeFilterChange = (e) => {
     const type = e.target.value;
     setSelectedMediaType(type);
-    setPagination(p => ({ ...p, current_page: 1 }));
-    fetchLifeGallery({ page: 1, media_type: type });
+    setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
   const handleStatusFilterChange = (e) => {
     const status = e.target.value;
     setSelectedStatus(status);
-    setPagination(p => ({ ...p, current_page: 1 }));
-    fetchLifeGallery({ page: 1, status: status });
+    setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
   const handleToggleStatus = async (row) => {
@@ -272,25 +266,25 @@ export default function LifeAtGdbList() {
 
       {/* Search and Filters Strip */}
       <div className="bg-white rounded-xl border border-slate-100 p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full md:w-fit">
-          <input
-            type="text"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search by title..."
-            className="border border-[#E6E6E6] rounded-lg px-3 py-2 text-sm placeholder-slate-400 focus:border-[#981B1F] focus:outline-none w-full md:w-64"
-          />
-          <Button type="submit" variant="secondary" className="shrink-0">
-            Search
-          </Button>
-        </form>
+        <div className="flex items-center gap-2 w-full md:w-fit">
+          <div className="relative w-full md:w-64">
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search by title..."
+              className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
+            />
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Media Type Filter */}
           <select
             value={selectedMediaType}
             onChange={handleMediaTypeFilterChange}
-            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[150px]"
+            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[150px] cursor-pointer"
           >
             <option value="">All Media Types</option>
             {MEDIA_TYPES.map((opt) => (
@@ -304,7 +298,7 @@ export default function LifeAtGdbList() {
           <select
             value={selectedStatus}
             onChange={handleStatusFilterChange}
-            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[130px]"
+            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[130px] cursor-pointer"
           >
             <option value="">All Statuses</option>
             {STATUS_OPTIONS.map((opt) => (

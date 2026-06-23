@@ -162,8 +162,13 @@ export default function CatalogueList() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-4 mb-5">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input className="pl-9" placeholder="Search product name..." value={search} onChange={e => { setSearch(e.target.value); setPagination(p => ({ ...p, current_page: 1 })); }} />
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
+              placeholder="Search product name..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPagination(p => ({ ...p, current_page: 1 })); }}
+            />
           </div>
           <select value={category} onChange={e => { setCategory(e.target.value); setPagination(p => ({ ...p, current_page: 1 })); }} className={selectStyle}>
             <option value="">All Categories</option>

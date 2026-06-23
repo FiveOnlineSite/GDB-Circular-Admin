@@ -7,6 +7,20 @@ import Upload from "../../components/common/Upload";
 import { getFacility, createFacility, updateFacility } from "../../services/facilityService";
 import { toast } from "sonner";
 
+const INITIAL_FORM = {
+  facility_name: "",
+  facility_type: "",
+  address: "",
+  phone: "",
+  state: "",
+  latitude: "",
+  longitude: "",
+  image_url: "",
+  image_alt: "",
+  sequence: 0,
+  status: "active",
+};
+
 export default function FacilityForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,11 +28,34 @@ export default function FacilityForm() {
   const isView = location.pathname.includes('/facilities/view');
   const isEdit = Boolean(id) && !isView;
 
-  const [form, setForm] = useState({ facility_name: "", facility_type: "", address: "", phone: "", state: "", latitude: "", longitude: "", image_url: "", image_alt: "", sequence: 0, status: "active" });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  useEffect(() => { if (isEdit || isView) { setLoading(true); getFacility(id).then(r => { setForm(r); }).catch(()=>toast.error('Failed to load')).finally(()=>setLoading(false)); } }, [id, isEdit, isView]);
+  useEffect(() => {
+    if (!(isEdit || isView)) return;
+
+    setLoading(true);
+    getFacility(id)
+      .then((response) => {
+        const facility = response?.data || response || {};
+        setForm({
+          facility_name: facility.facility_name || "",
+          facility_type: facility.facility_type || "",
+          address: facility.address || "",
+          phone: facility.phone || "",
+          state: facility.state || "",
+          latitude: facility.latitude ?? "",
+          longitude: facility.longitude ?? "",
+          image_url: facility.image_url || "",
+          image_alt: facility.image_alt || "",
+          sequence: facility.sequence ?? 0,
+          status: facility.status || "active",
+        });
+      })
+      .catch(() => toast.error("Failed to load"))
+      .finally(() => setLoading(false));
+  }, [id, isEdit, isView]);
 
   const updateField = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));

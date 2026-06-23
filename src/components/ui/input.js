@@ -12,10 +12,13 @@ const Input = React.forwardRef(({ className, type, error, errorMessage, ...props
       <div className="relative">
         <input
           type={inputType}
+          aria-invalid={error ? 'true' : 'false'}
           className={cn(
-            'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
             isPassword ? 'pr-10' : '',
-            error ? 'border-red-500 focus-visible:ring-red-500' : 'border-input focus-visible:ring-ring',
+            error
+              ? '!border-red-500 !ring-red-500/20 focus-visible:!border-red-500 focus-visible:!ring-red-500/20'
+              : 'border-input focus-visible:ring-ring',
             className,
           )}
           ref={ref}

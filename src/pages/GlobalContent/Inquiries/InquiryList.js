@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Search, Trash2, Download, Eye, X } from "lucide-react";
+import { Search, Trash2, Download, Eye, X, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
@@ -9,6 +9,13 @@ import { getInquiries, deleteInquiry } from "../../../services/globalContent/inq
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 const PAGE_URLS = ["", "/", "/about", "/contact", "/services", "/products", "/faq"];
+
+function formatDisplayDate(value) {
+  if (!value) return "";
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return "";
+  return `${day}-${month}-${year}`;
+}
 
 function exportToCSV(data) {
   if (!data.length) return;
@@ -187,21 +194,54 @@ export default function InquiryList() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-4 mb-6 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input className="pl-9" placeholder="Search name, email, mobile..." value={search} onChange={(e) => { setSearch(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} />
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
+              placeholder="Search name, email, mobile..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
+            />
           </div>
           <select
             value={pageUrl}
             onChange={(e) => { setPageUrl(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
-            className="w-full border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none"
+            className="w-full cursor-pointer border border-[#E6E6E6] rounded-lg bg-white p-2.5 text-sm focus:border-[#981B1F] focus:outline-none"
           >
             <option value="">All Pages</option>
             {PAGE_URLS.filter(Boolean).map((p) => (
               <option key={p} value={p}>{p}</option>
             ))}
           </select>
-          <Input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} placeholder="Start Date" />
-          <Input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} placeholder="End Date" />
+          <div className="relative">
+            <div className="flex h-10 w-full items-center rounded-md border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
+              <span className={startDate ? "text-[#111111]" : "text-slate-500"}>
+                {startDate ? formatDisplayDate(startDate) : "DD-MM-YYYY"}
+              </span>
+            </div>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
+              aria-label="Start Date"
+              className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+            />
+            <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          </div>
+          <div className="relative">
+            <div className="flex h-10 w-full items-center rounded-md border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
+              <span className={endDate ? "text-[#111111]" : "text-slate-500"}>
+                {endDate ? formatDisplayDate(endDate) : "DD-MM-YYYY"}
+              </span>
+            </div>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => { setEndDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
+              aria-label="End Date"
+              className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+            />
+            <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          </div>
         </div>
         {hasActiveFilters && (
           <Button size="sm" variant="ghost" onClick={clearFilters} className="text-slate-500 hover:text-slate-700">

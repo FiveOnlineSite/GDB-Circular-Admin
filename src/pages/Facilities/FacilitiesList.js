@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Edit2, Trash2 } from "lucide-react";
+import { Eye, Edit2, Trash2, Search } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { getFacilities, deleteFacility, toggleFacilityStatus } from "../../services/facilityService";
@@ -21,7 +22,12 @@ export default function FacilitiesList() {
   const fetch = async (params = {}) => {
     try {
       setLoading(true);
-      const res = await getFacilities({ ...params, page: pagination.current_page, limit: pagination.per_page, q: params.q || search });
+      const res = await getFacilities({
+        ...params,
+        page: params.page ?? pagination.current_page,
+        limit: params.limit ?? pagination.per_page,
+        search: params.search ?? search,
+      });
       if (res.success) {
         setRows(res.data?.data || []);
         if (res.data?.pagination) setPagination(res.data.pagination);
@@ -34,8 +40,7 @@ export default function FacilitiesList() {
     } finally { setLoading(false); }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetch(); }, [pagination.current_page, pagination.per_page, search]);
 
   const handleDelete = async () => {
     try {
@@ -115,9 +120,17 @@ export default function FacilitiesList() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center border border-gray-200 rounded-md overflow-hidden bg-white">
-            <input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') fetch({ page:1 }); }} className="px-3 py-2 w-64 text-sm placeholder-gray-400" placeholder="Search facilities..." />
-            <button onClick={()=>fetch({ page:1 })} className="px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700">Search</button>
+          <div className="relative w-64">
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPagination((prev) => ({ ...prev, current_page: 1 }));
+              }}
+              className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
+              placeholder="Search facilities..."
+            />
           </div>
           {hasPermission('facilities','create') && (<Button onClick={()=>navigate('/facilities/create')} className="text-white">Add Facility</Button>)}
         </div>

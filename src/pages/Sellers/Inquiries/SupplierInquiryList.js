@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Search, FileDown, Eye, Trash2, X } from "lucide-react";
+import { Search, FileDown, Eye, Trash2, X, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import ConfirmationModal from "../../../components/common/DeleteConfirmationModal";
 import { getInquiries, deleteInquiry, exportInquiries } from "../../../services/sellers/supplierInquiryService";
@@ -9,6 +10,13 @@ import { usePermissionContext } from "../../../context/PermissionContext";
 import * as XLSX from "xlsx";
 
 const RESIN_TYPES = ["LDPE", "HDPE", "PP"];
+
+function formatDisplayDate(value) {
+  if (!value) return "";
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return "";
+  return `${day}-${month}-${year}`;
+}
 
 export default function SupplierInquiryList() {
   const { hasPermission } = usePermissionContext();
@@ -78,35 +86,27 @@ export default function SupplierInquiryList() {
 
   useEffect(() => {
     fetchInquiries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current_page, pagination.per_page]);
+  }, [fetchInquiries]);
 
   const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    const value = e.target.value;
+    setSearch(value);
     setPagination((p) => ({ ...p, current_page: 1 }));
-    fetchInquiries({ page: 1 });
   };
 
   const handleResinFilterChange = (e) => {
     const resin = e.target.value;
     setSelectedResin(resin);
     setPagination((p) => ({ ...p, current_page: 1 }));
-    fetchInquiries({ page: 1, resin_type: resin });
   };
 
   const handleDateChange = (type, val) => {
     if (type === "start") {
       setStartDate(val);
       setPagination((p) => ({ ...p, current_page: 1 }));
-      fetchInquiries({ page: 1, startDate: val });
     } else {
       setEndDate(val);
       setPagination((p) => ({ ...p, current_page: 1 }));
-      fetchInquiries({ page: 1, endDate: val });
     }
   };
 
@@ -297,18 +297,16 @@ export default function SupplierInquiryList() {
           {/* Search */}
           <div>
             <label className="text-xs font-semibold text-slate-500 block mb-1">Search Keywords</label>
-            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-              <input
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
                 placeholder="Search by name, email, company..."
-                className="border border-[#E6E6E6] rounded-lg px-3 py-2 text-sm placeholder-slate-400 focus:border-[#981B1F] focus:outline-none w-full"
+                className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
               />
-              <Button type="submit" size="icon" className="bg-[#981B1F] hover:bg-[#C3662D] text-white transition-colors duration-200 shrink-0 h-9 w-9 flex items-center justify-center">
-                <Search size={14} className="text-white" />
-              </Button>
-            </form>
+            </div>
           </div>
 
           {/* Resin Type Filter */}
@@ -317,7 +315,7 @@ export default function SupplierInquiryList() {
             <select
               value={selectedResin}
               onChange={handleResinFilterChange}
-              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 h-9"
+              className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 h-10 cursor-pointer"
             >
               <option value="">All Resin Types</option>
               {RESIN_TYPES.map((opt) => (
@@ -332,12 +330,19 @@ export default function SupplierInquiryList() {
           <div>
             <label className="text-xs font-semibold text-slate-500 block mb-1">Received From</label>
             <div className="relative">
+              <div className="flex h-10 w-full items-center rounded-lg border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
+                <span className={startDate ? "text-[#111111]" : "text-slate-500"}>
+                  {startDate ? formatDisplayDate(startDate) : "DD-MM-YYYY"}
+                </span>
+              </div>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => handleDateChange("start", e.target.value)}
-                className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none text-slate-700 h-9"
+                aria-label="Received From"
+                className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
               />
+              <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             </div>
           </div>
 
@@ -345,12 +350,19 @@ export default function SupplierInquiryList() {
           <div>
             <label className="text-xs font-semibold text-slate-500 block mb-1">Received To</label>
             <div className="relative">
+              <div className="flex h-10 w-full items-center rounded-lg border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
+                <span className={endDate ? "text-[#111111]" : "text-slate-500"}>
+                  {endDate ? formatDisplayDate(endDate) : "DD-MM-YYYY"}
+                </span>
+              </div>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => handleDateChange("end", e.target.value)}
-                className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none text-slate-700 h-9"
+                aria-label="Received To"
+                className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
               />
+              <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             </div>
           </div>
         </div>

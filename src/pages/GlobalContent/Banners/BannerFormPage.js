@@ -83,6 +83,23 @@ export default function BannerFormPage() {
     if (!form.page) newErrors.page = "Page is required";
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.file_url) newErrors.file_url = "Background image/video is required";
+    if (String(form.sequence).trim() !== "" && Number(form.sequence) < 0) {
+      newErrors.sequence = "Sequence must be 0 or greater";
+    }
+    if (form.cta_button_link.trim()) {
+      const linkValue = form.cta_button_link.trim();
+      const isRelativePath = linkValue.startsWith("/");
+      let isValidUrl = false;
+      try {
+        new URL(linkValue);
+        isValidUrl = true;
+      } catch (_) {
+        isValidUrl = false;
+      }
+      if (!isRelativePath && !isValidUrl) {
+        newErrors.cta_button_link = "CTA button link must be a valid URL or start with /";
+      }
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -91,7 +108,14 @@ export default function BannerFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, sequence: Number(form.sequence) };
+      const payload = {
+        ...form,
+        title: form.title.trim(),
+        alt_text: form.alt_text.trim(),
+        cta_button_name: form.cta_button_name.trim(),
+        cta_button_link: form.cta_button_link.trim(),
+        sequence: Number(form.sequence),
+      };
       const res = isEdit ? await updateBanner(id, payload) : await createBanner(payload);
       if (res.success) {
         toast.success(isEdit ? "Banner updated" : "Banner created");
@@ -100,6 +124,10 @@ export default function BannerFormPage() {
         toast.error(res.message || "Operation failed");
       }
     } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors((prev) => ({ ...prev, ...apiErrors }));
+      }
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setSubmitting(false);
@@ -142,6 +170,7 @@ export default function BannerFormPage() {
                 name="page"
                 value={form.page}
                 onChange={handleChange}
+                aria-invalid={errors.page ? "true" : "false"}
                 className={`${fieldStyle} ${errors.page ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : ''}`}
               >
                 <option value="">Select Page</option>
@@ -170,23 +199,52 @@ export default function BannerFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Alt Text</label>
-              <Input name="alt_text" value={form.alt_text} onChange={handleChange} placeholder="Describe the banner image/video" />
+              <Input
+                name="alt_text"
+                value={form.alt_text}
+                onChange={handleChange}
+                placeholder="Describe the banner image/video"
+                error={!!errors.alt_text}
+                errorMessage={errors.alt_text}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handleChange} />
+              <Input
+                type="number"
+                min="0"
+                name="sequence"
+                value={form.sequence}
+                onChange={handleChange}
+                error={!!errors.sequence}
+                errorMessage={errors.sequence}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">CTA Button Name</label>
-              <Input name="cta_button_name" value={form.cta_button_name} onChange={handleChange} placeholder="Get Started, Learn More..." />
+              <Input
+                name="cta_button_name"
+                value={form.cta_button_name}
+                onChange={handleChange}
+                placeholder="Get Started, Learn More..."
+                error={!!errors.cta_button_name}
+                errorMessage={errors.cta_button_name}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">CTA Button Link</label>
-              <Input name="cta_button_link" value={form.cta_button_link} onChange={handleChange} placeholder="/contact or https://..." />
+              <Input
+                name="cta_button_link"
+                value={form.cta_button_link}
+                onChange={handleChange}
+                placeholder="/contact or https://..."
+                error={!!errors.cta_button_link}
+                errorMessage={errors.cta_button_link}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
-              <select name="status" value={form.status} onChange={handleChange} className={fieldStyle}>
+              <select name="status" value={form.status} onChange={handleChange} className={`${fieldStyle} cursor-pointer`}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>

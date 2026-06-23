@@ -71,8 +71,8 @@ export default function UserForm({ user = null, onClose, onSuccess }) {
     e.preventDefault();
     const newErrors = {};
 
-    if (!formData.firstName.trim()) newErrors.firstName = "First Name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last Name is required";
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
@@ -89,17 +89,21 @@ export default function UserForm({ user = null, onClose, onSuccess }) {
       if (!formData.password) {
         newErrors.password = "Password is required";
       } else if (formData.password.length < 8) {
-        newErrors.password = "Password must contain minimum 8 characters";
+        newErrors.password = "Password must be at least 8 characters";
       }
-      if (formData.password !== formData.confirmPassword) {
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = "Confirm password is required";
+      } else if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = "Passwords do not match";
       }
     } else {
       if (formData.password) {
         if (formData.password.length < 8) {
-          newErrors.password = "Password must contain minimum 8 characters";
+          newErrors.password = "Password must be at least 8 characters";
         }
-        if (formData.password !== formData.confirmPassword) {
+        if (!formData.confirmPassword) {
+          newErrors.confirmPassword = "Confirm password is required";
+        } else if (formData.password !== formData.confirmPassword) {
           newErrors.confirmPassword = "Passwords do not match";
         }
       }
@@ -133,6 +137,20 @@ export default function UserForm({ user = null, onClose, onSuccess }) {
 
       await onSuccess(payload);
     } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        const mappedErrors = {};
+        Object.entries(apiErrors).forEach(([key, value]) => {
+          if (key === "name") {
+            mappedErrors.firstName = value;
+          } else if (key === "roleIds" || key === "roleId") {
+            mappedErrors.roleId = value;
+          } else {
+            mappedErrors[key] = value;
+          }
+        });
+        setErrors((prev) => ({ ...prev, ...mappedErrors }));
+      }
       toast.error(err.response?.data?.message || "Submit failed");
     } finally {
       setLoading(false);
@@ -237,7 +255,8 @@ export default function UserForm({ user = null, onClose, onSuccess }) {
             name="roleId"
             value={formData.roleId}
             onChange={handleChange}
-            className={`w-full border ${errors.roleId ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15'} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition`}
+            aria-invalid={errors.roleId ? "true" : "false"}
+            className={`w-full cursor-pointer border ${errors.roleId ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15'} bg-white text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition`}
           >
             <option value="">Select Role</option>
             {roles.map(role => (
@@ -257,8 +276,8 @@ export default function UserForm({ user = null, onClose, onSuccess }) {
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition"
-            required
+            aria-invalid="false"
+            className="w-full cursor-pointer border border-[#E6E6E6] bg-white text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition"
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>

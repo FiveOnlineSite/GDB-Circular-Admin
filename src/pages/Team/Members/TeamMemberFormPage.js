@@ -103,6 +103,9 @@ export default function TeamMemberFormPage() {
     if (!form.designation.trim()) newErrors.designation = "Designation is required";
     if (!form.photo_url) newErrors.photo_url = "Profile photo is required";
     if (!form.photo_alt.trim()) newErrors.photo_alt = "Photo alt text is required";
+    if (!Number.isInteger(Number(form.sequence)) || Number(form.sequence) < 0) {
+      newErrors.sequence = "Sequence must be a non-negative integer";
+    }
 
     // Validate URL format if provided
     if (form.linkedin_url.trim()) {
@@ -141,6 +144,10 @@ export default function TeamMemberFormPage() {
         toast.error(res.message || "Operation failed");
       }
     } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors((prev) => ({ ...prev, ...apiErrors }));
+      }
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setSubmitting(false);
@@ -196,6 +203,7 @@ export default function TeamMemberFormPage() {
                 value={form.group_name}
                 onChange={handleChange}
                 disabled={isView}
+                aria-invalid={errors.group_name ? "true" : "false"}
                 className={`w-full border ${errors.group_name ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55`}
               >
                 <option value="">Select Group</option>
@@ -272,6 +280,8 @@ export default function TeamMemberFormPage() {
                 onChange={handleChange}
                 placeholder="0"
                 disabled={isView}
+                error={!!errors.sequence}
+                errorMessage={errors.sequence}
               />
             </div>
 
@@ -285,7 +295,7 @@ export default function TeamMemberFormPage() {
                 value={form.status}
                 onChange={handleChange}
                 disabled={isView}
-                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
+                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55 cursor-pointer"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -301,7 +311,7 @@ export default function TeamMemberFormPage() {
               checked={form.show_on_homepage}
               onChange={handleChange}
               disabled={isView}
-              className="h-4.5 w-4.5 rounded border-slate-300 text-[#981B1F] focus:ring-[#981B1F] disabled:opacity-55"
+              className="h-4.5 w-4.5 rounded border-slate-300 text-[#981B1F] focus:ring-[#981B1F] disabled:opacity-55 cursor-pointer"
             />
             <label
               htmlFor="show_on_homepage"

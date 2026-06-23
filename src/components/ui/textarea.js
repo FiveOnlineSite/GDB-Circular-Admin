@@ -5,9 +5,12 @@ const Textarea = React.forwardRef(({ className, error, errorMessage, ...props },
   return (
     <div className="w-full">
       <textarea
+        aria-invalid={error ? "true" : "false"}
         className={cn(
           "flex min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          error ? "border-red-500 focus-visible:ring-red-500" : "border-input focus-visible:ring-ring",
+          error
+            ? "!border-red-500 !ring-red-500/20 focus-visible:!border-red-500 focus-visible:!ring-red-500/20"
+            : "border-input focus-visible:ring-ring",
           className
         )}
         ref={ref}

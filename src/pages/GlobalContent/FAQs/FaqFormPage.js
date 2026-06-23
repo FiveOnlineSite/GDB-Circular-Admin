@@ -78,6 +78,16 @@ export default function FaqFormPage() {
     if (!form.page) newErrors.page = "Page is required";
     if (!form.question.trim()) newErrors.question = "Question is required";
     if (!form.answer.trim()) newErrors.answer = "Answer is required";
+    if (String(form.sequence).trim() !== "" && Number(form.sequence) < 0) {
+      newErrors.sequence = "Sequence must be 0 or greater";
+    }
+    if (form.faq_schema.trim()) {
+      try {
+        JSON.parse(form.faq_schema);
+      } catch (_) {
+        newErrors.faq_schema = "FAQ schema must be valid JSON";
+      }
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -95,6 +105,10 @@ export default function FaqFormPage() {
         toast.error(res.message || "Operation failed");
       }
     } catch (err) {
+      const apiErrors = err.response?.data?.error;
+      if (apiErrors && typeof apiErrors === "object") {
+        setErrors((prev) => ({ ...prev, ...apiErrors }));
+      }
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setSubmitting(false);
@@ -136,6 +150,7 @@ export default function FaqFormPage() {
                 name="page"
                 value={form.page}
                 onChange={handleChange}
+                aria-invalid={errors.page ? "true" : "false"}
                 className={`${fieldStyle} ${errors.page ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : ''}`}
               >
                 <option value="">Select Page</option>
@@ -151,11 +166,24 @@ export default function FaqFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handleChange} />
+              <Input
+                type="number"
+                min="0"
+                name="sequence"
+                value={form.sequence}
+                onChange={handleChange}
+                error={!!errors.sequence}
+                errorMessage={errors.sequence}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
-              <select name="status" value={form.status} onChange={handleChange} className={fieldStyle}>
+              <select
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                className={`${fieldStyle} cursor-pointer`}
+              >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
@@ -203,6 +231,8 @@ export default function FaqFormPage() {
               placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "FAQPage"\n}'}
               rows={6}
               className="font-mono text-xs"
+              error={!!errors.faq_schema}
+              errorMessage={errors.faq_schema}
             />
           </div>
         </div>
