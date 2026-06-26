@@ -41,17 +41,18 @@ export default function FooterPage() {
         const res = await getFooter();
         if (res.success && res.data) {
           const d = res.data;
+          const contact = d.contact || {};
           setForm({
-            phone: d.phone || "",
-            email: d.email || "",
-            address: d.address || "",
-            footer_description: d.footer_description || "",
+            phone: contact.phone || "",
+            email: contact.email || "",
+            address: contact.address || "",
+            footer_description: contact.footer_description || "",
           });
           const links = Array.isArray(d.socialLinks)
             ? d.socialLinks.map((l) => ({ ...l, _tempId: l.id || Date.now() + Math.random() }))
             : [];
           setSocialLinks(links);
-          const hasData = !!(d.phone || d.email || d.address || d.footer_description || links.length > 0);
+          const hasData = !!(contact.phone || contact.email || contact.address || contact.footer_description || links.length > 0);
           setIsEditing(!hasData);
         } else {
           setIsEditing(true);
