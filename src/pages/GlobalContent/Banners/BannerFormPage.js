@@ -10,7 +10,7 @@ import { createBanner, updateBanner, getBannerById } from "../../../services/glo
 const fieldStyle =
   "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
 
-const PAGES = ["home", "about", "contact", "services", "products", "blog", "faq", "sellers", "product-listing"];
+const PAGES = ["home", "about-us", "products", "seller", "teams", "facilities", "news-events", "contact", "services", "blog", "faq", "product-listing"];
 
 
 export default function BannerFormPage() {

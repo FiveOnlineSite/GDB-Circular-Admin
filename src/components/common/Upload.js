@@ -139,6 +139,7 @@ export default function Upload({
     }
 
     let fileToUpload = file;
+    let uploadFileName = file.name;
 
     // 3. Perform compression on frontend if enabled
     if (isImage && autoCompress && imageCompressEnabled) {
@@ -156,6 +157,7 @@ export default function Upload({
         }
 
         fileToUpload = compressed;
+        uploadFileName = file.name;
         if (onCompressionComplete) onCompressionComplete(compressed);
       } catch (err) {
         setCompressing(false);
@@ -181,6 +183,7 @@ export default function Upload({
         }
 
         fileToUpload = compressed;
+        uploadFileName = file.name;
         if (onCompressionComplete) onCompressionComplete(compressed);
       } catch (err) {
         setCompressing(false);
@@ -204,7 +207,7 @@ export default function Upload({
     if (onUploadStart) onUploadStart();
 
     const formData = new FormData();
-    formData.append("file", fileToUpload);
+    formData.append("file", fileToUpload, uploadFileName);
 
     try {
       const res = await api.post("/v1/media/upload", formData, {

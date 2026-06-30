@@ -47,6 +47,7 @@ export const compressImage = async (file, options = {}) => {
     maxWidthOrHeight: 1920,
     useWebWorker: true,
     initialQuality: 0.8,
+    fileType: file.type,
   };
 
   const finalOptions = { ...defaultOptions, ...options };
