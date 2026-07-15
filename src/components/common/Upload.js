@@ -36,6 +36,14 @@ export default function Upload({
   // Dynamic Media Rules State
   const [rules, setRules] = useState(null);
 
+  const getAllowedImageExts = () => {
+    const configuredExts = rules
+      ? rules.allowed_image_ext.split(",").map((x) => x.trim().toLowerCase())
+      : ["jpg", "jpeg", "png", "webp", "svg"];
+
+    return Array.from(new Set([...configuredExts, "svg"]));
+  };
+
   useEffect(() => {
     (async () => {
       try {
@@ -54,14 +62,13 @@ export default function Upload({
     if (!file) return;
 
     const isImage = file.type.startsWith("image/");
+    const isSvg = file.type === "image/svg+xml";
     const isVideo = file.type.startsWith("video/");
     const isPdf = file.type === "application/pdf";
     const fileExt = file.name.split(".").pop().toLowerCase();
 
     // 1. Resolve Rules
-    const allowedImageExts = rules
-      ? rules.allowed_image_ext.split(",").map((x) => x.trim().toLowerCase())
-      : ["jpg", "jpeg", "png", "webp"];
+    const allowedImageExts = getAllowedImageExts();
 
     const allowedVideoExts = rules
       ? rules.allowed_video_ext.split(",").map((x) => x.trim().toLowerCase())
@@ -73,9 +80,6 @@ export default function Upload({
     const autoCompress = rules ? rules.auto_compression_before_upload === 1 : compressBeforeUpload;
     const imageCompressEnabled = rules ? rules.image_compression_enabled === 1 : true;
     const videoCompressEnabled = rules ? rules.video_compression_enabled === 1 : true;
-    const imageQuality = rules ? rules.image_quality / 100 : 0.8;
-    const videoQuality = rules ? rules.video_quality : 80;
-
     // 2. Validate based on file type and extensions
     if (isImage) {
       if (mediaType === "video" || mediaType === "document") {
@@ -142,13 +146,16 @@ export default function Upload({
     let uploadFileName = file.name;
 
     // 3. Perform compression on frontend if enabled
-    if (isImage && autoCompress && imageCompressEnabled) {
+    const imageSizeKB = isImage ? getFileSizeKB(file) : 0;
+    const videoSizeMB = isVideo ? getFileSizeMB(file) : 0;
+
+    if (isImage && !isSvg && autoCompress && imageCompressEnabled && imageSizeKB > activeMaxImageKB) {
       setCompressing(true);
       if (onCompressionStart) onCompressionStart();
       try {
         const compressed = await compressImage(file, {
           maxSizeMB: activeMaxImageKB / 1024,
-          initialQuality: imageQuality,
+          initialQuality: 1,
         });
         const compSizeKB = getFileSizeKB(compressed);
 
@@ -167,13 +174,12 @@ export default function Upload({
         return;
       }
       setCompressing(false);
-    } else if (isVideo && autoCompress && videoCompressEnabled) {
+    } else if (isVideo && autoCompress && videoCompressEnabled && videoSizeMB > activeMaxVideoMB) {
       setCompressing(true);
       setCompressionProgress(0);
       if (onCompressionStart) onCompressionStart();
       try {
-        const targetCrf = Math.round(51 - (videoQuality * 51) / 100);
-        const compressed = await compressVideo(file, { crf: targetCrf }, (progress) => {
+        const compressed = await compressVideo(file, { crf: 18, preset: "slow" }, (progress) => {
           setCompressionProgress(progress);
         });
         const compSizeMB = getFileSizeMB(compressed);
@@ -320,7 +326,7 @@ export default function Upload({
               </div>
               <span className="text-sm font-bold text-slate-500">Click to upload {mediaType === "both" ? "media" : mediaType}</span>
               <span className="text-xs text-slate-400 font-medium">
-                {mediaType === "image" && `Image formats: ${rules ? rules.allowed_image_ext.toUpperCase() : "JPG, JPEG, PNG, WEBP"} — max ${maxImageLimitKB}KB`}
+                {mediaType === "image" && `Image formats: ${getAllowedImageExts().join(", ").toUpperCase()} — max ${maxImageLimitKB}KB`}
                 {mediaType === "video" && `Video formats: ${rules ? rules.allowed_video_ext.toUpperCase() : "MP4, WEBM, MOV"} — max ${maxVideoLimitMB}MB`}
                 {mediaType === "document" && "PDF — max 5MB"}
                 {mediaType === "both" && `Images max ${maxImageLimitKB}KB · Videos max ${maxVideoLimitMB}MB · PDFs max 5MB`}

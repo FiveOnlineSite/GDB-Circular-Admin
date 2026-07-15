@@ -55,8 +55,8 @@ export const compressVideo = async (file, options = {}, onProgress = null) => {
   const defaultOptions = {
     outputFormat: "mp4",
     videoCodec: "libx264",
-    crf: 28,
-    preset: "veryfast",
+    crf: 18,
+    preset: "slow",
     audioBitrate: "128k",
   };
 
@@ -93,6 +93,8 @@ export const compressVideo = async (file, options = {}, onProgress = null) => {
       "-vcodec", finalOptions.videoCodec,
       "-crf", String(finalOptions.crf),
       "-preset", finalOptions.preset,
+      "-map_metadata", "-1",
+      "-movflags", "+faststart",
       "-ab", finalOptions.audioBitrate,
       outputName
     ]);

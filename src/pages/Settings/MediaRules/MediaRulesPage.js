@@ -19,7 +19,7 @@ export default function MediaRulesPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
-    allowed_image_ext: "jpg,jpeg,png,webp",
+    allowed_image_ext: "jpg,jpeg,png,webp,svg",
     max_image_size_kb: 500,
     image_compression_enabled: 1,
     image_quality: 80,

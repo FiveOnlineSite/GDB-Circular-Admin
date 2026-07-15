@@ -16,7 +16,7 @@ export const getFileSizeKB = (file) => {
  * @returns {{valid: boolean, error?: string}}
  */
 export const validateImage = (file, maxSizeKB = 500) => {
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/svg+xml"];
   if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
@@ -46,7 +46,7 @@ export const compressImage = async (file, options = {}) => {
     maxSizeMB: 0.5,
     maxWidthOrHeight: 1920,
     useWebWorker: true,
-    initialQuality: 0.8,
+    initialQuality: 1,
     fileType: file.type,
   };
 
