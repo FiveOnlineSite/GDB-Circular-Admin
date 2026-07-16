@@ -1,4 +1,5 @@
 import axios from "axios";
+import { startGlobalLoader, stopGlobalLoader } from "./globalLoader";
 
 const api = axios.create({
   baseURL: (process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api",
@@ -11,6 +12,10 @@ const api = axios.create({
 // Add a request interceptor to attach the token
 api.interceptors.request.use(
   (config) => {
+    if (!config.skipGlobalLoader) {
+      startGlobalLoader();
+    }
+
     const userStr = localStorage.getItem("user");
     if (userStr && userStr !== "undefined" && userStr !== "null") {
       try {
@@ -36,12 +41,19 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    if (!error.config?.skipGlobalLoader) {
+      stopGlobalLoader();
+    }
     return Promise.reject(error);
   },
 );
 
 api.interceptors.response.use(
   (response) => {
+    if (!response.config?.skipGlobalLoader) {
+      stopGlobalLoader();
+    }
+
     if (
       response.config?.method?.toLowerCase() === "delete" &&
       (response.data === "" || response.data === null || response.data === undefined)
@@ -55,6 +67,10 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (!error.config?.skipGlobalLoader) {
+      stopGlobalLoader();
+    }
+
     if (error.response && [401].includes(error.response.status)) {
       // Clear local storage and redirect to login if token is invalid or access is forbidden (e.g., inactive user)
       localStorage.removeItem("user");

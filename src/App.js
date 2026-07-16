@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { PermissionProvider } from "./context/PermissionContext";
+import { GlobalLoaderProvider } from "./context/GlobalLoaderContext";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/Users";
@@ -69,6 +70,7 @@ import NewsList from "./pages/NewsUpdates/News/NewsList";
 import NewsFormPage from "./pages/NewsUpdates/News/NewsFormPage";
 // Settings Management
 import MediaRulesPage from "./pages/Settings/MediaRules/MediaRulesPage";
+import GlobalLoaderOverlay from "./components/common/GlobalLoaderOverlay";
 
 
 
@@ -87,12 +89,14 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <PermissionProvider>
-          <Router>
-            <Toaster position="top-center" richColors expand={false} />
-            <Routes>
+      <GlobalLoaderProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <PermissionProvider>
+            <Router>
+              <Toaster position="top-center" richColors expand={false} />
+              <GlobalLoaderOverlay />
+              <Routes>
               {/* Public Routes */}
               <Route
                 path="/login"
@@ -450,11 +454,12 @@ function App() {
 
           {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
-</Routes>
-          </Router>
-        </PermissionProvider>
-      </ThemeProvider>
-    </AuthProvider>
+              </Routes>
+            </Router>
+          </PermissionProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </GlobalLoaderProvider>
     </QueryClientProvider>
   );
 }
