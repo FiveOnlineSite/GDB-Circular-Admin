@@ -24,7 +24,7 @@ export default function MediaRulesPage() {
     image_compression_enabled: 1,
     image_quality: 80,
     allowed_video_ext: "mp4,webm,mov",
-    max_video_size_mb: 15,
+    max_video_size_mb: 20,
     video_compression_enabled: 1,
     video_quality: 80,
     enable_file_preview: 1,
@@ -268,7 +268,7 @@ export default function MediaRulesPage() {
                     name="max_video_size_mb"
                     value={form.max_video_size_mb}
                     onChange={handleChange}
-                    placeholder="15"
+                    placeholder="20"
                     disabled={!canUpdate}
                     required
                   />
