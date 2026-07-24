@@ -1,5 +1,5 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Loader2, X } from 'lucide-react';
 
 const ConfirmationModal = ({
   isOpen,
@@ -15,7 +15,16 @@ const ConfirmationModal = ({
   confirmVariant,
   isLoading = false,
 }) => {
+  const [internalLoading, setInternalLoading] = useState(false);
   const displayIsOpen = isOpen !== undefined ? isOpen : open;
+  const loading = isLoading || internalLoading;
+
+  useEffect(() => {
+    if (!displayIsOpen) {
+      setInternalLoading(false);
+    }
+  }, [displayIsOpen]);
+
   if (!displayIsOpen) return null;
 
   // Support both confirmText and confirmLabel
@@ -34,7 +43,7 @@ const ConfirmationModal = ({
   return (
     <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm'
-      onClick={!isLoading ? onClose : undefined}
+      onClick={!loading ? onClose : undefined}
     >
       <div
         className='bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all scale-100 relative'
@@ -42,7 +51,7 @@ const ConfirmationModal = ({
       >
         <button
           onClick={onClose}
-          disabled={isLoading}
+          disabled={loading}
           className='absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50'
         >
           <X className='w-5 h-5' />
@@ -52,17 +61,34 @@ const ConfirmationModal = ({
         <div className='flex justify-end gap-3'>
           <button
             onClick={onClose}
-            disabled={isLoading}
+            disabled={loading}
             className='px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors disabled:opacity-50'
           >
             {cancelText}
           </button>
           <button
-            onClick={onConfirm}
-            disabled={isLoading}
+            onClick={async () => {
+              const result = onConfirm?.();
+              if (result && typeof result.then === 'function') {
+                try {
+                  setInternalLoading(true);
+                  await result;
+                } finally {
+                  setInternalLoading(false);
+                }
+              }
+            }}
+            disabled={loading}
             className={`px-4 py-2 rounded-lg text-white font-medium transition-colors shadow-lg disabled:opacity-50 ${btnClass}`}
           >
-            {isLoading ? 'Processing...' : displayConfirmText}
+            {loading ? (
+              <span className='inline-flex items-center gap-2'>
+                <Loader2 className='h-4 w-4 animate-spin' />
+                Processing...
+              </span>
+            ) : (
+              displayConfirmText
+            )}
           </button>
         </div>
       </div>

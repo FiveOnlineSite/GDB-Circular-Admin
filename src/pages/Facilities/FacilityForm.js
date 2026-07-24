@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { Loader2, Save } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
@@ -30,6 +31,7 @@ export default function FacilityForm() {
 
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function FacilityForm() {
     }
 
     try {
-      setLoading(true);
+      setSubmitting(true);
       if (isEdit) await updateFacility(id, form); else await createFacility(form);
       toast.success('Saved');
       navigate('/facilities');
@@ -105,7 +107,7 @@ export default function FacilityForm() {
       }
       toast.error(e.response?.data?.message || 'Save failed');
     }
-    finally { setLoading(false); }
+    finally { setSubmitting(false); }
   };
 
   return (
@@ -182,7 +184,21 @@ export default function FacilityForm() {
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
-            {!isView && <Button type="submit" disabled={loading}>{loading? 'Saving...' : 'Save'}</Button>}
+            {!isView && (
+              <Button type="submit" disabled={submitting || loading}>
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isEdit ? "Update Facility" : "Add Facility"}
+                  </>
+                )}
+              </Button>
+            )}
             <Button type="button" variant="outline" onClick={()=>navigate('/facilities')}>{isView ? 'Back' : 'Cancel'}</Button>
           </div>
         </form>

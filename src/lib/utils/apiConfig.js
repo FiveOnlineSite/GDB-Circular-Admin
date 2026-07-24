@@ -12,7 +12,7 @@ const api = axios.create({
 // Add a request interceptor to attach the token
 api.interceptors.request.use(
   (config) => {
-    if (!config.skipGlobalLoader) {
+    if (config.showGlobalLoader) {
       startGlobalLoader();
     }
 
@@ -41,7 +41,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (!error.config?.skipGlobalLoader) {
+    if (error.config?.showGlobalLoader) {
       stopGlobalLoader();
     }
     return Promise.reject(error);
@@ -50,7 +50,7 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    if (!response.config?.skipGlobalLoader) {
+    if (response.config?.showGlobalLoader) {
       stopGlobalLoader();
     }
 
@@ -67,7 +67,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (!error.config?.skipGlobalLoader) {
+    if (error.config?.showGlobalLoader) {
       stopGlobalLoader();
     }
 
