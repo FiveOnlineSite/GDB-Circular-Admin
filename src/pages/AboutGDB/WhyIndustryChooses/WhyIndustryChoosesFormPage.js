@@ -94,7 +94,6 @@ export default function WhyIndustryChoosesFormPage() {
     e.preventDefault();
 
     const newErrors = {};
-    if (!form.stat_value.trim()) newErrors.stat_value = "Stat / Value is required";
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.description.trim()) newErrors.description = "Description is required";
 
@@ -168,15 +167,13 @@ export default function WhyIndustryChoosesFormPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                Stat / Value <span className="text-red-500">*</span>
+                Stat / Value
               </label>
               <Input
                 name="stat_value"
                 value={form.stat_value}
                 onChange={handleChange}
                 placeholder="e.g., 25+"
-                error={!!errors.stat_value}
-                errorMessage={errors.stat_value}
               />
             </div>
 
