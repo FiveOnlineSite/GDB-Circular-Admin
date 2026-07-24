@@ -9,7 +9,7 @@ import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import { getFeedstocks, deleteFeedstock, toggleFeedstockStatus } from "../../../services/sellers/feedstockService";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
-const CATEGORIES = ["LDPE", "HDPE", "PP"];
+const CATEGORIES = ["LDPE", "HDPE", "PP", "Other"];
 const STATUS_OPTIONS = ["active", "inactive"];
 
 export default function FeedstockList() {

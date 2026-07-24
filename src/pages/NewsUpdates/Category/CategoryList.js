@@ -40,7 +40,6 @@ export default function CategoryList() {
   const [formErrors, setFormErrors] = useState({});
   const [form, setForm] = useState({
     category_title: "",
-    category_type: "Dynamic Tab",
     visibility: 1,
     sequence: 0,
     status: "active",
@@ -114,7 +113,6 @@ export default function CategoryList() {
       const updatedVisibility = row.visibility === 1 ? 0 : 1;
       const res = await updateCategory(row.id, {
         category_title: row.category_title,
-        category_type: row.category_type,
         visibility: updatedVisibility,
         sequence: row.sequence,
         status: row.status,
@@ -133,7 +131,6 @@ export default function CategoryList() {
       setEditingItem(item);
       setForm({
         category_title: item.category_title,
-        category_type: item.category_type,
         visibility: item.visibility,
         sequence: item.sequence,
         status: item.status,
@@ -142,7 +139,6 @@ export default function CategoryList() {
       setEditingItem(null);
       setForm({
         category_title: "",
-        category_type: "Dynamic Tab",
         visibility: 1,
         sequence: 0,
         status: "active",
@@ -181,7 +177,6 @@ export default function CategoryList() {
       const payload = {
         ...form,
         category_title: form.category_title.trim(),
-        category_type: form.category_type.trim(),
       };
 
       const res = editingItem
@@ -225,7 +220,6 @@ export default function CategoryList() {
   const columns = [
     { field: "id", headerName: "ID", sortable: true },
     { field: "category_title", headerName: "Category Title", sortable: true },
-    { field: "category_type", headerName: "Category Type", sortable: true },
     {
       field: "visibility",
       headerName: "Visibility",
@@ -319,8 +313,8 @@ export default function CategoryList() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Category Tabs Management</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage tabs and categories for news updates and article filtration</p>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Category Management</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Manage categories for news updates and article filtration</p>
         </div>
 
         {canCreate && (
@@ -373,7 +367,7 @@ export default function CategoryList() {
           handlePerPageChange={(pp) =>
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
-          emptyMessage="No category tabs found."
+          emptyMessage="No categories found."
         />
       </div>
 
@@ -391,7 +385,7 @@ export default function CategoryList() {
               {/* Modal Header */}
               <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white">
-                  {editingItem ? "Edit Category tab" : "Add Category Tab"}
+                  {editingItem ? "Edit Category" : "Add Category"}
                 </h3>
                 <button
                   type="button"
@@ -419,24 +413,6 @@ export default function CategoryList() {
                     error={!!formErrors.category_title}
                     errorMessage={formErrors.category_title}
                   />
-                </div>
-
-                {/* Category Type */}
-                <div>
-                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                    Category Type <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="category_type"
-                    value={form.category_type}
-                    onChange={handleFormChange}
-                    disabled={submitting}
-                    className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  >
-                    <option value="Dynamic Tab">Dynamic Tab</option>
-                    <option value="Technical Specs">Technical Specs</option>
-                    <option value="Industry News">Industry News</option>
-                  </select>
                 </div>
 
                 {/* Sequence */}
@@ -514,7 +490,7 @@ export default function CategoryList() {
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
-                      {editingItem ? "Update Tab" : "Save Tab"}
+                      {editingItem ? "Update Category" : "Save Category"}
                     </>
                   )}
                 </Button>

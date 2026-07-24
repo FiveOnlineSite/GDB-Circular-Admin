@@ -35,6 +35,7 @@ export default function NewsFormPage() {
     date: "",
     short_description: "",
     image_url: "",
+    logo_url: "",
     image_alt: "",
     external_url: "",
     featured_homepage: 0,
@@ -76,6 +77,7 @@ export default function NewsFormPage() {
             date: d.date ? d.date.split("T")[0] : "",
             short_description: d.short_description || "",
             image_url: d.image_url || "",
+            logo_url: d.logo_url || "",
             image_alt: d.image_alt || "",
             external_url: d.external_url || "",
             featured_homepage: d.featured_homepage ?? 0,
@@ -125,6 +127,20 @@ export default function NewsFormPage() {
       setErrors((prev) => {
         const next = { ...prev };
         delete next.image_url;
+        return next;
+      });
+    }
+  };
+
+  const handleLogoUpload = (url) => {
+    setForm((prev) => ({
+      ...prev,
+      logo_url: url,
+    }));
+    if (errors.logo_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.logo_url;
         return next;
       });
     }
@@ -445,6 +461,20 @@ export default function NewsFormPage() {
                 {errors.image_url}
               </span>
             )}
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
+              Logo File
+            </label>
+            <Upload
+              value={form.logo_url}
+              onChange={handleLogoUpload}
+              mediaType="image"
+              accept="image/*"
+              maxSizeKB={500}
+              disabled={isView}
+            />
           </div>
 
           <div>

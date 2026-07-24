@@ -203,6 +203,7 @@ export default function FeedstockFormPage() {
                   <option value="LDPE">LDPE</option>
                   <option value="HDPE">HDPE</option>
                   <option value="PP">PP</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 

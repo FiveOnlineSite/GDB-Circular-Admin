@@ -198,6 +198,28 @@ export default function NewsList() {
       },
     },
     {
+      field: "logo_url",
+      headerName: "Logo",
+      sortable: false,
+      renderCell: ({ row }) => {
+        const fileSrc = row.logo_url
+          ? row.logo_url.startsWith("http")
+            ? row.logo_url
+            : `${process.env.REACT_APP_API_URL || ""}${row.logo_url}`
+          : "";
+
+        if (!fileSrc) return <span className="text-slate-400">—</span>;
+
+        return (
+          <img
+            src={fileSrc}
+            alt={`${row.title} logo`}
+            className="w-16 h-10 object-contain rounded border border-slate-200 bg-white p-1"
+          />
+        );
+      },
+    },
+    {
       field: "title",
       headerName: "Article Title",
       sortable: true,
