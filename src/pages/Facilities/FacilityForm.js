@@ -14,6 +14,7 @@ const INITIAL_FORM = {
   addressLine2: "",
   phone: "",
   image_url: "",
+  is_development: false,
   sequence: 0,
   status: "active",
 };
@@ -43,6 +44,7 @@ export default function FacilityForm() {
           addressLine2: facility.addressLine2 || facility.state || "",
           phone: facility.phone || "",
           image_url: facility.image_url || "",
+          is_development: Boolean(facility.is_development ?? facility.isDevelopment),
           sequence: facility.sequence ?? 0,
           status: facility.status || "active",
         });
@@ -68,12 +70,12 @@ export default function FacilityForm() {
 
     const newErrors = {};
     if (!form.title.trim()) newErrors.title = "Title is required";
-    if (!form.addressLine1.trim()) newErrors.addressLine1 = "Address Line 1 is required";
-    if (!form.addressLine2.trim()) newErrors.addressLine2 = "Address Line 2 is required";
-    if (!form.phone.trim()) newErrors.phone = "Phone is required";
+    if (!form.is_development && !form.addressLine1.trim()) newErrors.addressLine1 = "Address Line 1 is required";
+    if (!form.is_development && !form.addressLine2.trim()) newErrors.addressLine2 = "Address Line 2 is required";
+    if (!form.is_development && !form.phone.trim()) newErrors.phone = "Phone is required";
     if (!form.image_url) newErrors.image_url = "Image Upload is required";
 
-    const mobileRegex = /^\+?[0-9\s-]{8,15}$/;
+    const mobileRegex = /^\+?[\d\s()-]{8,20}$/;
     if (form.phone.trim() && !mobileRegex.test(form.phone.trim())) {
       newErrors.phone = "Please enter a valid phone number";
     }
@@ -112,18 +114,29 @@ export default function FacilityForm() {
             <Input value={form.title} onChange={e=>updateField("title", e.target.value)} error={!!errors.title} errorMessage={errors.title} disabled={isView} />
           </div>
 
+          <label className="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-3">
+            <input
+              type="checkbox"
+              checked={form.is_development}
+              onChange={(e) => updateField("is_development", e.target.checked)}
+              disabled={isView}
+              className="h-4 w-4 accent-[#981B1F]"
+            />
+            <span className="text-sm font-medium text-slate-700">Facility is in development</span>
+          </label>
+
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 1 <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 1 {!form.is_development && <span className="text-red-500">*</span>}</label>
             <Input value={form.addressLine1} onChange={e=>updateField("addressLine1", e.target.value)} error={!!errors.addressLine1} errorMessage={errors.addressLine1} disabled={isView} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 2 <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 2 {!form.is_development && <span className="text-red-500">*</span>}</label>
             <Textarea value={form.addressLine2} onChange={e=>updateField("addressLine2", e.target.value)} error={!!errors.addressLine2} errorMessage={errors.addressLine2} disabled={isView} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Phone <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Phone {!form.is_development && <span className="text-red-500">*</span>}</label>
             <Input value={form.phone} onChange={e=>updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
           </div>
 
