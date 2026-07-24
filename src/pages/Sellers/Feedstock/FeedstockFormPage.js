@@ -115,7 +115,6 @@ export default function FeedstockFormPage() {
     if (!form.short_description.trim()) newErrors.short_description = "Short Description is required";
     if (!form.image_url) newErrors.image_url = "Material Image is required";
     if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
-    if (!form.pdf_url) newErrors.pdf_url = "PDF Specification Document is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -327,7 +326,7 @@ export default function FeedstockFormPage() {
 
           <div>
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
-              PDF Spec File (Max: 5MB) <span className="text-red-500">*</span>
+              PDF Spec File (Max: 5MB)
             </label>
             <Upload
               value={form.pdf_url}
