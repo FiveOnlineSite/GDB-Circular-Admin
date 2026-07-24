@@ -9,15 +9,11 @@ import { getFacility, createFacility, updateFacility } from "../../services/faci
 import { toast } from "sonner";
 
 const INITIAL_FORM = {
-  facility_name: "",
-  facility_type: "",
-  address: "",
+  title: "",
+  addressLine1: "",
+  addressLine2: "",
   phone: "",
-  state: "",
-  latitude: "",
-  longitude: "",
   image_url: "",
-  image_alt: "",
   sequence: 0,
   status: "active",
 };
@@ -42,15 +38,11 @@ export default function FacilityForm() {
       .then((response) => {
         const facility = response?.data || response || {};
         setForm({
-          facility_name: facility.facility_name || "",
-          facility_type: facility.facility_type || "",
-          address: facility.address || "",
+          title: facility.title || facility.facility_name || "",
+          addressLine1: facility.addressLine1 || facility.address || "",
+          addressLine2: facility.addressLine2 || facility.state || "",
           phone: facility.phone || "",
-          state: facility.state || "",
-          latitude: facility.latitude ?? "",
-          longitude: facility.longitude ?? "",
           image_url: facility.image_url || "",
-          image_alt: facility.image_alt || "",
           sequence: facility.sequence ?? 0,
           status: facility.status || "active",
         });
@@ -75,14 +67,10 @@ export default function FacilityForm() {
     if (isView) return;
 
     const newErrors = {};
-    if (!form.facility_name.trim()) newErrors.facility_name = "Facility Name is required";
-    if (!form.facility_type.trim()) newErrors.facility_type = "Facility Type is required";
-    if (!form.address.trim()) newErrors.address = "Address is required";
+    if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!form.addressLine1.trim()) newErrors.addressLine1 = "Address Line 1 is required";
+    if (!form.addressLine2.trim()) newErrors.addressLine2 = "Address Line 2 is required";
     if (!form.phone.trim()) newErrors.phone = "Phone is required";
-    if (!form.state.trim()) newErrors.state = "State is required";
-    if (!String(form.latitude).trim()) newErrors.latitude = "Latitude is required";
-    if (!String(form.longitude).trim()) newErrors.longitude = "Longitude is required";
-    if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
     if (!form.image_url) newErrors.image_url = "Image Upload is required";
 
     const mobileRegex = /^\+?[0-9\s-]{8,15}$/;
@@ -120,45 +108,23 @@ export default function FacilityForm() {
       <div className="bg-white rounded-lg shadow-sm p-6 ">
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Facility Name <span className="text-red-500">*</span></label>
-            <Input value={form.facility_name} onChange={e=>updateField("facility_name", e.target.value)} error={!!errors.facility_name} errorMessage={errors.facility_name} disabled={isView} />
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Title <span className="text-red-500">*</span></label>
+            <Input value={form.title} onChange={e=>updateField("title", e.target.value)} error={!!errors.title} errorMessage={errors.title} disabled={isView} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Facility Type <span className="text-red-500">*</span></label>
-            <Input value={form.facility_type} onChange={e=>updateField("facility_type", e.target.value)} error={!!errors.facility_type} errorMessage={errors.facility_type} disabled={isView} />
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 1 <span className="text-red-500">*</span></label>
+            <Input value={form.addressLine1} onChange={e=>updateField("addressLine1", e.target.value)} error={!!errors.addressLine1} errorMessage={errors.addressLine1} disabled={isView} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Address <span className="text-red-500">*</span></label>
-            <Textarea value={form.address} onChange={e=>updateField("address", e.target.value)} error={!!errors.address} errorMessage={errors.address} disabled={isView} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Phone <span className="text-red-500">*</span></label>
-              <Input value={form.phone} onChange={e=>updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">State <span className="text-red-500">*</span></label>
-              <Input value={form.state} onChange={e=>updateField("state", e.target.value)} error={!!errors.state} errorMessage={errors.state} disabled={isView} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude <span className="text-red-500">*</span></label>
-              <Input value={form.latitude} onChange={e=>updateField("latitude", e.target.value)} error={!!errors.latitude} errorMessage={errors.latitude} disabled={isView} />
-            </div>
-            <div>
-                <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude <span className="text-red-500">*</span></label>
-                <Input value={form.longitude} onChange={e=>updateField("longitude", e.target.value)} error={!!errors.longitude} errorMessage={errors.longitude} disabled={isView} />
-            </div>
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 2 <span className="text-red-500">*</span></label>
+            <Textarea value={form.addressLine2} onChange={e=>updateField("addressLine2", e.target.value)} error={!!errors.addressLine2} errorMessage={errors.addressLine2} disabled={isView} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Image Alt Text <span className="text-red-500">*</span></label>
-            <Input value={form.image_alt} onChange={e=>updateField("image_alt", e.target.value)} error={!!errors.image_alt} errorMessage={errors.image_alt} disabled={isView} />
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Phone <span className="text-red-500">*</span></label>
+            <Input value={form.phone} onChange={e=>updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
           </div>
 
           <div>

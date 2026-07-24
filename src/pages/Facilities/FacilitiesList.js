@@ -58,13 +58,11 @@ export default function FacilitiesList() {
   };
 
   const columns = [
-    { field: "image_url", headerName: "Image", sortable: false, renderCell: ({ row }) => row.image_url ? (<img src={row.image_url.startsWith('http')?row.image_url:`${process.env.REACT_APP_API_URL||'http://localhost:5000'}${row.image_url}`} alt={row.image_alt} className="h-14 w-20 object-cover rounded-md shadow-sm" />) : <span>—</span> },
-    { field: "facility_name", headerName: "Facility Name", sortable: true },
-    { field: "facility_type", headerName: "Facility Type", sortable: true },
-    { field: "address", headerName: "Address", sortable: false },
+    { field: "image_url", headerName: "Image", sortable: false, renderCell: ({ row }) => row.image_url ? (<img src={row.image_url.startsWith('http')?row.image_url:`${process.env.REACT_APP_API_URL||'http://localhost:5000'}${row.image_url}`} alt={row.image_alt || row.title} className="h-14 w-20 object-cover rounded-md shadow-sm" />) : <span>—</span> },
+    { field: "title", headerName: "Title", sortable: true },
+    { field: "addressLine1", headerName: "Address Line 1", sortable: false },
+    { field: "addressLine2", headerName: "Address Line 2", sortable: false },
     { field: "phone", headerName: "Phone", sortable: false },
-    { field: "state", headerName: "State", sortable: true },
-    { field: "coordinates", headerName: "Coordinates", sortable: false, renderCell: ({ row }) => `${row.latitude || ''}, ${row.longitude || ''}` },
     { field: "sequence", headerName: "Seq", sortable: true },
     { field: "status", headerName: "Status", sortable: false, renderCell: ({ row }) => (<span className={`px-3 py-1 rounded-full text-sm font-semibold ${row.status==='active'?'bg-green-50 text-green-700 border border-green-100':'bg-red-50 text-red-700 border border-red-100'}`}>{row.status==='active'?'Active':'Inactive'}</span>) },
     { field: "actions", headerName: "Actions", sortable: false, sticky: "right", renderCell: ({ row }) => (
@@ -143,7 +141,7 @@ export default function FacilitiesList() {
           emptyMessage="No facilities yet." />
       </div>
 
-      <ConfirmationModal isOpen={deleteModal} onClose={()=>{ setDeleteModal(false); setSelected(null); }} onConfirm={handleDelete} title="Delete Facility" message={`Delete ${selected?.facility_name}?`} confirmLabel="Delete" confirmVariant="destructive" />
+      <ConfirmationModal isOpen={deleteModal} onClose={()=>{ setDeleteModal(false); setSelected(null); }} onConfirm={handleDelete} title="Delete Facility" message={`Delete ${selected?.title || selected?.facility_name}?`} confirmLabel="Delete" confirmVariant="destructive" />
     </div>
   );
 }
