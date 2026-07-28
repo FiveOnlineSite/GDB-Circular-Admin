@@ -62,11 +62,6 @@ export default function BannerList() {
         );
       },
     },
-    {
-      field: "cta_button_name",
-      headerName: "CTA",
-      renderCell: ({ row }) => row.cta_button_name || "-",
-    },
     { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "status",
@@ -115,7 +110,7 @@ export default function BannerList() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Banner Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage page banners with images, videos, and CTA buttons</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage page banners with images and videos</p>
         </div>
         {hasPermission("globalContent", "banner.create") && (
           <Button onClick={() => navigate("/global-content/banners/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">

@@ -11,7 +11,6 @@ import { Textarea } from "../../../components/ui/textarea";
 import { getCaseStudyById, createCaseStudy, updateCaseStudy } from "../../../services/productListing";
 
 const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
-
 const QUILL_MODULES = {
   toolbar: [
     [{ header: [1, 2, 3, false] }],
@@ -22,8 +21,7 @@ const QUILL_MODULES = {
   ],
 };
 const QUILL_FORMATS = ["header", "bold", "italic", "underline", "strike", "list", "bullet", "link", "image"];
-
-const INIT = { title: "", short_description: "", image_url: "", image_alt: "", full_description: "", sequence: 0, status: "active" };
+const INIT = { title: "", short_description: "", tag: "", image_url: "", image_alt: "", description: "", sources: "", sequence: 0, status: "active" };
 
 export default function CaseStudyFormPage() {
   const navigate = useNavigate();
@@ -34,6 +32,7 @@ export default function CaseStudyFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(INIT);
+  const [errors, setErrors] = useState({});
   const quillRef = useRef(null);
 
   useEffect(() => {
@@ -44,20 +43,35 @@ export default function CaseStudyFormPage() {
         const res = await getCaseStudyById(id);
         if (res.success && res.data) {
           const d = res.data;
-          setForm({ title: d.title || "", short_description: d.short_description || "", image_url: d.image_url || "", image_alt: d.image_alt || "", full_description: d.full_description || "", sequence: d.sequence ?? 0, status: d.status || "active" });
-        } else { toast.error("Case study not found"); navigate("/product-listing/case-study"); }
-      } catch { toast.error("Failed to load"); navigate("/product-listing/case-study"); }
-      finally { setPageLoading(false); }
+          setForm({
+            title: d.title || "",
+            short_description: d.short_description || "",
+            tag: d.tag || "",
+            image_url: d.image_url || "",
+            image_alt: d.image_alt || "",
+            description: d.description || "",
+            sources: d.sources || "",
+            sequence: d.sequence ?? 0,
+            status: d.status || "active",
+          });
+        } else {
+          toast.error("Case study not found");
+          navigate("/product-listing/case-study");
+        }
+      } catch {
+        toast.error("Failed to load");
+        navigate("/product-listing/case-study");
+      } finally {
+        setPageLoading(false);
+      }
     })();
   }, [id, navigate]);
 
-  const [errors, setErrors] = useState({});
-
-  const handle = e => {
+  const handle = (e) => {
     const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value }));
+    setForm((p) => ({ ...p, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const next = { ...prev };
         delete next[name];
         return next;
@@ -65,10 +79,11 @@ export default function CaseStudyFormPage() {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!form.short_description.trim()) newErrors.short_description = "Short description is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -77,12 +92,27 @@ export default function CaseStudyFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, sequence: Number(form.sequence) };
+      const payload = {
+        ...form,
+        title: form.title.trim(),
+        short_description: form.short_description.trim(),
+        tag: form.tag.trim(),
+        image_alt: form.image_alt.trim(),
+        sources: form.sources.trim(),
+        sequence: Number(form.sequence),
+      };
       const res = isEdit ? await updateCaseStudy(id, payload) : await createCaseStudy(payload);
-      if (res.success) { toast.success(isEdit ? "Case study updated" : "Case study created"); navigate("/product-listing/case-study"); }
-      else toast.error(res.message || "Operation failed");
-    } catch (err) { toast.error(err.response?.data?.message || "Operation failed"); }
-    finally { setSubmitting(false); }
+      if (res.success) {
+        toast.success(isEdit ? "Case study updated" : "Case study created");
+        navigate("/product-listing/case-study");
+      } else {
+        toast.error(res.message || "Operation failed");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Operation failed");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (pageLoading) return <div className="flex justify-center items-center h-64"><div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" /></div>;
@@ -102,29 +132,25 @@ export default function CaseStudyFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        {/* Basic Info */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Case Study Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Title <span className="text-red-500">*</span></label>
-              <Input
-                name="title"
-                value={form.title}
-                onChange={handle}
-                placeholder="Case study title"
-                disabled={isView}
-                error={!!errors.title}
-                errorMessage={errors.title}
-              />
+              <Input name="title" value={form.title} onChange={handle} placeholder="Case study title" disabled={isView} error={!!errors.title} errorMessage={errors.title} />
             </div>
-            <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description</label>
-              <Textarea name="short_description" value={form.short_description} onChange={handle} rows={3} placeholder="Brief summary of the case study..." disabled={isView} />
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Tag</label>
+              <Input name="tag" value={form.tag} onChange={handle} placeholder="e.g. Film Recycling / Packaging" disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
               <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the image" disabled={isView} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description <span className="text-red-500">*</span></label>
+              <Textarea name="short_description" value={form.short_description} onChange={handle} rows={3} placeholder="Brief summary of the case study..." disabled={isView} />
+              {errors.short_description && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.short_description}</span>}
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
@@ -140,54 +166,35 @@ export default function CaseStudyFormPage() {
           </div>
         </div>
 
-        {/* Image Upload */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
-            Cover Image
-          </h2>
-          <Upload
-            value={form.image_url}
-            onChange={(url) => setForm((p) => ({ ...p, image_url: url }))}
-            mediaType="image"
-            accept="image/*"
-            maxSizeKB={500}
-            disabled={isView}
-          />
+          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Cover Image</h2>
+          <Upload value={form.image_url} onChange={(url) => setForm((p) => ({ ...p, image_url: url }))} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
         </div>
 
-        {/* Rich Text Editor */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Full Description</h2>
+          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Description</h2>
           {isView ? (
-            <div
-              className="prose max-w-none text-slate-700 dark:text-gray-200 ql-editor"
-              dangerouslySetInnerHTML={{ __html: form.full_description || "<p class='text-slate-400'>No description provided</p>" }}
-            />
+            <div className="prose max-w-none text-slate-700 dark:text-gray-200 ql-editor" dangerouslySetInnerHTML={{ __html: form.description || "<p class='text-slate-400'>No description provided</p>" }} />
           ) : (
             <div className="rounded-xl overflow-hidden border border-slate-200">
-              <ReactQuill
-                ref={quillRef}
-                theme="snow"
-                value={form.full_description}
-                onChange={val => setForm(p => ({ ...p, full_description: val }))}
-                modules={QUILL_MODULES}
-                formats={QUILL_FORMATS}
-                placeholder="Write the full case study description here..."
-                style={{ minHeight: 300 }}
-              />
+              <ReactQuill ref={quillRef} theme="snow" value={form.description} onChange={(val) => setForm((p) => ({ ...p, description: val }))} modules={QUILL_MODULES} formats={QUILL_FORMATS} placeholder="Write the case study description here..." style={{ minHeight: 300 }} />
             </div>
           )}
         </div>
 
-        {!isView && (
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Sources</h2>
+          <Textarea name="sources" value={form.sources} onChange={handle} rows={4} placeholder="Enter source links, notes, or citations..." disabled={isView} />
+        </div>
+
+        {!isView ? (
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => navigate("/product-listing/case-study")}>Cancel</Button>
             <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
               {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update" : "Create"} Case Study</>}
             </Button>
           </div>
-        )}
-        {isView && (
+        ) : (
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => navigate("/product-listing/case-study")}>Back to List</Button>
             <Button type="button" style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" onClick={() => navigate(`/product-listing/case-study/edit/${id}`)}>Edit</Button>

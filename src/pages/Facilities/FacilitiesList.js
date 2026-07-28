@@ -9,6 +9,8 @@ import { getFacilities, deleteFacility, toggleFacilityStatus } from "../../servi
 import { usePermissionContext } from "../../context/PermissionContext";
 import { toast } from "sonner";
 
+const FACILITY_TYPES = ["", "GDB International", "GDB Circular", "GDB Paint & Coatings"];
+
 export default function FacilitiesList() {
   const { hasPermission } = usePermissionContext();
   const navigate = useNavigate();
@@ -17,7 +19,8 @@ export default function FacilitiesList() {
   const [pagination, setPagination] = useState({ current_page: 1, per_page: 10, total: 0, last_page: 1 });
   const [deleteModal, setDeleteModal] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
+  const [facilityType, setFacilityType] = useState("");
 
   const fetch = async (params = {}) => {
     try {
@@ -27,6 +30,7 @@ export default function FacilitiesList() {
         page: params.page ?? pagination.current_page,
         limit: params.limit ?? pagination.per_page,
         search: params.search ?? search,
+        facility_type: params.facility_type ?? facilityType,
       });
       if (res.success) {
         setRows(res.data?.data || []);
@@ -34,79 +38,89 @@ export default function FacilitiesList() {
       } else {
         setRows([]);
       }
-    } catch (e) {
+    } catch {
       toast.error("Failed to load facilities");
       setRows([]);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetch(); }, [pagination.current_page, pagination.per_page, search]);
+  useEffect(() => {
+    fetch();
+  }, [pagination.current_page, pagination.per_page, search, facilityType]);
 
   const handleDelete = async () => {
     try {
       const res = await deleteFacility(selected.id);
-      if (res.success) { toast.success("Facility deleted"); fetch(); }
-    } catch (e) { toast.error(e.response?.data?.message || "Delete failed"); }
-    finally { setDeleteModal(false); setSelected(null); }
+      if (res.success) {
+        toast.success("Facility deleted");
+        fetch();
+      }
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Delete failed");
+    } finally {
+      setDeleteModal(false);
+      setSelected(null);
+    }
   };
 
   const handleToggle = async (row) => {
     try {
       const res = await toggleFacilityStatus(row.id);
-      if (res.success) { toast.success(`Facility marked as ${res.data.status}`); fetch(); }
-    } catch (e) { toast.error(e.response?.data?.message || 'Failed to toggle status'); }
+      if (res.success) {
+        toast.success(`Facility marked as ${res.data.status}`);
+        fetch();
+      }
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to toggle status");
+    }
   };
 
   const columns = [
-    { field: "image_url", headerName: "Image", sortable: false, renderCell: ({ row }) => row.image_url ? (<img src={row.image_url.startsWith('http')?row.image_url:`${process.env.REACT_APP_API_URL||'http://localhost:5000'}${row.image_url}`} alt={row.image_alt || row.title} className="h-14 w-20 object-cover rounded-md shadow-sm" />) : <span>—</span> },
-    { field: "title", headerName: "Title", sortable: true },
-    { field: "addressLine1", headerName: "Address Line 1", sortable: false },
-    { field: "addressLine2", headerName: "Address Line 2", sortable: false },
+    {
+      field: "image_url",
+      headerName: "Image",
+      sortable: false,
+      renderCell: ({ row }) =>
+        row.image_url ? (
+          <img src={row.image_url.startsWith("http") ? row.image_url : `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${row.image_url}`} alt={row.image_alt || row.facility_name} className="h-14 w-20 object-cover rounded-md shadow-sm" />
+        ) : (
+          <span>-</span>
+        ),
+    },
+    { field: "facility_name", headerName: "Facility Name", sortable: true },
+    { field: "facility_type", headerName: "Facility Type", sortable: true },
+    { field: "state", headerName: "State", sortable: true },
     { field: "phone", headerName: "Phone", sortable: false },
     { field: "sequence", headerName: "Seq", sortable: true },
-    { field: "status", headerName: "Status", sortable: false, renderCell: ({ row }) => (<span className={`px-3 py-1 rounded-full text-sm font-semibold ${row.status==='active'?'bg-green-50 text-green-700 border border-green-100':'bg-red-50 text-red-700 border border-red-100'}`}>{row.status==='active'?'Active':'Inactive'}</span>) },
-    { field: "actions", headerName: "Actions", sortable: false, sticky: "right", renderCell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        {hasPermission('facilities','view') && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-            onClick={()=>navigate(`/facilities/view/${row.id}`)}
-          >
-            <Eye className="h-4 w-4 text-[#981B1F]" />
-          </Button>
-        )}
-        {hasPermission('facilities','update') && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-            onClick={()=>navigate(`/facilities/edit/${row.id}`)}
-          >
-            <Edit2 className="h-4 w-4 text-[#C3662D]" />
-          </Button>
-        )}
-        {hasPermission('facilities','update') && <Button size="sm" variant="ghost" onClick={()=>handleToggle(row)}>{row.status==='active'?'Deactivate':'Activate'}</Button>}
-        {hasPermission('facilities','delete') && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-            onClick={()=>{ setSelected(row); setDeleteModal(true); }}
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
-        )}
-      </div>
-    ) },
+    {
+      field: "status",
+      headerName: "Status",
+      sortable: false,
+      renderCell: ({ row }) => <span className={`px-3 py-1 rounded-full text-sm font-semibold ${row.status === "active" ? "bg-green-50 text-green-700 border border-green-100" : "bg-red-50 text-red-700 border border-red-100"}`}>{row.status === "active" ? "Active" : "Inactive"}</span>,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      sticky: "right",
+      renderCell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          {hasPermission("facilities", "view") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/facilities/view/${row.id}`)}><Eye className="h-4 w-4 text-[#981B1F]" /></Button>}
+          {hasPermission("facilities", "update") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/facilities/edit/${row.id}`)}><Edit2 className="h-4 w-4 text-[#C3662D]" /></Button>}
+          {hasPermission("facilities", "update") && <Button size="sm" variant="ghost" onClick={() => handleToggle(row)}>{row.status === "active" ? "Deactivate" : "Activate"}</Button>}
+          {hasPermission("facilities", "delete") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50" onClick={() => { setSelected(row); setDeleteModal(true); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>}
+        </div>
+      ),
+    },
   ];
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#981B1F' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#981B1F" }}>
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21h18M4 10h16V7a2 2 0 00-2-2H6a2 2 0 00-2 2v3zM8 21V12h8v9" />
             </svg>
@@ -120,28 +134,21 @@ export default function FacilitiesList() {
         <div className="flex items-center gap-3">
           <div className="relative w-64">
             <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPagination((prev) => ({ ...prev, current_page: 1 }));
-              }}
-              className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
-              placeholder="Search facilities..."
-            />
+            <Input value={search} onChange={(e) => { setSearch(e.target.value); setPagination((prev) => ({ ...prev, current_page: 1 })); }} className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm" placeholder="Search facilities..." />
           </div>
-          {hasPermission('facilities','create') && (<Button onClick={()=>navigate('/facilities/create')} className="text-white">Add Facility</Button>)}
+          <select value={facilityType} onChange={(e) => { setFacilityType(e.target.value); setPagination((prev) => ({ ...prev, current_page: 1 })); }} className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[170px] cursor-pointer">
+            <option value="">All Facility Types</option>
+            {FACILITY_TYPES.filter(Boolean).map((type) => <option key={type} value={type}>{type}</option>)}
+          </select>
+          {hasPermission("facilities", "create") && <Button onClick={() => navigate("/facilities/create")} className="text-white">Add Facility</Button>}
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <ReusableDataTable columns={columns} rows={rows} loading={loading} pagination={pagination}
-          handlePageChange={p => setPagination(prev => ({ ...prev, current_page: p }))}
-          handlePerPageChange={pp => setPagination(prev => ({ ...prev, per_page: pp, current_page: 1 }))}
-          emptyMessage="No facilities yet." />
+        <ReusableDataTable columns={columns} rows={rows} loading={loading} pagination={pagination} handlePageChange={(p) => setPagination((prev) => ({ ...prev, current_page: p }))} handlePerPageChange={(pp) => setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))} emptyMessage="No facilities yet." />
       </div>
 
-      <ConfirmationModal isOpen={deleteModal} onClose={()=>{ setDeleteModal(false); setSelected(null); }} onConfirm={handleDelete} title="Delete Facility" message={`Delete ${selected?.title || selected?.facility_name}?`} confirmLabel="Delete" confirmVariant="destructive" />
+      <ConfirmationModal isOpen={deleteModal} onClose={() => { setDeleteModal(false); setSelected(null); }} onConfirm={handleDelete} title="Delete Facility" message={`Delete ${selected?.facility_name}?`} confirmLabel="Delete" confirmVariant="destructive" />
     </div>
   );
 }

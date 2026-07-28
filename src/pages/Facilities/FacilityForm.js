@@ -8,13 +8,18 @@ import Upload from "../../components/common/Upload";
 import { getFacility, createFacility, updateFacility } from "../../services/facilityService";
 import { toast } from "sonner";
 
+const FACILITY_TYPES = ["GDB International", "GDB Circular", "GDB Paint & Coatings"];
+
 const INITIAL_FORM = {
-  title: "",
-  addressLine1: "",
-  addressLine2: "",
+  facility_name: "",
+  facility_type: "GDB Circular",
+  address: "",
   phone: "",
+  state: "",
+  latitude: "",
+  longitude: "",
   image_url: "",
-  is_development: false,
+  image_alt: "",
   sequence: 0,
   status: "active",
 };
@@ -23,9 +28,8 @@ export default function FacilityForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const isView = location.pathname.includes('/facilities/view');
+  const isView = location.pathname.includes("/facilities/view");
   const isEdit = Boolean(id) && !isView;
-
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -33,18 +37,20 @@ export default function FacilityForm() {
 
   useEffect(() => {
     if (!(isEdit || isView)) return;
-
     setLoading(true);
     getFacility(id)
       .then((response) => {
         const facility = response?.data || response || {};
         setForm({
-          title: facility.title || facility.facility_name || "",
-          addressLine1: facility.addressLine1 || facility.address || "",
-          addressLine2: facility.addressLine2 || facility.state || "",
+          facility_name: facility.facility_name || "",
+          facility_type: facility.facility_type || "GDB Circular",
+          address: facility.address || "",
           phone: facility.phone || "",
+          state: facility.state || "",
+          latitude: facility.latitude || "",
+          longitude: facility.longitude || "",
           image_url: facility.image_url || "",
-          is_development: Boolean(facility.is_development ?? facility.isDevelopment),
+          image_alt: facility.image_alt || "",
           sequence: facility.sequence ?? 0,
           status: facility.status || "active",
         });
@@ -69,10 +75,13 @@ export default function FacilityForm() {
     if (isView) return;
 
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = "Title is required";
-    if (!form.is_development && !form.addressLine1.trim()) newErrors.addressLine1 = "Address Line 1 is required";
-    if (!form.is_development && !form.addressLine2.trim()) newErrors.addressLine2 = "Address Line 2 is required";
-    if (!form.is_development && !form.phone.trim()) newErrors.phone = "Phone is required";
+    if (!form.facility_name.trim()) newErrors.facility_name = "Facility name is required";
+    if (!form.facility_type.trim()) newErrors.facility_type = "Facility type is required";
+    if (!form.address.trim()) newErrors.address = "Address is required";
+    if (!form.phone.trim()) newErrors.phone = "Phone is required";
+    if (!form.state.trim()) newErrors.state = "State is required";
+    if (!form.latitude.trim()) newErrors.latitude = "Latitude is required";
+    if (!form.longitude.trim()) newErrors.longitude = "Longitude is required";
     if (!form.image_url) newErrors.image_url = "Image Upload is required";
 
     const mobileRegex = /^\+?[\d\s()-]{8,20}$/;
@@ -87,98 +96,114 @@ export default function FacilityForm() {
 
     try {
       setSubmitting(true);
-      if (isEdit) await updateFacility(id, form); else await createFacility(form);
-      toast.success('Saved');
-      navigate('/facilities');
+      const payload = {
+        ...form,
+        facility_name: form.facility_name.trim(),
+        address: form.address.trim(),
+        phone: form.phone.trim(),
+        state: form.state.trim(),
+        latitude: form.latitude.trim(),
+        longitude: form.longitude.trim(),
+        image_alt: form.image_alt.trim(),
+        sequence: Number(form.sequence),
+      };
+      if (isEdit) await updateFacility(id, payload);
+      else await createFacility(payload);
+      toast.success("Saved");
+      navigate("/facilities");
     } catch (e) {
       const apiErrors = e.response?.data?.error;
       if (apiErrors && typeof apiErrors === "object") {
         setErrors(apiErrors);
       }
-      toast.error(e.response?.data?.message || 'Save failed');
+      toast.error(e.response?.data?.message || "Save failed");
+    } finally {
+      setSubmitting(false);
     }
-    finally { setSubmitting(false); }
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">{isView ? 'View Facility' : isEdit ? 'Edit Facility' : 'Add Facility'}</h2>
-        <p className="text-sm text-gray-500 mt-1">Provide facility details and an image for listings</p>
+        <h2 className="text-2xl font-bold">{isView ? "View Facility" : isEdit ? "Edit Facility" : "Add Facility"}</h2>
+        <p className="text-sm text-gray-500 mt-1">Provide facility details, location data, and an image for listings</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6 ">
+      <div className="bg-white rounded-lg shadow-sm p-6">
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Title <span className="text-red-500">*</span></label>
-            <Input value={form.title} onChange={e=>updateField("title", e.target.value)} error={!!errors.title} errorMessage={errors.title} disabled={isView} />
-          </div>
-
-          <label className="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-3">
-            <input
-              type="checkbox"
-              checked={form.is_development}
-              onChange={(e) => updateField("is_development", e.target.checked)}
-              disabled={isView}
-              className="h-4 w-4 accent-[#981B1F]"
-            />
-            <span className="text-sm font-medium text-slate-700">Facility is in development</span>
-          </label>
-
-          <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 1 {!form.is_development && <span className="text-red-500">*</span>}</label>
-            <Input value={form.addressLine1} onChange={e=>updateField("addressLine1", e.target.value)} error={!!errors.addressLine1} errorMessage={errors.addressLine1} disabled={isView} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Facility Name <span className="text-red-500">*</span></label>
+              <Input value={form.facility_name} onChange={(e) => updateField("facility_name", e.target.value)} error={!!errors.facility_name} errorMessage={errors.facility_name} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Facility Type <span className="text-red-500">*</span></label>
+              <select value={form.facility_type} onChange={(e) => updateField("facility_type", e.target.value)} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white disabled:opacity-55">
+                {FACILITY_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+              {errors.facility_type && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.facility_type}</span>}
+            </div>
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Address Line 2 {!form.is_development && <span className="text-red-500">*</span>}</label>
-            <Textarea value={form.addressLine2} onChange={e=>updateField("addressLine2", e.target.value)} error={!!errors.addressLine2} errorMessage={errors.addressLine2} disabled={isView} />
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Address <span className="text-red-500">*</span></label>
+            <Textarea value={form.address} onChange={(e) => updateField("address", e.target.value)} error={!!errors.address} errorMessage={errors.address} disabled={isView} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Phone <span className="text-red-500">*</span></label>
+              <Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">State <span className="text-red-500">*</span></label>
+              <Input value={form.state} onChange={(e) => updateField("state", e.target.value)} error={!!errors.state} errorMessage={errors.state} disabled={isView} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude <span className="text-red-500">*</span></label>
+              <Input value={form.latitude} onChange={(e) => updateField("latitude", e.target.value)} error={!!errors.latitude} errorMessage={errors.latitude} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude <span className="text-red-500">*</span></label>
+              <Input value={form.longitude} onChange={(e) => updateField("longitude", e.target.value)} error={!!errors.longitude} errorMessage={errors.longitude} disabled={isView} />
+            </div>
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Phone {!form.is_development && <span className="text-red-500">*</span>}</label>
-            <Input value={form.phone} onChange={e=>updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Image Alt Text</label>
+            <Input value={form.image_alt} onChange={(e) => updateField("image_alt", e.target.value)} disabled={isView} />
           </div>
 
           <div>
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image Upload <span className="text-red-500">*</span></label>
-            <Upload
-              value={form.image_url}
-              onChange={(url) => updateField("image_url", url)}
-              mediaType="image"
-              accept="image/*"
-              maxSizeKB={500}
-              disabled={isView}
-            />
-            {errors.image_url && (
-              <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
-                {errors.image_url}
-              </span>
-            )}
+            <Upload value={form.image_url} onChange={(url) => updateField("image_url", url)} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
+            {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
           </div>
 
-          <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Sequence</label>
-            <Input type="number" value={form.sequence} onChange={e=>setForm(f=>({...f, sequence: Number(e.target.value)}))} disabled={isView} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Sequence</label>
+              <Input type="number" value={form.sequence} onChange={(e) => updateField("sequence", Number(e.target.value))} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Status</label>
+              <select value={form.status} onChange={(e) => updateField("status", e.target.value)} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white disabled:opacity-55">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
             {!isView && (
               <Button type="submit" disabled={submitting || loading}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    {isEdit ? "Update Facility" : "Add Facility"}
-                  </>
-                )}
+                {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Facility" : "Add Facility"}</>}
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={()=>navigate('/facilities')}>{isView ? 'Back' : 'Cancel'}</Button>
+            <Button type="button" variant="outline" onClick={() => navigate("/facilities")}>{isView ? "Back" : "Cancel"}</Button>
           </div>
         </form>
       </div>

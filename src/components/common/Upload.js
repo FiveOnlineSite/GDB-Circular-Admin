@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ImageIcon, Video, FileText, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../lib/utils/apiConfig";
@@ -35,6 +35,21 @@ export default function Upload({
 
   // Dynamic Media Rules State
   const [rules, setRules] = useState(null);
+  const sessionUploadedUrlsRef = useRef(new Set());
+  const latestValueRef = useRef(value);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
+
+  const deleteUploadedFile = async (fileUrl) => {
+    if (!fileUrl || !fileUrl.startsWith("/uploads/")) return;
+    try {
+      await api.delete("/v1/media/upload", { data: { url: fileUrl } });
+    } catch (err) {
+      // Best-effort cleanup only.
+    }
+  };
 
   const getAllowedImageExts = () => {
     const configuredExts = rules
@@ -229,6 +244,17 @@ export default function Upload({
 
       if (res.data && res.data.success) {
         const fileUrl = res.data.data.url;
+        const previousValue = latestValueRef.current;
+        if (
+          previousValue &&
+          previousValue !== fileUrl &&
+          sessionUploadedUrlsRef.current.has(previousValue)
+        ) {
+          sessionUploadedUrlsRef.current.delete(previousValue);
+          deleteUploadedFile(previousValue);
+        }
+
+        sessionUploadedUrlsRef.current.add(fileUrl);
         onChange(fileUrl);
         if (onSuccess) onSuccess(fileUrl);
         toast.success("File uploaded successfully.");
@@ -246,8 +272,23 @@ export default function Upload({
 
   const handleClear = (e) => {
     e.preventDefault();
+    const currentValue = latestValueRef.current;
+    if (currentValue && sessionUploadedUrlsRef.current.has(currentValue)) {
+      sessionUploadedUrlsRef.current.delete(currentValue);
+      deleteUploadedFile(currentValue);
+    }
     onChange("");
   };
+
+  useEffect(() => {
+    return () => {
+      const pendingUrls = Array.from(sessionUploadedUrlsRef.current);
+      sessionUploadedUrlsRef.current.clear();
+      pendingUrls.forEach((fileUrl) => {
+        deleteUploadedFile(fileUrl);
+      });
+    };
+  }, []);
 
   const previewSrc = value
     ? value.startsWith("data:")

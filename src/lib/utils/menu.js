@@ -15,7 +15,7 @@ import {
   GitBranch,
   Star,
   Package,
-  Truck,
+  ShieldCheck,
   BookOpen,
   Building,
 } from 'lucide-react';
@@ -157,13 +157,13 @@ export const MenuItems = [
         action: 'catalogue.view'
       },
       {
-        title: 'Logistics Support',
-        icon: Truck,
-        url: '/product-listing/logistics-support',
+        title: 'Quality Assurance',
+        icon: ShieldCheck,
+        url: '/product-listing/quality-assurance',
         exact: true,
         allowedRoles: [1, 2],
         module: 'product',
-        action: 'logistics.view'
+        action: 'quality.view'
       },
       {
         title: 'Case Study',
@@ -303,13 +303,32 @@ export const MenuItems = [
     ]
   },
   {
-      title: 'Facilities',
-      icon: Building,
-      url: '/facilities',
-      allowedRoles: [1, 2],
-      module: 'facilities',
-      action: 'view'
-    },
+    title: 'Facilities',
+    icon: Building,
+    url: '/facilities',
+    allowedRoles: [1, 2],
+    module: 'facilities',
+    subItems: [
+      {
+        title: 'Facility Listing',
+        icon: Building,
+        url: '/facilities/listing',
+        exact: true,
+        allowedRoles: [1, 2],
+        module: 'facilities',
+        action: 'view'
+      },
+      {
+        title: 'What We Do',
+        icon: Star,
+        url: '/facilities/what-we-do',
+        exact: true,
+        allowedRoles: [1, 2],
+        module: 'facilities',
+        action: 'whatwedo.view'
+      }
+    ]
+  },
   {
     title: 'Settings',
     icon: Shield,

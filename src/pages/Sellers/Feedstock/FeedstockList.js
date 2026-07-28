@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, FileText, Eye, Search } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
@@ -157,29 +157,6 @@ export default function FeedstockList() {
         </span>
       ),
     },
-    {
-      field: "pdf_url",
-      headerName: "PDF Document",
-      sortable: false,
-      renderCell: ({ row }) => {
-        if (!row.pdf_url) return <span className="text-slate-400">—</span>;
-        const pdfSrc = row.pdf_url.startsWith("http")
-          ? row.pdf_url
-          : `${process.env.REACT_APP_API_URL || ""}${row.pdf_url}`;
-
-        return (
-          <a
-            href={pdfSrc}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-sm font-semibold text-[#981B1F] hover:text-[#C3662D] transition-colors"
-          >
-            <FileText size={16} className="mr-1" />
-            PDF Spec
-          </a>
-        );
-      },
-    },
     { field: "sequence", headerName: "Sequence", sortable: true },
     {
       field: "status",
@@ -258,7 +235,7 @@ export default function FeedstockList() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Feedstock Catalogue</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage polymer feedstock specs, categories, and technical document links</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage polymer feedstock categories, descriptions, and images</p>
         </div>
 
         {hasPermission("sellers", "feedstock.create") && (

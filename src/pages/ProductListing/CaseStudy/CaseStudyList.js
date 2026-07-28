@@ -54,6 +54,7 @@ export default function CaseStudyList() {
         : <div className="h-10 w-16 rounded border bg-slate-100 flex items-center justify-center text-xs text-slate-400">No img</div>,
     },
     { field: "title", headerName: "Title", sortable: true },
+    { field: "tag", headerName: "Tag", sortable: true, renderCell: ({ row }) => row.tag || "—" },
     { field: "short_description", headerName: "Short Description", renderCell: ({ row }) => <span className="text-xs text-slate-500 line-clamp-2 max-w-[200px]">{row.short_description || "—"}</span> },
     { field: "sequence", headerName: "Seq", sortable: true },
     {

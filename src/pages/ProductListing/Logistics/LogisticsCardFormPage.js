@@ -6,7 +6,11 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import Upload from "../../../components/common/Upload";
 import { Textarea } from "../../../components/ui/textarea";
-import { getLogisticsCardById, createLogisticsCard, updateLogisticsCard } from "../../../services/productListing";
+import {
+  getQualityAssuranceCardById,
+  createQualityAssuranceCard,
+  updateQualityAssuranceCard,
+} from "../../../services/productListing";
 
 const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
 
@@ -17,29 +21,42 @@ export default function LogisticsCardFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ card_title: "", card_description: "", icon_url: "", icon_alt: "", sequence: 0, status: "active" });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!isEdit) return;
     (async () => {
       try {
         setPageLoading(true);
-        const res = await getLogisticsCardById(id);
+        const res = await getQualityAssuranceCardById(id);
         if (res.success && res.data) {
           const d = res.data;
-          setForm({ card_title: d.card_title || "", card_description: d.card_description || "", icon_url: d.icon_url || "", icon_alt: d.icon_alt || "", sequence: d.sequence ?? 0, status: d.status || "active" });
-        } else { toast.error("Card not found"); navigate("/product-listing/logistics-support"); }
-      } catch { toast.error("Failed to load"); navigate("/product-listing/logistics-support"); }
-      finally { setPageLoading(false); }
+          setForm({
+            card_title: d.card_title || "",
+            card_description: d.card_description || "",
+            icon_url: d.icon_url || "",
+            icon_alt: d.icon_alt || "",
+            sequence: d.sequence ?? 0,
+            status: d.status || "active",
+          });
+        } else {
+          toast.error("Card not found");
+          navigate("/product-listing/quality-assurance");
+        }
+      } catch {
+        toast.error("Failed to load");
+        navigate("/product-listing/quality-assurance");
+      } finally {
+        setPageLoading(false);
+      }
     })();
   }, [id, isEdit, navigate]);
 
-  const [errors, setErrors] = useState({});
-
-  const handle = e => {
+  const handle = (e) => {
     const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value }));
+    setForm((p) => ({ ...p, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const next = { ...prev };
         delete next[name];
         return next;
@@ -47,7 +64,7 @@ export default function LogisticsCardFormPage() {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     if (!form.card_title.trim()) newErrors.card_title = "Card title is required";
@@ -59,25 +76,40 @@ export default function LogisticsCardFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, sequence: Number(form.sequence) };
-      const res = isEdit ? await updateLogisticsCard(id, payload) : await createLogisticsCard(payload);
-      if (res.success) { toast.success(isEdit ? "Card updated" : "Card created"); navigate("/product-listing/logistics-support"); }
-      else toast.error(res.message || "Operation failed");
-    } catch (err) { toast.error(err.response?.data?.message || "Operation failed"); }
-    finally { setSubmitting(false); }
+      const payload = {
+        ...form,
+        card_title: form.card_title.trim(),
+        card_description: form.card_description.trim(),
+        icon_alt: form.icon_alt.trim(),
+        sequence: Number(form.sequence),
+      };
+      const res = isEdit ? await updateQualityAssuranceCard(id, payload) : await createQualityAssuranceCard(payload);
+      if (res.success) {
+        toast.success(isEdit ? "Card updated" : "Card created");
+        navigate("/product-listing/quality-assurance");
+      } else {
+        toast.error(res.message || "Operation failed");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Operation failed");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (pageLoading) return <div className="flex justify-center items-center h-64"><div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" /></div>;
+  if (pageLoading) {
+    return <div className="flex justify-center items-center h-64"><div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-6 pb-12 w-full">
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="icon" type="button" onClick={() => navigate("/product-listing/logistics-support")} className="rounded-xl border-slate-200">
+        <Button variant="outline" size="icon" type="button" onClick={() => navigate("/product-listing/quality-assurance")} className="rounded-xl border-slate-200">
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{isEdit ? "Edit Card" : "Add Card"}</h1>
-          <p className="text-slate-500 text-sm">Manage a logistics support card</p>
+          <p className="text-slate-500 text-sm">Manage a quality assurance card</p>
         </div>
       </div>
 
@@ -87,18 +119,11 @@ export default function LogisticsCardFormPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Card Title <span className="text-red-500">*</span></label>
-              <Input
-                name="card_title"
-                value={form.card_title}
-                onChange={handle}
-                placeholder="e.g. Express Delivery"
-                error={!!errors.card_title}
-                errorMessage={errors.card_title}
-              />
+              <Input name="card_title" value={form.card_title} onChange={handle} placeholder="e.g. In-house Validation" error={!!errors.card_title} errorMessage={errors.card_title} />
             </div>
             <div className="md:col-span-2">
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Card Description</label>
-              <Textarea name="card_description" value={form.card_description} onChange={handle} rows={4} placeholder="Describe this support feature..." />
+              <Textarea name="card_description" value={form.card_description} onChange={handle} rows={4} placeholder="Describe this quality assurance capability..." />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Icon Alt Text</label>
@@ -117,23 +142,14 @@ export default function LogisticsCardFormPage() {
             </div>
           </div>
 
-          {/* Icon/Image Upload */}
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
-              Icon / Image
-            </label>
-            <Upload
-              value={form.icon_url}
-              onChange={(url) => setForm(p => ({ ...p, icon_url: url }))}
-              mediaType="image"
-              accept="image/*"
-              maxSizeKB={30}
-            />
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Icon / Image</label>
+            <Upload value={form.icon_url} onChange={(url) => setForm((p) => ({ ...p, icon_url: url }))} mediaType="image" accept="image/*" maxSizeKB={30} />
           </div>
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => navigate("/product-listing/logistics-support")}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => navigate("/product-listing/quality-assurance")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Card" : "Create Card"}</>}
           </Button>

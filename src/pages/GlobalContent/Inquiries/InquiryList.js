@@ -8,7 +8,7 @@ import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import { getInquiries, deleteInquiry } from "../../../services/globalContent/inquiries";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
-const PAGE_URLS = ["", "/", "/about", "/contact", "/services", "/products", "/faq"];
+const PAGE_URLS = ["", "/", "/about-us", "/products", "/seller", "/facilities", "/teams", "/news-events"];
 
 function formatDisplayDate(value) {
   if (!value) return "";
@@ -19,15 +19,15 @@ function formatDisplayDate(value) {
 
 function exportToCSV(data) {
   if (!data.length) return;
-  const headers = ["ID", "First Name", "Last Name", "Email", "Mobile", "Company", "WhatsApp", "Message", "Page URL", "Submitted At"];
+  const headers = ["ID", "First Name", "Last Name", "Email", "Mobile", "Company", "What Brings You Here", "Message", "Page URL", "Submitted At"];
   const rows = data.map((r) => [
     r.id,
     r.first_name,
     r.last_name,
     r.email,
-    r.mobile,
+    r.mobile || "",
     r.company || "",
-    r.whatsapp_number || "",
+    r.what_brings_you_here || "",
     (r.message || "").replace(/\n/g, " "),
     r.page_url || "",
     r.created_at ? new Date(r.created_at).toLocaleString() : "",
@@ -71,7 +71,9 @@ export default function InquiryList() {
       if (res.success) {
         setRows(Array.isArray(res.data) ? res.data : []);
         if (res.pagination) setPagination(res.pagination);
-      } else setRows([]);
+      } else {
+        setRows([]);
+      }
     } catch {
       toast.error("Failed to load inquiries");
       setRows([]);
@@ -80,12 +82,17 @@ export default function InquiryList() {
     }
   }, [search, pageUrl, startDate, endDate, pagination.current_page, pagination.per_page]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleDeleteConfirm = async () => {
     try {
       const res = await deleteInquiry(selectedItem.id);
-      if (res.success) { toast.success("Inquiry deleted"); fetchData(); }
+      if (res.success) {
+        toast.success("Inquiry deleted");
+        fetchData();
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Delete failed");
     } finally {
@@ -118,32 +125,30 @@ export default function InquiryList() {
     {
       field: "name",
       headerName: "Name",
-      renderCell: ({ row }) => (
-        <span className="font-medium">{row.first_name} {row.last_name}</span>
-      ),
+      renderCell: ({ row }) => <span className="font-medium">{row.first_name} {row.last_name}</span>,
     },
     { field: "email", headerName: "Email" },
-    { field: "mobile", headerName: "Mobile" },
+    { field: "mobile", headerName: "Mobile", renderCell: ({ row }) => row.mobile || "-" },
     {
       field: "company",
       headerName: "Company",
       renderCell: ({ row }) => row.company || "-",
     },
     {
+      field: "what_brings_you_here",
+      headerName: "What Brings You Here",
+      renderCell: ({ row }) => row.what_brings_you_here || "-",
+    },
+    {
       field: "page_url",
       headerName: "Page URL",
-      renderCell: ({ row }) => (
-        <span className="text-xs text-slate-500 truncate max-w-[120px] block">{row.page_url || "-"}</span>
-      ),
+      renderCell: ({ row }) => <span className="text-xs text-slate-500 truncate max-w-[120px] block">{row.page_url || "-"}</span>,
     },
     {
       field: "created_at",
       headerName: "Submitted",
       sortable: true,
-      renderCell: ({ row }) =>
-        row.created_at ? (
-          <span className="text-xs">{new Date(row.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</span>
-        ) : "-",
+      renderCell: ({ row }) => row.created_at ? <span className="text-xs">{new Date(row.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</span> : "-",
     },
     {
       field: "actions",
@@ -152,21 +157,11 @@ export default function InquiryList() {
       sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-            onClick={() => { setViewItem(row); setViewModal(true); }}
-          >
+          <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => { setViewItem(row); setViewModal(true); }}>
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
           {hasPermission("globalContent", "inquiries.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelectedItem(row); setDeleteModal(true); }}
-            >
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50" onClick={() => { setSelectedItem(row); setDeleteModal(true); }}>
               <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           )}
@@ -179,7 +174,6 @@ export default function InquiryList() {
 
   return (
     <div className="p-6">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inquiry Form Submissions</h1>
@@ -190,56 +184,28 @@ export default function InquiryList() {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-4 mb-6 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
-              placeholder="Search name, email, mobile..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
-            />
+            <Input className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm" placeholder="Search name, email, mobile..." value={search} onChange={(e) => { setSearch(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} />
           </div>
-          <select
-            value={pageUrl}
-            onChange={(e) => { setPageUrl(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
-            className="w-full cursor-pointer border border-[#E6E6E6] rounded-lg bg-white p-2.5 text-sm focus:border-[#981B1F] focus:outline-none"
-          >
+          <select value={pageUrl} onChange={(e) => { setPageUrl(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} className="w-full cursor-pointer border border-[#E6E6E6] rounded-lg bg-white p-2.5 text-sm focus:border-[#981B1F] focus:outline-none">
             <option value="">All Pages</option>
-            {PAGE_URLS.filter(Boolean).map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
+            {PAGE_URLS.filter(Boolean).map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
           <div className="relative">
             <div className="flex h-10 w-full items-center rounded-md border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
-              <span className={startDate ? "text-[#111111]" : "text-slate-500"}>
-                {startDate ? formatDisplayDate(startDate) : "DD-MM-YYYY"}
-              </span>
+              <span className={startDate ? "text-[#111111]" : "text-slate-500"}>{startDate ? formatDisplayDate(startDate) : "DD-MM-YYYY"}</span>
             </div>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
-              aria-label="Start Date"
-              className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-            />
+            <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} aria-label="Start Date" className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" />
             <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           </div>
           <div className="relative">
             <div className="flex h-10 w-full items-center rounded-md border border-[#E6E6E6] bg-white px-3 pr-11 text-sm text-[#111111]">
-              <span className={endDate ? "text-[#111111]" : "text-slate-500"}>
-                {endDate ? formatDisplayDate(endDate) : "DD-MM-YYYY"}
-              </span>
+              <span className={endDate ? "text-[#111111]" : "text-slate-500"}>{endDate ? formatDisplayDate(endDate) : "DD-MM-YYYY"}</span>
             </div>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => { setEndDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }}
-              aria-label="End Date"
-              className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-            />
+            <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPagination((p) => ({ ...p, current_page: 1 })); }} aria-label="End Date" className="inquiry-date-input absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" />
             <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           </div>
         </div>
@@ -250,35 +216,23 @@ export default function InquiryList() {
         )}
       </div>
 
-      {/* Table */}
-      <ReusableDataTable
-        columns={columns}
-        rows={rows}
-        loading={loading}
-        pagination={pagination}
-        handlePageChange={(page) => setPagination((p) => ({ ...p, current_page: page }))}
-        handlePerPageChange={(perPage) => setPagination((p) => ({ ...p, per_page: perPage, current_page: 1 }))}
-        emptyMessage="No inquiries found."
-      />
+      <ReusableDataTable columns={columns} rows={rows} loading={loading} pagination={pagination} handlePageChange={(page) => setPagination((p) => ({ ...p, current_page: page }))} handlePerPageChange={(perPage) => setPagination((p) => ({ ...p, per_page: perPage, current_page: 1 }))} emptyMessage="No inquiries found." />
 
-      {/* View Modal */}
       {viewModal && viewItem && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setViewModal(false)}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-lg font-bold">Inquiry Details</h2>
-              <Button variant="ghost" size="icon" onClick={() => setViewModal(false)}>
-                <X className="w-4 h-4" />
-              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setViewModal(false)}><X className="w-4 h-4" /></Button>
             </div>
             <div className="p-6 space-y-3">
               {[
                 ["First Name", viewItem.first_name],
                 ["Last Name", viewItem.last_name],
                 ["Email", viewItem.email],
-                ["Mobile", viewItem.mobile],
+                ["Mobile", viewItem.mobile || "-"],
                 ["Company", viewItem.company || "-"],
-                ["WhatsApp", viewItem.whatsapp_number || "-"],
+                ["What Brings You Here", viewItem.what_brings_you_here || "-"],
                 ["Page URL", viewItem.page_url || "-"],
                 ["Submitted At", viewItem.created_at ? new Date(viewItem.created_at).toLocaleString() : "-"],
               ].map(([label, value]) => (
@@ -290,9 +244,7 @@ export default function InquiryList() {
               {viewItem.message && (
                 <div>
                   <span className="text-sm font-semibold text-slate-500 block mb-1">Message</span>
-                  <p className="text-sm text-slate-800 dark:text-gray-200 bg-slate-50 dark:bg-gray-800 rounded-lg p-3 whitespace-pre-wrap">
-                    {viewItem.message}
-                  </p>
+                  <p className="text-sm text-slate-800 dark:text-gray-200 bg-slate-50 dark:bg-gray-800 rounded-lg p-3 whitespace-pre-wrap">{viewItem.message}</p>
                 </div>
               )}
             </div>
@@ -300,15 +252,7 @@ export default function InquiryList() {
         </div>
       )}
 
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => { setDeleteModal(false); setSelectedItem(null); }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Inquiry"
-        message="Are you sure you want to permanently delete this inquiry?"
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
+      <ConfirmationModal isOpen={deleteModal} onClose={() => { setDeleteModal(false); setSelectedItem(null); }} onConfirm={handleDeleteConfirm} title="Delete Inquiry" message="Are you sure you want to permanently delete this inquiry?" confirmLabel="Delete" confirmVariant="destructive" />
     </div>
   );
 }
