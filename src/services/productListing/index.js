@@ -10,14 +10,14 @@ export const updateProduct = (id, data) => api.put(`${base}/catalogue/${id}`, da
 export const deleteProduct = (id) => api.delete(`${base}/catalogue/${id}`).then(r => r.data);
 export const toggleProductStatus = (id) => api.patch(`${base}/catalogue/${id}/toggle-status`).then(r => r.data);
 
-// Logistics Support
-export const getLogisticsSection = () => api.get(`${base}/logistics-support`).then(r => r.data);
-export const updateLogisticsSection = (data) => api.put(`${base}/logistics-support/section`, data).then(r => r.data);
-export const getLogisticsCards = () => api.get(`${base}/logistics-support/cards`).then(r => r.data);
-export const getLogisticsCardById = (id) => api.get(`${base}/logistics-support/cards/${id}`).then(r => r.data);
-export const createLogisticsCard = (data) => api.post(`${base}/logistics-support/cards`, data).then(r => r.data);
-export const updateLogisticsCard = (id, data) => api.put(`${base}/logistics-support/cards/${id}`, data).then(r => r.data);
-export const deleteLogisticsCard = (id) => api.delete(`${base}/logistics-support/cards/${id}`).then(r => r.data);
+// Quality Assurance
+export const getQualityAssuranceSection = () => api.get(`${base}/quality-assurance`).then(r => r.data);
+export const updateQualityAssuranceSection = (data) => api.put(`${base}/quality-assurance/section`, data).then(r => r.data);
+export const getQualityAssuranceCards = () => api.get(`${base}/quality-assurance/cards`).then(r => r.data);
+export const getQualityAssuranceCardById = (id) => api.get(`${base}/quality-assurance/cards/${id}`).then(r => r.data);
+export const createQualityAssuranceCard = (data) => api.post(`${base}/quality-assurance/cards`, data).then(r => r.data);
+export const updateQualityAssuranceCard = (id, data) => api.put(`${base}/quality-assurance/cards/${id}`, data).then(r => r.data);
+export const deleteQualityAssuranceCard = (id) => api.delete(`${base}/quality-assurance/cards/${id}`).then(r => r.data);
 
 // Case Studies
 export const getCaseStudies = (params) => api.get(`${base}/case-study`, { params }).then(r => r.data);

@@ -157,11 +157,31 @@ export default function ReusableDataTable({
   // Use API pagination data
   const currentPage = pagination?.current_page || 1;
   const perPage = pagination?.per_page || pageSize;
-  const totalItems = pagination?.total || 0;
-  const lastPage = pagination?.last_page || 1;
+  const hasServerPagination =
+    Number.isFinite(pagination?.total) &&
+    Number.isFinite(pagination?.last_page) &&
+    (pagination.total > 0 || pagination.last_page > 1 || currentPage > 1);
+
+  const inferredLastPage =
+    rows.length === 0 ? currentPage : rows.length < perPage ? currentPage : currentPage + 1;
+
+  const totalItems = hasServerPagination ? pagination.total : rows.length;
+  const lastPage = hasServerPagination
+    ? pagination.last_page
+    : Math.max(1, inferredLastPage);
 
   // Derived total pages
   const totalPages = lastPage;
+  const displayFrom = rows.length === 0 ? 0 : (currentPage - 1) * perPage + 1;
+  const displayTo = rows.length === 0 ? 0 : (currentPage - 1) * perPage + rows.length;
+  const displaySummary = hasServerPagination
+    ? `Showing ${displayFrom.toLocaleString()} to ${Math.min(
+        currentPage * perPage,
+        totalItems,
+      ).toLocaleString()} of ${totalItems.toLocaleString()} entries`
+    : `Showing ${displayFrom.toLocaleString()} to ${displayTo.toLocaleString()}${
+        rows.length === perPage ? "+" : ""
+      } entries`;
 
   const handleSelectAllClick = (e) => {
     const checked = e.target.checked;
@@ -402,24 +422,7 @@ export default function ReusableDataTable({
                 <SelectItem value='100'>100</SelectItem>
               </SelectContent>
             </Select>
-            <span className='text-sm text-gray-500 ml-8'>
-              Showing{' '}
-              <span className='font-semibold text-gray-700'>
-                {(totalItems === 0
-                  ? 0
-                  : (currentPage - 1) * perPage + 1
-                ).toLocaleString()}
-              </span>{' '}
-              to{' '}
-              <span className='font-semibold text-gray-700'>
-                {Math.min(currentPage * perPage, totalItems).toLocaleString()}
-              </span>{' '}
-              of{' '}
-              <span className='font-semibold text-gray-700'>
-                {totalItems.toLocaleString()}
-              </span>{' '}
-              entries
-            </span>
+            <span className='text-sm text-gray-500 ml-8'>{displaySummary}</span>
           </div>
 
           <div className='flex items-center gap-1.5'>

@@ -9,10 +9,24 @@ import { Textarea } from "../../../components/ui/textarea";
 import { getProductById, createProduct, updateProduct } from "../../../services/productListing";
 
 const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
-
 const CATEGORIES = ["LDPE", "HDPE", "PP"];
-
-const INIT = { product_category: "", product_name: "", short_description: "", image_url: "", image_alt: "", pdf_url: "", show_on_homepage: false, sequence: 0, status: "active" };
+const INIT = {
+  product_category: "",
+  product_name: "",
+  short_description: "",
+  image_url: "",
+  image_alt: "",
+  grade_no: "",
+  color: "",
+  density_g_cm3: "",
+  mfi_g_10min: "",
+  ash_percent: "",
+  fda_lno: false,
+  pcr_content_percent: "",
+  show_on_homepage: false,
+  sequence: 0,
+  status: "active",
+};
 
 export default function CatalogueFormPage() {
   const navigate = useNavigate();
@@ -23,6 +37,7 @@ export default function CatalogueFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(INIT);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!id) return;
@@ -32,20 +47,41 @@ export default function CatalogueFormPage() {
         const res = await getProductById(id);
         if (res.success && res.data) {
           const d = res.data;
-          setForm({ product_category: d.product_category || "", product_name: d.product_name || "", short_description: d.short_description || "", image_url: d.image_url || "", image_alt: d.image_alt || "", pdf_url: d.pdf_url || "", show_on_homepage: Boolean(d.show_on_homepage), sequence: d.sequence ?? 0, status: d.status || "active" });
-        } else { toast.error("Product not found"); navigate("/product-listing/catalogue"); }
-      } catch { toast.error("Failed to load product"); navigate("/product-listing/catalogue"); }
-      finally { setPageLoading(false); }
+          setForm({
+            product_category: d.product_category || "",
+            product_name: d.product_name || "",
+            short_description: d.short_description || "",
+            image_url: d.image_url || "",
+            image_alt: d.image_alt || "",
+            grade_no: d.grade_no || "",
+            color: d.color || "",
+            density_g_cm3: d.density_g_cm3 ?? "",
+            mfi_g_10min: d.mfi_g_10min ?? "",
+            ash_percent: d.ash_percent ?? "",
+            fda_lno: Boolean(d.fda_lno),
+            pcr_content_percent: d.pcr_content_percent ?? "",
+            show_on_homepage: Boolean(d.show_on_homepage),
+            sequence: d.sequence ?? 0,
+            status: d.status || "active",
+          });
+        } else {
+          toast.error("Product not found");
+          navigate("/product-listing/catalogue");
+        }
+      } catch {
+        toast.error("Failed to load product");
+        navigate("/product-listing/catalogue");
+      } finally {
+        setPageLoading(false);
+      }
     })();
   }, [id, navigate]);
 
-  const [errors, setErrors] = useState({});
-
-  const handle = e => {
+  const handle = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(p => ({ ...p, [name]: type === "checkbox" ? checked : value }));
+    setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const next = { ...prev };
         delete next[name];
         return next;
@@ -53,14 +89,14 @@ export default function CatalogueFormPage() {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     if (!form.product_category) newErrors.product_category = "Product category is required";
     if (!form.product_name.trim()) newErrors.product_name = "Product name is required";
+    if (!form.short_description.trim()) newErrors.short_description = "Short description is required";
     if (!form.image_url) newErrors.image_url = "Product image is required";
     if (!Number.isInteger(Number(form.sequence)) || Number(form.sequence) < 0) newErrors.sequence = "Sequence must be a non-negative integer";
-    if (form.pdf_url && !String(form.pdf_url).toLowerCase().includes(".pdf")) newErrors.pdf_url = "Please upload a valid PDF file";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -74,21 +110,32 @@ export default function CatalogueFormPage() {
         product_name: form.product_name.trim(),
         short_description: form.short_description.trim(),
         image_alt: form.image_alt.trim(),
-        pdf_url: form.pdf_url.trim(),
+        grade_no: form.grade_no.trim(),
+        color: form.color.trim(),
+        density_g_cm3: form.density_g_cm3 === "" ? null : Number(form.density_g_cm3),
+        mfi_g_10min: form.mfi_g_10min === "" ? null : Number(form.mfi_g_10min),
+        ash_percent: form.ash_percent === "" ? null : Number(form.ash_percent),
+        pcr_content_percent: form.pcr_content_percent === "" ? null : Number(form.pcr_content_percent),
         sequence: Number(form.sequence),
         show_on_homepage: form.show_on_homepage ? 1 : 0,
+        fda_lno: form.fda_lno ? 1 : 0,
       };
       const res = isEdit ? await updateProduct(id, payload) : await createProduct(payload);
-      if (res.success) { toast.success(isEdit ? "Product updated" : "Product created"); navigate("/product-listing/catalogue"); }
-      else toast.error(res.message || "Operation failed");
+      if (res.success) {
+        toast.success(isEdit ? "Product updated" : "Product created");
+        navigate("/product-listing/catalogue");
+      } else {
+        toast.error(res.message || "Operation failed");
+      }
     } catch (err) {
       const apiErrors = err.response?.data?.error;
       if (apiErrors && typeof apiErrors === "object") {
-        setErrors(prev => ({ ...prev, ...apiErrors }));
+        setErrors((prev) => ({ ...prev, ...apiErrors }));
       }
       toast.error(err.response?.data?.message || "Operation failed");
+    } finally {
+      setSubmitting(false);
     }
-    finally { setSubmitting(false); }
   };
 
   if (pageLoading) return <div className="flex justify-center items-center h-64"><div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" /></div>;
@@ -108,65 +155,52 @@ export default function CatalogueFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        {/* Core Fields */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Product Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Product Category <span className="text-red-500">*</span></label>
-              <select
-                name="product_category"
-                value={form.product_category}
-                onChange={handle}
-                aria-invalid={errors.product_category ? "true" : "false"}
-                className={`${ss} ${errors.product_category ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : ''}`}
-                disabled={isView}
-              >
+              <select name="product_category" value={form.product_category} onChange={handle} aria-invalid={errors.product_category ? "true" : "false"} className={`${ss} ${errors.product_category ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : ""}`} disabled={isView}>
                 <option value="">Select Category</option>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-              {errors.product_category && (
-                <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
-                  {errors.product_category}
-                </span>
-              )}
+              {errors.product_category && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.product_category}</span>}
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Product Name <span className="text-red-500">*</span></label>
-              <Input
-                name="product_name"
-                value={form.product_name}
-                onChange={handle}
-                placeholder="e.g. LDPE Virgin Grade"
-                disabled={isView}
-                error={!!errors.product_name}
-                errorMessage={errors.product_name}
-              />
+              <Input name="product_name" value={form.product_name} onChange={handle} placeholder="e.g. Food Grade LLDPE PCR" disabled={isView} error={!!errors.product_name} errorMessage={errors.product_name} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Grade No.</label>
+              <Input name="grade_no" value={form.grade_no} onChange={handle} placeholder="e.g. GDB-LDPE-101" disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Color</label>
+              <Input name="color" value={form.color} onChange={handle} placeholder="e.g. Natural / Black" disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Density (g/cm3)</label>
+              <Input type="number" step="0.0001" name="density_g_cm3" value={form.density_g_cm3} onChange={handle} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">MFI (g/10min)</label>
+              <Input type="number" step="0.0001" name="mfi_g_10min" value={form.mfi_g_10min} onChange={handle} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Ash (%)</label>
+              <Input type="number" step="0.0001" name="ash_percent" value={form.ash_percent} onChange={handle} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">PCR Content (%)</label>
+              <Input type="number" step="0.01" name="pcr_content_percent" value={form.pcr_content_percent} onChange={handle} disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
-              <Input
-                name="image_alt"
-                value={form.image_alt}
-                onChange={handle}
-                placeholder="Describe the product image"
-                disabled={isView}
-                error={!!errors.image_alt}
-                errorMessage={errors.image_alt}
-              />
+              <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the product image" disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input
-                type="number"
-                min="0"
-                name="sequence"
-                value={form.sequence}
-                onChange={handle}
-                disabled={isView}
-                error={!!errors.sequence}
-                errorMessage={errors.sequence}
-              />
+              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handle} disabled={isView} error={!!errors.sequence} errorMessage={errors.sequence} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
@@ -175,28 +209,32 @@ export default function CatalogueFormPage() {
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-            <div className="flex items-center gap-3 mt-6">
-              <input type="checkbox" id="show_on_homepage" name="show_on_homepage" checked={form.show_on_homepage} onChange={handle} disabled={isView} className="w-4 h-4 cursor-pointer accent-[#981B1F]" />
-              <label htmlFor="show_on_homepage" className="text-sm font-semibold text-slate-600 dark:text-gray-300 cursor-pointer">Show on Homepage</label>
+            <div className="space-y-3 md:col-span-2">
+              <label className="flex items-center gap-3">
+                <input type="checkbox" id="show_on_homepage" name="show_on_homepage" checked={form.show_on_homepage} onChange={handle} disabled={isView} className="w-4 h-4 cursor-pointer accent-[#981B1F]" />
+                <span className="text-sm font-semibold text-slate-600 dark:text-gray-300">Show on Homepage</span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input type="checkbox" id="fda_lno" name="fda_lno" checked={form.fda_lno} onChange={handle} disabled={isView} className="w-4 h-4 cursor-pointer accent-[#981B1F]" />
+                <span className="text-sm font-semibold text-slate-600 dark:text-gray-300">FDA LNO Available</span>
+              </label>
             </div>
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description</label>
-            <Textarea name="short_description" value={form.short_description} onChange={handle} rows={3} placeholder="Brief product description..." disabled={isView} />
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description <span className="text-red-500">*</span></label>
+            <Textarea name="short_description" value={form.short_description} onChange={handle} rows={4} placeholder="Brief product description..." disabled={isView} />
+            {errors.short_description && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.short_description}</span>}
           </div>
         </div>
 
-        {/* Image Upload */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
-            Product Image <span className="text-red-500">*</span>
-          </h2>
+          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Product Image <span className="text-red-500">*</span></h2>
           <Upload
             value={form.image_url}
             onChange={(url) => {
               setForm((p) => ({ ...p, image_url: url }));
               if (errors.image_url) {
-                setErrors(prev => {
+                setErrors((prev) => {
                   const next = { ...prev };
                   delete next.image_url;
                   return next;
@@ -208,51 +246,17 @@ export default function CatalogueFormPage() {
             maxSizeKB={500}
             disabled={isView}
           />
-          {errors.image_url && (
-            <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
-              {errors.image_url}
-            </span>
-          )}
+          {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
         </div>
 
-        {/* PDF Upload */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
-            Know More PDF
-          </h2>
-          <Upload
-            value={form.pdf_url}
-            onChange={(url) => {
-              setForm((p) => ({ ...p, pdf_url: url }));
-              if (errors.pdf_url) {
-                setErrors(prev => {
-                  const next = { ...prev };
-                  delete next.pdf_url;
-                  return next;
-                });
-              }
-            }}
-            mediaType="document"
-            accept="application/pdf"
-            compressBeforeUpload={false}
-            disabled={isView}
-          />
-          {errors.pdf_url && (
-            <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
-              {errors.pdf_url}
-            </span>
-          )}
-        </div>
-
-        {!isView && (
+        {!isView ? (
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => navigate("/product-listing/catalogue")}>Cancel</Button>
             <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
               {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Product" : "Create Product"}</>}
             </Button>
           </div>
-        )}
-        {isView && (
+        ) : (
           <div className="flex justify-end">
             <Button type="button" variant="outline" onClick={() => navigate("/product-listing/catalogue")}>Back to List</Button>
           </div>

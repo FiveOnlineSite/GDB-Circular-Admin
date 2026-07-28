@@ -198,28 +198,6 @@ export default function NewsList() {
       },
     },
     {
-      field: "logo_url",
-      headerName: "Logo",
-      sortable: false,
-      renderCell: ({ row }) => {
-        const fileSrc = row.logo_url
-          ? row.logo_url.startsWith("http")
-            ? row.logo_url
-            : `${process.env.REACT_APP_API_URL || ""}${row.logo_url}`
-          : "";
-
-        if (!fileSrc) return <span className="text-slate-400">—</span>;
-
-        return (
-          <img
-            src={fileSrc}
-            alt={`${row.title} logo`}
-            className="w-16 h-10 object-contain rounded border border-slate-200 bg-white p-1"
-          />
-        );
-      },
-    },
-    {
       field: "title",
       headerName: "Article Title",
       sortable: true,
@@ -256,24 +234,6 @@ export default function NewsList() {
       renderCell: ({ row }) => (
         <span className="flex justify-center w-full">
           {row.featured_homepage === 1 ? (
-            <span className="text-green-600 bg-green-50 rounded-full p-0.5 border border-green-150">
-              <Check size={12} />
-            </span>
-          ) : (
-            <span className="text-slate-300">
-              <X size={12} />
-            </span>
-          )}
-        </span>
-      ),
-    },
-    {
-      field: "featured_listing",
-      headerName: "Featured List",
-      sortable: true,
-      renderCell: ({ row }) => (
-        <span className="flex justify-center w-full">
-          {row.featured_listing === 1 ? (
             <span className="text-green-600 bg-green-50 rounded-full p-0.5 border border-green-150">
               <Check size={12} />
             </span>
@@ -362,7 +322,7 @@ export default function NewsList() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">News & Updates</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage public articles, events announcements, dynamic posts, and featured items</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage public articles, events announcements, and featured homepage posts</p>
         </div>
 
         {canCreate && (

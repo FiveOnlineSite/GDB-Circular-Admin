@@ -53,6 +53,8 @@ import WhyIndustryChoosesFormPage from "./pages/AboutGDB/WhyIndustryChooses/WhyI
 // Facilities
 import FacilitiesList from "./pages/Facilities/FacilitiesList";
 import FacilityForm from "./pages/Facilities/FacilityForm";
+import WhatWeDoPage from "./pages/Facilities/WhatWeDoPage";
+import WhatWeDoCardForm from "./pages/Facilities/WhatWeDoCardForm";
 // GDB Team Management
 import TeamMemberList from "./pages/Team/Members/TeamMemberList";
 import TeamMemberFormPage from "./pages/Team/Members/TeamMemberFormPage";
@@ -293,15 +295,15 @@ function App() {
             <ProtectedRoute><MainLayout><PermissionRoute module="product" action="catalogue.view"><CatalogueFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
-          {/* Logistics Support */}
-          <Route path="/product-listing/logistics-support" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="logistics.view"><LogisticsPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          {/* Quality Assurance */}
+          <Route path="/product-listing/quality-assurance" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="quality.view"><LogisticsPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
-          <Route path="/product-listing/logistics-support/cards/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="logistics.create"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          <Route path="/product-listing/quality-assurance/cards/create" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="quality.create"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
-          <Route path="/product-listing/logistics-support/cards/edit/:id" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="logistics.update"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          <Route path="/product-listing/quality-assurance/cards/edit/:id" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="product" action="quality.update"><LogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Case Study */}
@@ -321,7 +323,8 @@ function App() {
           {/* ===== ABOUT GDB ROUTES ===== */}
 
           {/* Facilities */}
-          <Route path="/facilities" element={
+          <Route path="/facilities" element={<Navigate to="/facilities/listing" replace />} />
+          <Route path="/facilities/listing" element={
             <ProtectedRoute><MainLayout><PermissionRoute module="facilities" action="view"><FacilitiesList /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/facilities/create" element={
@@ -332,6 +335,15 @@ function App() {
           } />
           <Route path="/facilities/view/:id" element={
             <ProtectedRoute><MainLayout><PermissionRoute module="facilities" action="view"><FacilityForm /></PermissionRoute></MainLayout></ProtectedRoute>
+          } />
+          <Route path="/facilities/what-we-do" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="facilities" action="whatwedo.view"><WhatWeDoPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          } />
+          <Route path="/facilities/what-we-do/cards/create" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="facilities" action="whatwedo.create"><WhatWeDoCardForm /></PermissionRoute></MainLayout></ProtectedRoute>
+          } />
+          <Route path="/facilities/what-we-do/cards/edit/:id" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="facilities" action="whatwedo.update"><WhatWeDoCardForm /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Overview */}

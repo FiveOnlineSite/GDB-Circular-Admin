@@ -72,9 +72,19 @@ export default function CatalogueList() {
         <span className="px-2 py-0.5 rounded text-xs font-semibold bg-[#981B1F]/10 text-[#981B1F]">{row.product_category}</span>
       ),
     },
+    { field: "grade_no", headerName: "Grade No.", sortable: true, renderCell: ({ row }) => row.grade_no || "—" },
+    { field: "color", headerName: "Color", sortable: true, renderCell: ({ row }) => row.color || "—" },
     {
       field: "short_description", headerName: "Description",
       renderCell: ({ row }) => <span className="text-xs text-slate-500 line-clamp-2 max-w-[180px]">{row.short_description || "—"}</span>,
+    },
+    {
+      field: "fda_lno", headerName: "FDA LNO", sortable: false,
+      renderCell: ({ row }) => <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${Number(row.fda_lno) === 1 ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>{Number(row.fda_lno) === 1 ? "Yes" : "No"}</span>,
+    },
+    {
+      field: "pcr_content_percent", headerName: "PCR %",
+      renderCell: ({ row }) => row.pcr_content_percent ?? "—",
     },
     {
       field: "show_on_homepage", headerName: "Homepage", sortable: false,
