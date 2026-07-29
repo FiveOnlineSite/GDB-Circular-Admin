@@ -86,7 +86,13 @@ export default function WhatWeDoPage() {
       renderCell: ({ row }) =>
         row.icon_url ? (
           <img
-            src={row.icon_url.startsWith("data:") || row.icon_url.startsWith("http") ? row.icon_url : `${process.env.REACT_APP_API_URL || ""}${row.icon_url}`}
+            src={
+              row.icon_url.startsWith("data:") ||
+              row.icon_url.startsWith("http") ||
+              row.icon_url.startsWith("/figma-assets/")
+                ? row.icon_url
+                : `${process.env.REACT_APP_API_URL || ""}${row.icon_url}`
+            }
             alt={row.icon_alt || row.card_title}
             className="h-10 w-10 object-cover rounded border"
           />

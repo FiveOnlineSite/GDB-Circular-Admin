@@ -62,6 +62,8 @@ import LifeAtGdbList from "./pages/Team/LifeAtGdb/LifeAtGdbList";
 import LifeAtGdbFormPage from "./pages/Team/LifeAtGdb/LifeAtGdbFormPage";
 // Sellers Page Management
 import AlwaysBuyingFormPage from "./pages/Sellers/AlwaysBuying/AlwaysBuyingFormPage";
+import SellerLogisticsPage from "./pages/Sellers/Logistics/SellerLogisticsPage";
+import SellerLogisticsCardFormPage from "./pages/Sellers/Logistics/SellerLogisticsCardFormPage";
 import FeedstockList from "./pages/Sellers/Feedstock/FeedstockList";
 import FeedstockFormPage from "./pages/Sellers/Feedstock/FeedstockFormPage";
 import SupplierInquiryList from "./pages/Sellers/Inquiries/SupplierInquiryList";
@@ -415,6 +417,16 @@ function App() {
           {/* We're Always Buying */}
           <Route path="/sellers/always-buying" element={
             <ProtectedRoute><MainLayout><PermissionRoute module="sellers" action="buying.view"><AlwaysBuyingFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          } />
+
+          <Route path="/sellers/logistics" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="sellers" action="logistics.view"><SellerLogisticsPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          } />
+          <Route path="/sellers/logistics/cards/create" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="sellers" action="logistics.create"><SellerLogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
+          } />
+          <Route path="/sellers/logistics/cards/edit/:id" element={
+            <ProtectedRoute><MainLayout><PermissionRoute module="sellers" action="logistics.update"><SellerLogisticsCardFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
           {/* Feedstock Catalogue */}

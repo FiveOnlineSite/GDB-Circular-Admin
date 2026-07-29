@@ -256,6 +256,15 @@ export const MenuItems = [
         action: 'buying.view'
       },
       {
+        title: 'Logistics',
+        icon: ShieldCheck,
+        url: '/sellers/logistics',
+        exact: true,
+        allowedRoles: [1, 2],
+        module: 'sellers',
+        action: 'logistics.view'
+      },
+      {
         title: 'Feedstock Catalogue',
         icon: Package,
         url: '/sellers/feedstock-catalogue',
