@@ -17,7 +17,7 @@ export default function WhyChooseCardFormPage() {
   const isEdit = Boolean(id);
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ card_title: "", card_description: "", file_url: "", alt_text: "", sequence: 0, status: "active" });
+  const [form, setForm] = useState({ card_title: "", card_description: "", file_url: "", cover_image_url: "", alt_text: "", sequence: 0, status: "active" });
 
   useEffect(() => {
     if (!isEdit) return;
@@ -27,7 +27,7 @@ export default function WhyChooseCardFormPage() {
         const res = await getWhyChooseCardById(id);
         if (res.success && res.data) {
           const d = res.data;
-          setForm({ card_title: d.card_title || "", card_description: d.card_description || "", file_url: d.file_url || "", alt_text: d.alt_text || "", sequence: d.sequence ?? 0, status: d.status || "active" });
+          setForm({ card_title: d.card_title || "", card_description: d.card_description || "", file_url: d.file_url || "", cover_image_url: d.cover_image_url || "", alt_text: d.alt_text || "", sequence: d.sequence ?? 0, status: d.status || "active" });
         } else { toast.error("Card not found"); navigate("/homepage-management/whychoose"); }
       } catch { toast.error("Failed to load"); navigate("/homepage-management/whychoose"); }
       finally { setPageLoading(false); }
@@ -120,7 +120,7 @@ export default function WhyChooseCardFormPage() {
 
           <div>
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
-              Image / Video Upload
+              Video / Primary Media Upload
             </label>
             <Upload
               value={form.file_url}
@@ -132,6 +132,21 @@ export default function WhyChooseCardFormPage() {
               maxSizeKB={500}
               maxSizeMB={50}
             />
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
+              Cover Image Upload
+            </label>
+            <Upload
+              value={form.cover_image_url}
+              onChange={(url) => {
+                setForm((prev) => ({ ...prev, cover_image_url: url }));
+              }}
+              mediaType="image"
+              accept="image/*"
+              maxSizeKB={500}
+            />
+            <p className="mt-1 text-xs text-slate-500">Shown while the card video is loading on the homepage.</p>
           </div>
         </div>
 

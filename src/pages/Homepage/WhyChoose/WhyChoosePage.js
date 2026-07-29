@@ -81,6 +81,16 @@ export default function WhyChoosePage() {
         return isVideo ? <video src={src} className="h-10 w-16 object-cover rounded border" muted /> : <img src={src} alt={row.alt_text || ""} className="h-10 w-16 object-cover rounded border" />;
       },
     },
+    {
+      field: "cover_image_url",
+      headerName: "Cover Image",
+      sortable: false,
+      renderCell: ({ row }) => {
+        if (!row.cover_image_url) return <span className="text-slate-400 text-xs">—</span>;
+        const src = row.cover_image_url.startsWith("data:") ? row.cover_image_url : `${process.env.REACT_APP_API_URL || ""}${row.cover_image_url}`;
+        return <img src={src} alt={row.alt_text || ""} className="h-10 w-16 object-cover rounded border" />;
+      },
+    },
     { field: "card_title", headerName: "Card Title", sortable: true },
     { field: "card_description", headerName: "Description", renderCell: ({ row }) => <span className="text-xs text-slate-500 line-clamp-2 max-w-xs">{row.card_description || "—"}</span> },
     { field: "sequence", headerName: "Seq", sortable: true },
