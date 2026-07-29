@@ -296,7 +296,7 @@ export default function ReusableDataTable({
                       column.align === 'right' && 'text-right',
                       column.align === 'center' && 'text-center',
                       column.sticky === 'right' &&
-                        'sticky right-0 z-40 bg-white dark:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
+                        'sticky right-0 z-10 bg-white dark:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
                       'whitespace-nowrap',
                       column.cellClassName,
                       column.headerClassName,
@@ -363,7 +363,7 @@ export default function ReusableDataTable({
                             column.align === 'right' && 'text-right',
                             column.align === 'center' && 'text-center',
                             column.sticky === 'right' &&
-                              'sticky right-0 z-30 bg-white dark:bg-gray-900 group-hover:bg-white dark:group-hover:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
+                              'sticky right-0 z-10 bg-white dark:bg-gray-900 group-hover:bg-white dark:group-hover:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
                             column.field === 'actions' && 'whitespace-nowrap',
                             column.cellClassName,
                           )}

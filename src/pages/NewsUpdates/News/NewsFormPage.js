@@ -33,6 +33,7 @@ export default function NewsFormPage() {
     short_description: "",
     image_url: "",
     image_alt: "",
+    logo_url: "",
     external_url: "",
     featured_homepage: 0,
     publish_status: "draft",
@@ -70,6 +71,7 @@ export default function NewsFormPage() {
             short_description: d.short_description || "",
             image_url: d.image_url || "",
             image_alt: d.image_alt || "",
+            logo_url: d.logo_url || "",
             external_url: d.external_url || "",
             featured_homepage: d.featured_homepage ?? 0,
             publish_status: d.publish_status || "draft",
@@ -263,6 +265,20 @@ export default function NewsFormPage() {
           <div>
             <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text <span className="text-red-500">*</span></label>
             <Input name="image_alt" value={form.image_alt} onChange={handleChange} placeholder="Describe the image" disabled={isView} error={!!errors.image_alt} errorMessage={errors.image_alt} />
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Publisher / Brand Logo</label>
+            <Upload
+              value={form.logo_url}
+              onChange={(url) => {
+                setForm((prev) => ({ ...prev, logo_url: url }));
+              }}
+              mediaType="image"
+              accept="image/*"
+              maxSizeKB={500}
+              disabled={isView}
+            />
+            <p className="mt-1 text-xs text-slate-500">Optional. This logo will appear at the bottom-right of the news card on the frontend.</p>
           </div>
         </div>
 
