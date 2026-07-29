@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
@@ -9,13 +9,20 @@ import Upload from "../../../components/common/Upload";
 import { getSeoById, createSeo, updateSeo } from "../../../services/globalContent/seo";
 
 const PAGES = [
+  "global",
   "home",
   "about",
+  "about-us",
   "contact",
   "services",
   "products",
   "blog",
+  "news-events",
   "faq",
+  "facilities",
+  "seller",
+  "teams",
+  "casestudy",
   "careers",
   "privacy-policy",
   "terms-conditions",
@@ -40,6 +47,67 @@ const SCHEMA_TYPES = [
 
 const formStyle =
   "w-full cursor-pointer border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+
+const createEmptySchemaEntry = () => ({
+  schema_type: "",
+  schema_json: "",
+});
+
+function parseSchemaEntries(schemaType, schemaJson) {
+  const trimmedJson = schemaJson?.trim();
+
+  if (!trimmedJson) {
+    return [createEmptySchemaEntry()];
+  }
+
+  try {
+    const parsed = JSON.parse(trimmedJson);
+    const items = Array.isArray(parsed) ? parsed : [parsed];
+    const parsedEntries = items.map((item, index) => ({
+      schema_type:
+        item && typeof item === "object" && !Array.isArray(item)
+          ? item["@type"] || ""
+          : index === 0
+            ? schemaType || ""
+            : "",
+      schema_json: JSON.stringify(item, null, 2),
+    }));
+
+    return parsedEntries.length ? parsedEntries : [createEmptySchemaEntry()];
+  } catch (_) {
+    return [
+      {
+        schema_type: schemaType || "",
+        schema_json: trimmedJson,
+      },
+    ];
+  }
+}
+
+function buildSchemaPayload(entries) {
+  const normalizedEntries = entries
+    .map((entry) => ({
+      schema_type: entry.schema_type.trim(),
+      schema_json: entry.schema_json.trim(),
+    }))
+    .filter((entry) => entry.schema_type || entry.schema_json);
+
+  if (!normalizedEntries.length) {
+    return { schema_type: "", schema_json: "" };
+  }
+
+  const parsedItems = normalizedEntries.map((entry) => JSON.parse(entry.schema_json));
+  const schemaTypes = [...new Set(normalizedEntries.map((entry) => entry.schema_type).filter(Boolean))].join(", ");
+  const serializedJson =
+    parsedItems.length === 1
+      ? JSON.stringify(parsedItems[0], null, 2)
+      : JSON.stringify(parsedItems, null, 2);
+
+  return {
+    schema_type: schemaTypes,
+    schema_json: serializedJson,
+  };
+}
 
 export default function SeoFormPage() {
   const navigate = useNavigate();
@@ -66,6 +134,7 @@ export default function SeoFormPage() {
     schema_json: "",
     status: "active",
   });
+  const [schemaEntries, setSchemaEntries] = useState([createEmptySchemaEntry()]);
 
   useEffect(() => {
     if (isEdit) {
@@ -92,6 +161,7 @@ export default function SeoFormPage() {
               schema_json: d.schema_json || "",
               status: d.status || "active",
             });
+            setSchemaEntries(parseSchemaEntries(d.schema_type || "", d.schema_json || ""));
           } else {
             toast.error("SEO entry not found");
             navigate("/global-content/seo");
@@ -121,6 +191,34 @@ export default function SeoFormPage() {
     }
   };
 
+  const handleSchemaEntryChange = (index, key, value) => {
+    setSchemaEntries((prev) =>
+      prev.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [key]: value } : entry
+      )
+    );
+
+    if (errors.schema_json) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.schema_json;
+        return next;
+      });
+    }
+  };
+
+  const addSchemaEntry = () => {
+    setSchemaEntries((prev) => [...prev, createEmptySchemaEntry()]);
+  };
+
+  const removeSchemaEntry = (index) => {
+    setSchemaEntries((prev) =>
+      prev.length === 1
+        ? [createEmptySchemaEntry()]
+        : prev.filter((_, entryIndex) => entryIndex !== index)
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -137,11 +235,19 @@ export default function SeoFormPage() {
     if (form.og_image && !form.og_image_alt.trim()) {
       newErrors.og_image_alt = "OG image alt text is required when an image is uploaded";
     }
-    if (form.schema_json.trim()) {
+    const activeSchemaEntries = schemaEntries.filter(
+      (entry) => entry.schema_type.trim() || entry.schema_json.trim()
+    );
+    for (const entry of activeSchemaEntries) {
+      if (!entry.schema_json.trim()) {
+        newErrors.schema_json = "Each schema entry must include valid JSON";
+        break;
+      }
       try {
-        JSON.parse(form.schema_json);
+        JSON.parse(entry.schema_json);
       } catch (_) {
-        newErrors.schema_json = "Schema JSON must be valid JSON";
+        newErrors.schema_json = "Each schema entry must contain valid JSON";
+        break;
       }
     }
 
@@ -152,18 +258,21 @@ export default function SeoFormPage() {
 
     try {
       setSubmitting(true);
+      const schemaPayload = buildSchemaPayload(schemaEntries);
       const res = isEdit
         ? await updateSeo(id, {
             ...form,
             canonical_url: form.canonical_url.trim(),
             og_image_alt: form.og_image_alt.trim(),
-            schema_json: form.schema_json.trim(),
+            schema_type: schemaPayload.schema_type,
+            schema_json: schemaPayload.schema_json,
           })
         : await createSeo({
             ...form,
             canonical_url: form.canonical_url.trim(),
             og_image_alt: form.og_image_alt.trim(),
-            schema_json: form.schema_json.trim(),
+            schema_type: schemaPayload.schema_type,
+            schema_json: schemaPayload.schema_json,
           });
       if (res.success) {
         toast.success(isEdit ? "SEO entry updated successfully" : "SEO entry created successfully");
@@ -447,42 +556,72 @@ export default function SeoFormPage() {
 
         {/* Schema */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
-            Schema Markup
-          </h2>
-
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-              Schema Type
-            </label>
-              <select
-                name="schema_type"
-                value={form.schema_type}
-                onChange={handleChange}
-                aria-invalid="false"
-                className={formStyle}
-              >
-              <option value="">Select Schema Type</option>
-              {SCHEMA_TYPES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+          <div className="flex items-center justify-between border-b pb-3">
+            <h2 className="text-base font-semibold text-slate-700 dark:text-white">
+              Schema Markup
+            </h2>
+            <Button type="button" variant="outline" onClick={addSchemaEntry}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Schema
+            </Button>
           </div>
 
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-              Schema JSON
-            </label>
-            <Textarea
-              name="schema_json"
-              value={form.schema_json}
-              onChange={handleChange}
-              placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Organization"\n}'}
-              rows={6}
-              className="font-mono text-xs"
-              error={!!errors.schema_json}
-              errorMessage={errors.schema_json}
-            />
+          <div className="space-y-4">
+            {schemaEntries.map((entry, index) => (
+              <div key={index} className="rounded-xl border border-slate-200 dark:border-gray-700 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-white">
+                    Schema {index + 1}
+                  </h3>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeSchemaEntry(index)}
+                    disabled={schemaEntries.length === 1}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Remove
+                  </Button>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                    Schema Type
+                  </label>
+                  <select
+                    value={entry.schema_type}
+                    onChange={(e) => handleSchemaEntryChange(index, "schema_type", e.target.value)}
+                    aria-invalid="false"
+                    className={formStyle}
+                  >
+                    <option value="">Select Schema Type</option>
+                    {SCHEMA_TYPES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                    Schema JSON
+                  </label>
+                  <Textarea
+                    value={entry.schema_json}
+                    onChange={(e) => handleSchemaEntryChange(index, "schema_json", e.target.value)}
+                    placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Organization"\n}'}
+                    rows={6}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+            ))}
+
+            {errors.schema_json ? (
+              <span className="text-red-500 text-xs font-semibold block text-left">
+                {errors.schema_json}
+              </span>
+            ) : null}
           </div>
         </div>
 
