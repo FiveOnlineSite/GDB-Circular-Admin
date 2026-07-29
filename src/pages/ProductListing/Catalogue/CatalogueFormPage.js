@@ -112,10 +112,10 @@ export default function CatalogueFormPage() {
         image_alt: form.image_alt.trim(),
         grade_no: form.grade_no.trim(),
         color: form.color.trim(),
-        density_g_cm3: form.density_g_cm3 === "" ? null : Number(form.density_g_cm3),
-        mfi_g_10min: form.mfi_g_10min === "" ? null : Number(form.mfi_g_10min),
-        ash_percent: form.ash_percent === "" ? null : Number(form.ash_percent),
-        pcr_content_percent: form.pcr_content_percent === "" ? null : Number(form.pcr_content_percent),
+        density_g_cm3: form.density_g_cm3.trim(),
+        mfi_g_10min: form.mfi_g_10min.trim(),
+        ash_percent: form.ash_percent.trim(),
+        pcr_content_percent: form.pcr_content_percent.trim(),
         sequence: Number(form.sequence),
         show_on_homepage: form.show_on_homepage ? 1 : 0,
         fda_lno: form.fda_lno ? 1 : 0,
@@ -180,19 +180,19 @@ export default function CatalogueFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Density (g/cm3)</label>
-              <Input type="number" step="0.0001" name="density_g_cm3" value={form.density_g_cm3} onChange={handle} disabled={isView} />
+              <Input name="density_g_cm3" value={form.density_g_cm3} onChange={handle} placeholder="e.g. 0.910 - 0.935" disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">MFI (g/10min)</label>
-              <Input type="number" step="0.0001" name="mfi_g_10min" value={form.mfi_g_10min} onChange={handle} disabled={isView} />
+              <Input name="mfi_g_10min" value={form.mfi_g_10min} onChange={handle} placeholder="e.g. 1.50 - 2.30" disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Ash (%)</label>
-              <Input type="number" step="0.0001" name="ash_percent" value={form.ash_percent} onChange={handle} disabled={isView} />
+              <Input name="ash_percent" value={form.ash_percent} onChange={handle} placeholder="e.g. < 1.0%" disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">PCR Content (%)</label>
-              <Input type="number" step="0.01" name="pcr_content_percent" value={form.pcr_content_percent} onChange={handle} disabled={isView} />
+              <Input name="pcr_content_percent" value={form.pcr_content_percent} onChange={handle} placeholder="e.g. 100%" disabled={isView} />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
