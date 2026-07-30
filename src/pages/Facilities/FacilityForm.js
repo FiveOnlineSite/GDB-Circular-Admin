@@ -88,8 +88,6 @@ export default function FacilityForm() {
       if (!form.address.trim()) newErrors.address = "Address is required";
       if (!form.phone.trim()) newErrors.phone = "Phone is required";
       if (!form.state.trim()) newErrors.state = "State is required";
-      if (!form.latitude.trim()) newErrors.latitude = "Latitude is required";
-      if (!form.longitude.trim()) newErrors.longitude = "Longitude is required";
       if (!form.image_url) newErrors.image_url = "Image Upload is required";
     }
 
@@ -186,11 +184,11 @@ export default function FacilityForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude {!form.is_development && <span className="text-red-500">*</span>}</label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude</label>
               <Input value={form.latitude} onChange={(e) => updateField("latitude", e.target.value)} error={!!errors.latitude} errorMessage={errors.latitude} disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude {!form.is_development && <span className="text-red-500">*</span>}</label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude</label>
               <Input value={form.longitude} onChange={(e) => updateField("longitude", e.target.value)} error={!!errors.longitude} errorMessage={errors.longitude} disabled={isView} />
             </div>
           </div>
