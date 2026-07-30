@@ -11,21 +11,14 @@ import { getSeoById, createSeo, updateSeo } from "../../../services/globalConten
 const PAGES = [
   "global",
   "home",
-  "about",
   "about-us",
-  "contact",
-  "services",
-  "products",
-  "blog",
-  "news-events",
-  "faq",
   "facilities",
+  "products",
   "seller",
   "teams",
-  "casestudy",
-  "careers",
+  "news-events",
   "privacy-policy",
-  "terms-conditions",
+  "case-study"
 ];
 
 const ROBOTS_OPTIONS = [
@@ -55,23 +48,39 @@ const createEmptySchemaEntry = () => ({
 
 function parseSchemaEntries(schemaType, schemaJson) {
   const trimmedJson = schemaJson?.trim();
+  const savedSchemaTypes =
+    typeof schemaType === "string"
+      ? schemaType
+          .split(",")
+          .map((type) => type.trim())
+          .filter(Boolean)
+      : [];
 
   if (!trimmedJson) {
-    return [createEmptySchemaEntry()];
+    return [
+      {
+        schema_type: savedSchemaTypes[0] || "",
+        schema_json: "",
+      },
+    ];
   }
 
   try {
     const parsed = JSON.parse(trimmedJson);
     const items = Array.isArray(parsed) ? parsed : [parsed];
-    const parsedEntries = items.map((item, index) => ({
-      schema_type:
-        item && typeof item === "object" && !Array.isArray(item)
-          ? item["@type"] || ""
-          : index === 0
-            ? schemaType || ""
-            : "",
-      schema_json: JSON.stringify(item, null, 2),
-    }));
+    const parsedEntries = items.map((item, index) => {
+      const jsonSchemaType =
+        item && typeof item === "object" && !Array.isArray(item) && typeof item["@type"] === "string"
+          ? item["@type"]
+          : "";
+      const savedSchemaType =
+        savedSchemaTypes[index] || (savedSchemaTypes.length === 1 ? savedSchemaTypes[0] : "");
+
+      return {
+        schema_type: savedSchemaType || jsonSchemaType,
+        schema_json: JSON.stringify(item, null, 2),
+      };
+    });
 
     return parsedEntries.length ? parsedEntries : [createEmptySchemaEntry()];
   } catch (_) {
