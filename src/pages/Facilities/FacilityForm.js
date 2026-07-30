@@ -13,6 +13,7 @@ const FACILITY_TYPES = ["GDB International", "GDB Circular", "GDB Paint & Coatin
 const INITIAL_FORM = {
   facility_name: "",
   facility_type: "GDB Circular",
+  is_development: false,
   address: "",
   phone: "",
   state: "",
@@ -44,6 +45,7 @@ export default function FacilityForm() {
         setForm({
           facility_name: facility.facility_name || "",
           facility_type: facility.facility_type || "GDB Circular",
+          is_development: Boolean(facility.is_development),
           address: facility.address || "",
           phone: facility.phone || "",
           state: facility.state || "",
@@ -61,13 +63,18 @@ export default function FacilityForm() {
 
   const updateField = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+
+      if (field === "is_development" && value) {
+        ["address", "phone", "state", "latitude", "longitude", "image_url"].forEach(
+          (optionalField) => delete next[optionalField]
+        );
+      }
+
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -77,12 +84,14 @@ export default function FacilityForm() {
     const newErrors = {};
     if (!form.facility_name.trim()) newErrors.facility_name = "Facility name is required";
     if (!form.facility_type.trim()) newErrors.facility_type = "Facility type is required";
-    if (!form.address.trim()) newErrors.address = "Address is required";
-    if (!form.phone.trim()) newErrors.phone = "Phone is required";
-    if (!form.state.trim()) newErrors.state = "State is required";
-    if (!form.latitude.trim()) newErrors.latitude = "Latitude is required";
-    if (!form.longitude.trim()) newErrors.longitude = "Longitude is required";
-    if (!form.image_url) newErrors.image_url = "Image Upload is required";
+    if (!form.is_development) {
+      if (!form.address.trim()) newErrors.address = "Address is required";
+      if (!form.phone.trim()) newErrors.phone = "Phone is required";
+      if (!form.state.trim()) newErrors.state = "State is required";
+      if (!form.latitude.trim()) newErrors.latitude = "Latitude is required";
+      if (!form.longitude.trim()) newErrors.longitude = "Longitude is required";
+      if (!form.image_url) newErrors.image_url = "Image Upload is required";
+    }
 
     const mobileRegex = /^\+?[\d\s()-]{8,20}$/;
     if (form.phone.trim() && !mobileRegex.test(form.phone.trim())) {
@@ -99,6 +108,7 @@ export default function FacilityForm() {
       const payload = {
         ...form,
         facility_name: form.facility_name.trim(),
+        is_development: Boolean(form.is_development),
         address: form.address.trim(),
         phone: form.phone.trim(),
         state: form.state.trim(),
@@ -145,29 +155,42 @@ export default function FacilityForm() {
             </div>
           </div>
 
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-4">
+            <input
+              type="checkbox"
+              checked={form.is_development}
+              onChange={(e) => updateField("is_development", e.target.checked)}
+              disabled={isView}
+              className="mt-0.5 h-4 w-4 accent-[#981B1F] disabled:opacity-55"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-slate-700">In Development</span>
+            </span>
+          </label>
+
           <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Address <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600 block mb-1">Address {!form.is_development && <span className="text-red-500">*</span>}</label>
             <Textarea value={form.address} onChange={(e) => updateField("address", e.target.value)} error={!!errors.address} errorMessage={errors.address} disabled={isView} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Phone <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Phone {!form.is_development && <span className="text-red-500">*</span>}</label>
               <Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">State <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">State {!form.is_development && <span className="text-red-500">*</span>}</label>
               <Input value={form.state} onChange={(e) => updateField("state", e.target.value)} error={!!errors.state} errorMessage={errors.state} disabled={isView} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Latitude {!form.is_development && <span className="text-red-500">*</span>}</label>
               <Input value={form.latitude} onChange={(e) => updateField("latitude", e.target.value)} error={!!errors.latitude} errorMessage={errors.latitude} disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Longitude {!form.is_development && <span className="text-red-500">*</span>}</label>
               <Input value={form.longitude} onChange={(e) => updateField("longitude", e.target.value)} error={!!errors.longitude} errorMessage={errors.longitude} disabled={isView} />
             </div>
           </div>
@@ -178,7 +201,7 @@ export default function FacilityForm() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image Upload <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image Upload {!form.is_development && <span className="text-red-500">*</span>}</label>
             <Upload value={form.image_url} onChange={(url) => updateField("image_url", url)} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
             {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
           </div>
