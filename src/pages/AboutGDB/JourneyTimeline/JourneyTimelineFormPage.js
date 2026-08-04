@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import Upload from "../../../components/common/Upload";
 import { Textarea } from "../../../components/ui/textarea";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import {
   getJourneyTimelineItemById,
   createJourneyTimelineItem,
@@ -220,6 +221,15 @@ export default function JourneyTimelineFormPage() {
         </div>
 
         <div className="flex gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="about.timeline.delete"
+            endpoint={`/about-gdb/journey-timeline/items/${id}`}
+            redirectTo="/about-gdb/journey-timeline"
+            title="Delete Timeline Item"
+            message="Are you sure you want to delete this timeline item? This action cannot be undone."
+            successMessage="Timeline item deleted"
+          />
           <Button type="submit" disabled={submitting} className="bg-[#981B1F] hover:bg-[#7a1619] text-white gap-2">
             {submitting ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : <><Save className="w-4 h-4" />{isEdit ? "Update Item" : "Create Item"}</>}
           </Button>

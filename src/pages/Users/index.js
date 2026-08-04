@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Search } from "lucide-react";
+import { Plus, Edit2, Search } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
-import { getUsers, deleteUser, updateUserStatus } from "../../services/user";
+import { getUsers, updateUserStatus } from "../../services/user";
 import { usePermissionContext } from "../../context/PermissionContext";
 
 export default function UserManagement() {
@@ -25,10 +24,6 @@ export default function UserManagement() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [sortConfig, setSortConfig] = useState({ sortBy: "id", sortOrder: "desc" });
-
-  // Modals state
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   const fetchUsers = React.useCallback(async () => {
     try {
@@ -80,24 +75,6 @@ export default function UserManagement() {
       navigate(`/users/edit/${user.id}`);
     } else {
       navigate("/users/create");
-    }
-  };
-
-  const handleOpenDeleteModal = (user) => {
-    setSelectedUser(user);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteUser(selectedUser.id);
-      if (res.success) {
-        toast.success("User deleted successfully");
-        setDeleteModalOpen(false);
-        fetchUsers();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
     }
   };
 
@@ -189,16 +166,6 @@ export default function UserManagement() {
                 <Edit2 className="h-4 w-4 text-[#C3662D]" />
               </Button>
             )}
-            {hasPermission("user.delete") && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-                onClick={() => handleOpenDeleteModal(userItem)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            )}
           </div>
         );
       }
@@ -262,14 +229,6 @@ export default function UserManagement() {
       </div>
 
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete User"
-        message={`Are you sure you want to delete user "${selectedUser?.name}"? This action cannot be undone.`}
-      />
     </div>
   );
 }

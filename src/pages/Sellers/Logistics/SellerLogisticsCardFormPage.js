@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import Upload from "../../../components/common/Upload";
 import { Textarea } from "../../../components/ui/textarea";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import {
   createSellerLogisticsCard,
   getSellerLogisticsCardById,
@@ -149,6 +150,15 @@ export default function SellerLogisticsCardFormPage() {
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="seller.logistics.delete"
+            endpoint={`/sellers/logistics/cards/${id}`}
+            redirectTo="/sellers/logistics"
+            title="Delete Card"
+            message="Are you sure you want to delete this logistics card?"
+            successMessage="Card deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/sellers/logistics")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Card" : "Create Card"}</>}

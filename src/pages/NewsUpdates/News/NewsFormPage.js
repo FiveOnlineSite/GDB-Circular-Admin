@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getNewsById, createNews, updateNews } from "../../../services/news/newsService";
 import { getCategories } from "../../../services/news/newsCategoryService";
 
@@ -283,6 +284,15 @@ export default function NewsFormPage() {
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="news.content.delete"
+            endpoint={`/news/${id}`}
+            redirectTo="/news-updates"
+            title="Delete News Article"
+            message="Are you sure you want to delete this news article? This action cannot be undone."
+            successMessage="News article deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/news-updates")}>{isView ? "Back" : "Cancel"}</Button>
           {!isView && (
             <Button type="submit" disabled={submitting} className="bg-[#981B1F] hover:bg-[#C3662D] text-white shadow-sm transition-colors">

@@ -4,7 +4,7 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { getRoles } from "../../services/role";
 
-export default function UserForm({ user = null, onClose, onSuccess }) {
+export default function UserForm({ user = null, onClose, onSuccess, deleteAction = null }) {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -287,6 +287,7 @@ export default function UserForm({ user = null, onClose, onSuccess }) {
       </div>
 
       <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+        {deleteAction}
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>

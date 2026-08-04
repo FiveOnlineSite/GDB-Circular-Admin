@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import EditPageDeleteAction from "../../components/common/EditPageDeleteAction";
 import UserForm from "./UserForm";
 import { getUserById, createUser, updateUser } from "../../services/user";
 
@@ -89,6 +90,17 @@ export default function UserFormPage() {
           user={user}
           onClose={() => navigate("/users")}
           onSuccess={handleFormSuccess}
+          deleteAction={(
+            <EditPageDeleteAction
+              id={id}
+              permission="user.delete"
+              endpoint={`/users/${id}`}
+              redirectTo="/users"
+              title="Delete User"
+              message="Are you sure you want to delete this user? This action cannot be undone."
+              successMessage="User deleted successfully"
+            />
+          )}
         />
       </div>
     </div>

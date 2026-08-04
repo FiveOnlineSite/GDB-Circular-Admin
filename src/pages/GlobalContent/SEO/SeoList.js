@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import { getSeoList, deleteSeo } from "../../../services/globalContent/seo";
+import { getSeoList } from "../../../services/globalContent/seo";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 export default function SeoList() {
@@ -21,8 +20,6 @@ export default function SeoList() {
     last_page: 1,
   });
 
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -48,21 +45,6 @@ export default function SeoList() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteSeo(selectedItem.id);
-      if (res.success) {
-        toast.success("SEO entry deleted successfully");
-        fetchData();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete SEO entry");
-    } finally {
-      setDeleteModalOpen(false);
-      setSelectedItem(null);
-    }
-  };
 
   const columns = [
     {
@@ -114,19 +96,6 @@ export default function SeoList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("globalContent", "seo.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => {
-                setSelectedItem(row);
-                setDeleteModalOpen(true);
-              }}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -171,19 +140,6 @@ export default function SeoList() {
         emptyMessage="No SEO entries found. Click 'Add New' to create one."
       />
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedItem(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete SEO Entry"
-        message={`Are you sure you want to delete the SEO entry for "${selectedItem?.page}"? This action cannot be undone.`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

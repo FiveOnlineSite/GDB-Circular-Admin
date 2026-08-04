@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Search, X, Eye } from "lucide-react";
+import { Plus, Edit2, Search, X, Eye } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import { getCaseStudies, deleteCaseStudy } from "../../../services/productListing";
+import { getCaseStudies } from "../../../services/productListing";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
@@ -19,8 +18,6 @@ export default function CaseStudyList() {
   const [pagination, setPagination] = useState({ current_page: 1, per_page: 10, total: 0, last_page: 1 });
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selected, setSelected] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -35,14 +32,6 @@ export default function CaseStudyList() {
   }, [search, statusFilter, pagination.current_page, pagination.per_page]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
-
-  const handleDelete = async () => {
-    try {
-      const res = await deleteCaseStudy(selected.id);
-      if (res.success) { toast.success("Case study deleted"); fetchData(); }
-    } catch (err) { toast.error(err.response?.data?.message || "Delete failed"); }
-    finally { setDeleteModal(false); setSelected(null); }
-  };
 
   const selectStyle = "border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
 
@@ -91,17 +80,6 @@ export default function CaseStudyList() {
               title="Edit"
             >
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
-          )}
-          {hasPermission("product", "casestudy.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelected(row); setDeleteModal(true); }}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           )}
         </div>
@@ -155,15 +133,6 @@ export default function CaseStudyList() {
         emptyMessage="No case studies found. Click 'Add Case Study' to create one."
       />
 
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => { setDeleteModal(false); setSelected(null); }}
-        onConfirm={handleDelete}
-        title="Delete Case Study"
-        message={`Delete "${selected?.title}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Save, Loader2, GitBranch } from "lucide-react";
+import { Plus, Edit2, Save, Loader2, GitBranch } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import {
   getProcessSection, updateProcessSection,
-  getProcessSteps, deleteProcessStep,
 } from "../../../services/homepage";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -23,8 +21,6 @@ export default function ProcessPage() {
 
   const [stepsLoading, setStepsLoading] = useState(false);
   const [steps, setSteps] = useState([]);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedStep, setSelectedStep] = useState(null);
 
   const loadAll = async () => {
     try {
@@ -59,30 +55,6 @@ export default function ProcessPage() {
       toast.error(err.response?.data?.message || "Save failed");
     } finally {
       setSectionSaving(false);
-    }
-  };
-
-  const reloadSteps = async () => {
-    try {
-      setStepsLoading(true);
-      const res = await getProcessSteps();
-      if (res.success) setSteps(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      toast.error("Failed to reload steps");
-    } finally {
-      setStepsLoading(false);
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteProcessStep(selectedStep.id);
-      if (res.success) { toast.success("Step deleted"); reloadSteps(); }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelectedStep(null);
     }
   };
 
@@ -132,16 +104,6 @@ export default function ProcessPage() {
               onClick={() => navigate(`/homepage-management/process/steps/edit/${row.id}`)}
             >
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
-          )}
-          {hasPermission("homepage", "process.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelectedStep(row); setDeleteModal(true); }}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           )}
         </div>
@@ -199,15 +161,6 @@ export default function ProcessPage() {
         <ReusableDataTable columns={columns} rows={steps} loading={stepsLoading} emptyMessage="No steps added yet. Click 'Add Step' to create one." />
       </div>
 
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => { setDeleteModal(false); setSelectedStep(null); }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Process Step"
-        message={`Are you sure you want to delete "${selectedStep?.step_title}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

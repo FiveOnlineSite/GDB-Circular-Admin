@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Eye, Check, X, Search, CalendarDays } from "lucide-react";
+import { Plus, Edit2, Eye, Check, X, Search, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/DeleteConfirmationModal";
-import { getNews, deleteNews, toggleNewsPublish } from "../../../services/news/newsService";
+import { getNews, toggleNewsPublish } from "../../../services/news/newsService";
 import { getCategories } from "../../../services/news/newsCategoryService";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -23,7 +22,6 @@ export default function NewsList() {
 
   const canCreate = hasPermission("news", "content.create");
   const canUpdate = hasPermission("news", "content.update");
-  const canDelete = hasPermission("news", "content.delete");
   const canPublish = hasPermission("news", "content.publish");
 
   const [rows, setRows] = useState([]);
@@ -42,8 +40,6 @@ export default function NewsList() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   // Fetch Categories for Filter Dropdown
   useEffect(() => {
@@ -151,26 +147,6 @@ export default function NewsList() {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update publish status");
-    }
-  };
-
-  const handleDeleteClick = (item) => {
-    setSelectedItem(item);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteNews(selectedItem.id);
-      if (res.success) {
-        toast.success("News article deleted successfully");
-        fetchNewsList();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete news article");
-    } finally {
-      setDeleteModalOpen(false);
-      setSelectedItem(null);
     }
   };
 
@@ -300,17 +276,6 @@ export default function NewsList() {
               {row.publish_status === "published" ? "Make Draft" : "Publish"}
             </Button>
           )}
-          {canDelete && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => handleDeleteClick(row)}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -433,17 +398,6 @@ export default function NewsList() {
         />
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedItem(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete News Article"
-        message={`Are you sure you want to delete the article "${selectedItem?.title}"? This action cannot be undone.`}
-      />
     </div>
   );
 }

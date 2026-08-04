@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import { getBanners, deleteBanner } from "../../../services/globalContent/banners";
+import { getBanners } from "../../../services/globalContent/banners";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 export default function BannerList() {
@@ -13,8 +12,6 @@ export default function BannerList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -31,18 +28,6 @@ export default function BannerList() {
   };
 
   useEffect(() => { fetchData(); }, []);
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteBanner(selectedItem.id);
-      if (res.success) { toast.success("Banner deleted"); fetchData(); }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelectedItem(null);
-    }
-  };
 
   const columns = [
     { field: "page", headerName: "Page", sortable: true },
@@ -62,7 +47,6 @@ export default function BannerList() {
         );
       },
     },
-    { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "status",
       headerName: "Status",
@@ -90,16 +74,6 @@ export default function BannerList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("globalContent", "banner.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelectedItem(row); setDeleteModal(true); }}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -119,15 +93,6 @@ export default function BannerList() {
         )}
       </div>
       <ReusableDataTable columns={columns} rows={rows} loading={loading} emptyMessage="No banners found. Click 'Add Banner' to create one." />
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => { setDeleteModal(false); setSelectedItem(null); }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Banner"
-        message={`Are you sure you want to delete "${selectedItem?.title}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

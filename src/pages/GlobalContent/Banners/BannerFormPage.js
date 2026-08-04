@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { Input } from "../../../components/ui/input";
 import { createBanner, updateBanner, getBannerById } from "../../../services/globalContent/banners";
 
@@ -21,7 +22,6 @@ export default function BannerFormPage() {
     title: "",
     file_url: "",
     alt_text: "",
-    sequence: 0,
     status: "active",
   });
   const [errors, setErrors] = useState({});
@@ -39,7 +39,6 @@ export default function BannerFormPage() {
             title: d.title || "",
             file_url: d.file_url || "",
             alt_text: d.alt_text || "",
-            sequence: d.sequence ?? 0,
             status: d.status || "active",
           });
         } else {
@@ -74,9 +73,6 @@ export default function BannerFormPage() {
     if (!form.page) newErrors.page = "Page is required";
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.file_url) newErrors.file_url = "Background image/video is required";
-    if (String(form.sequence).trim() !== "" && Number(form.sequence) < 0) {
-      newErrors.sequence = "Sequence must be 0 or greater";
-    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -89,7 +85,6 @@ export default function BannerFormPage() {
         ...form,
         title: form.title.trim(),
         alt_text: form.alt_text.trim(),
-        sequence: Number(form.sequence),
       };
       const res = isEdit ? await updateBanner(id, payload) : await createBanner(payload);
       if (res.success) {
@@ -146,10 +141,6 @@ export default function BannerFormPage() {
               <Input name="alt_text" value={form.alt_text} onChange={handleChange} placeholder="Describe the banner image/video" />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handleChange} error={!!errors.sequence} errorMessage={errors.sequence} />
-            </div>
-            <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handleChange} className={`${fieldStyle} cursor-pointer`}>
                 <option value="active">Active</option>
@@ -175,6 +166,15 @@ export default function BannerFormPage() {
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="global.banner.delete"
+            endpoint={`/global-content/banners/${id}`}
+            redirectTo="/global-content/banners"
+            title="Delete Banner"
+            message="Are you sure you want to delete this banner?"
+            successMessage="Banner deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/global-content/banners")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Banner" : "Create Banner"}</>}

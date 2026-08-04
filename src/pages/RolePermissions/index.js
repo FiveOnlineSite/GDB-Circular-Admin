@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Key, CheckSquare, Square } from "lucide-react";
+import { Plus, Edit2, Key, CheckSquare, Square } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
+import EditPageDeleteAction from "../../components/common/EditPageDeleteAction";
 import { getRoles, createRole, updateRole, deleteRole, assignPermissionsToRole } from "../../services/role";
 import { getPermissions } from "../../services/permission";
 import { usePermissionContext } from "../../context/PermissionContext";
@@ -17,7 +17,6 @@ export default function RolePermissions() {
   
   // Modals state
   const [roleModalOpen, setRoleModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
   
   // Active/selected item states
@@ -109,24 +108,6 @@ export default function RolePermissions() {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Role submit failed");
-    }
-  };
-
-  const handleOpenDeleteModal = (role) => {
-    setSelectedRole(role);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteRole(selectedRole.id);
-      if (res.success) {
-        toast.success("Role deleted successfully");
-        setDeleteModalOpen(false);
-        fetchRoles();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
     }
   };
 
@@ -236,16 +217,6 @@ export default function RolePermissions() {
                 <Edit2 className="h-4 w-4 text-[#C3662D]" />
               </Button>
             )}
-            {!isSuperAdmin && hasPermission("role.delete") && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-                onClick={() => handleOpenDeleteModal(role)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            )}
           </div>
         );
       }
@@ -316,6 +287,18 @@ export default function RolePermissions() {
                 </div>
               </div>
               <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+                <EditPageDeleteAction
+                  id={selectedRole?.id}
+                  permission="role.delete"
+                  onDelete={() => deleteRole(selectedRole.id)}
+                  onDeleted={() => {
+                    setRoleModalOpen(false);
+                    fetchRoles();
+                  }}
+                  title="Delete Role"
+                  message={`Are you sure you want to delete the role "${selectedRole?.name}"? This action cannot be undone.`}
+                  successMessage="Role deleted successfully"
+                />
                 <Button type="button" variant="outline" onClick={() => setRoleModalOpen(false)}>
                   Cancel
                 </Button>
@@ -423,14 +406,6 @@ export default function RolePermissions() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Role"
-        message={`Are you sure you want to delete the role "${selectedRole?.name}"? This action cannot be undone.`}
-      />
     </div>
   );
 }

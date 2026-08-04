@@ -238,6 +238,10 @@ export default function ReusableDataTable({
   const isAllSelected = rows.length > 0 && selected.length === rows.length;
   const isSomeSelected = selected.length > 0 && selected.length < rows.length;
   const getColumnStyle = (column) => {
+    if (column.field === 'actions') {
+      return { width: 'auto' };
+    }
+
     if (column.sticky === 'right') {
       const stickyWidth = column.minWidth || column.width || 180;
       return {

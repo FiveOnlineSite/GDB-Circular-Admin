@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import Upload from "../../components/common/Upload";
+import EditPageDeleteAction from "../../components/common/EditPageDeleteAction";
 import {
   getFacilitiesWhatWeDoCardById,
   createFacilitiesWhatWeDoCard,
@@ -155,6 +156,15 @@ export default function WhatWeDoCardForm() {
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="facilities.whatwedo.delete"
+            endpoint={`/facilities/what-we-do/cards/${id}`}
+            redirectTo="/facilities/what-we-do"
+            title="Delete Card"
+            message="Are you sure you want to delete this card?"
+            successMessage="Card deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/facilities/what-we-do")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Card" : "Create Card"}</>}

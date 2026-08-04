@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Edit2, Loader2, Plus, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { Edit2, Loader2, Plus, Save, ShieldCheck } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import {
-  deleteSellerLogisticsCard,
-  getSellerLogisticsCards,
   getSellerLogisticsSection,
   updateSellerLogisticsSection,
 } from "../../../services/sellers/logisticsService";
@@ -24,8 +21,6 @@ export default function SellerLogisticsPage() {
   const [section, setSection] = useState({ section_title: "", section_description: "" });
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selected, setSelected] = useState(null);
   const [isEditingSection, setIsEditingSection] = useState(false);
 
   const load = async () => {
@@ -51,17 +46,6 @@ export default function SellerLogisticsPage() {
     }
   };
 
-  const reloadCards = async () => {
-    try {
-      const res = await getSellerLogisticsCards();
-      if (res.success) {
-        setCards(Array.isArray(res.data) ? res.data : []);
-      }
-    } catch {
-      toast.error("Failed to reload cards");
-    }
-  };
-
   useEffect(() => {
     load();
   }, []);
@@ -81,21 +65,6 @@ export default function SellerLogisticsPage() {
       toast.error(err.response?.data?.message || "Save failed");
     } finally {
       setSectionSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      const res = await deleteSellerLogisticsCard(selected.id);
-      if (res.success) {
-        toast.success("Card deleted");
-        reloadCards();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelected(null);
     }
   };
 
@@ -148,20 +117,6 @@ export default function SellerLogisticsPage() {
               title="Edit"
             >
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
-          )}
-          {hasPermission("sellers", "logistics.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => {
-                setSelected(row);
-                setDeleteModal(true);
-              }}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           )}
         </div>
@@ -238,18 +193,6 @@ export default function SellerLogisticsPage() {
         <ReusableDataTable columns={columns} rows={cards} loading={loading} emptyMessage="No cards added yet." />
       </div>
 
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => {
-          setDeleteModal(false);
-          setSelected(null);
-        }}
-        onConfirm={handleDelete}
-        title="Delete Card"
-        message={`Delete "${selected?.card_title}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

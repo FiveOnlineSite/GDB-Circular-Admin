@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, Search, X, Eye } from "lucide-react";
+import { Plus, Edit2, ToggleLeft, ToggleRight, Search, X, Eye } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import { getProducts, deleteProduct, toggleProductStatus } from "../../../services/productListing";
+import { getProducts, toggleProductStatus } from "../../../services/productListing";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 const CATEGORIES = ["LDPE", "HDPE", "PP"];
@@ -21,8 +20,6 @@ export default function CatalogueList() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -37,14 +34,6 @@ export default function CatalogueList() {
   }, [search, category, statusFilter, pagination.current_page, pagination.per_page]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
-
-  const handleDelete = async () => {
-    try {
-      const res = await deleteProduct(selectedItem.id);
-      if (res.success) { toast.success("Product deleted"); fetchData(); }
-    } catch (err) { toast.error(err.response?.data?.message || "Delete failed"); }
-    finally { setDeleteModal(false); setSelectedItem(null); }
-  };
 
   const handleToggle = async (row) => {
     try {
@@ -138,17 +127,6 @@ export default function CatalogueList() {
               {row.status === "active" ? <ToggleRight className="h-4 w-4 text-green-600" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
             </Button>
           )}
-          {hasPermission("product", "catalogue.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelectedItem(row); setDeleteModal(true); }}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -204,15 +182,6 @@ export default function CatalogueList() {
         emptyMessage="No products found. Click 'Add Product' to create one."
       />
 
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => { setDeleteModal(false); setSelectedItem(null); }}
-        onConfirm={handleDelete}
-        title="Delete Product"
-        message={`Are you sure you want to delete "${selectedItem?.product_name}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

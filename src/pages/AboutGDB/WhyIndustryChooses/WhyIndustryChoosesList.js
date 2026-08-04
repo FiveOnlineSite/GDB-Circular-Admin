@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Save, Loader2, TrendingUp } from "lucide-react";
+import { Plus, Edit2, Save, Loader2, TrendingUp } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import { 
   getWhyIndustryChoosesSection, 
   updateWhyIndustryChoosesSection, 
   getWhyIndustryChoosesItems, 
-  deleteWhyIndustryChoosesItem 
 } from "../../../services/aboutGDB";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -25,8 +23,6 @@ export default function WhyIndustryChoosesList() {
 
   const [itemsLoading, setItemsLoading] = useState(false);
   const [rows, setRows] = useState([]);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const loadAll = async () => {
     try {
@@ -82,21 +78,6 @@ export default function WhyIndustryChoosesList() {
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteWhyIndustryChoosesItem(selectedItem.id);
-      if (res.success) {
-        toast.success("Item deleted");
-        loadAll();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelectedItem(null);
-    }
-  };
-
   const columns = [
     { field: "stat_value", headerName: "Stat / Value", sortable: true, width: 120 },
     { field: "title", headerName: "Title", sortable: true, flex: 1 },
@@ -129,16 +110,6 @@ export default function WhyIndustryChoosesList() {
               onClick={() => navigate(`/about-gdb/why-industry-chooses-gdb-pcr/edit/${row.id}`)}
             >
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
-          )}
-          {hasPermission("about", "industry.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelectedItem(row); setDeleteModal(true); }}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           )}
         </div>
@@ -261,15 +232,6 @@ export default function WhyIndustryChoosesList() {
         )}
       </div>
 
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => setDeleteModal(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Item"
-        message="Are you sure you want to delete this item? This action cannot be undone."
-        confirmText="Delete"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
-      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import Upload from "../../components/common/Upload";
+import EditPageDeleteAction from "../../components/common/EditPageDeleteAction";
 import { getFacility, createFacility, updateFacility } from "../../services/facilityService";
 import { toast } from "sonner";
 
@@ -219,6 +220,15 @@ export default function FacilityForm() {
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+            <EditPageDeleteAction
+              id={isEdit && !isView ? id : null}
+              permission="facilities.delete"
+              endpoint={`/facilities/${id}`}
+              redirectTo="/facilities/listing"
+              title="Delete Facility"
+              message="Are you sure you want to delete this facility?"
+              successMessage="Facility deleted"
+            />
             {!isView && (
               <Button type="submit" disabled={submitting || loading}>
                 {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Facility" : "Add Facility"}</>}

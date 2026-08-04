@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Search, Trash2, Download, Eye, X, CalendarDays } from "lucide-react";
+import { Search, Download, Eye, X, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getInquiries, deleteInquiry } from "../../../services/globalContent/inquiries";
-import { usePermissionContext } from "../../../context/PermissionContext";
 
 const PAGE_URLS = ["", "/", "/about-us", "/products", "/seller", "/facilities", "/teams", "/news-events"];
 
@@ -44,7 +43,6 @@ function exportToCSV(data) {
 }
 
 export default function InquiryList() {
-  const { hasPermission } = usePermissionContext();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current_page: 1, per_page: 10, total: 0, last_page: 1 });
@@ -52,8 +50,6 @@ export default function InquiryList() {
   const [pageUrl, setPageUrl] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [viewModal, setViewModal] = useState(false);
   const [viewItem, setViewItem] = useState(null);
 
@@ -85,21 +81,6 @@ export default function InquiryList() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteInquiry(selectedItem.id);
-      if (res.success) {
-        toast.success("Inquiry deleted");
-        fetchData();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelectedItem(null);
-    }
-  };
 
   const handleExport = async () => {
     try {
@@ -160,11 +141,6 @@ export default function InquiryList() {
           <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => { setViewItem(row); setViewModal(true); }}>
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
-          {hasPermission("globalContent", "inquiries.delete") && (
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50" onClick={() => { setSelectedItem(row); setDeleteModal(true); }}>
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -248,11 +224,26 @@ export default function InquiryList() {
                 </div>
               )}
             </div>
+            <div className="flex justify-end gap-3 border-t p-6">
+              <EditPageDeleteAction
+                id={viewItem.id}
+                permission="global.inquiries.delete"
+                onDelete={() => deleteInquiry(viewItem.id)}
+                onDeleted={() => {
+                  setViewModal(false);
+                  setViewItem(null);
+                  fetchData();
+                }}
+                title="Delete Inquiry"
+                message="Are you sure you want to permanently delete this inquiry?"
+                successMessage="Inquiry deleted"
+              />
+              <Button type="button" variant="outline" onClick={() => setViewModal(false)}>Close</Button>
+            </div>
           </div>
         </div>
       )}
 
-      <ConfirmationModal isOpen={deleteModal} onClose={() => { setDeleteModal(false); setSelectedItem(null); }} onConfirm={handleDeleteConfirm} title="Delete Inquiry" message="Are you sure you want to permanently delete this inquiry?" confirmLabel="Delete" confirmVariant="destructive" />
     </div>
   );
 }

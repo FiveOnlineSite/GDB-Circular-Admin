@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Save, Loader2, CalendarDays } from "lucide-react";
+import { Plus, Edit2, Save, Loader2, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import {
   getJourneyTimelineSection,
   updateJourneyTimelineSection,
   getJourneyTimelineItems,
-  deleteJourneyTimelineItem,
 } from "../../../services/aboutGDB";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -24,8 +22,6 @@ export default function JourneyTimelineList() {
   const [isEditingSection, setIsEditingSection] = useState(false);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [rows, setRows] = useState([]);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const loadAll = async () => {
     try {
@@ -79,21 +75,6 @@ export default function JourneyTimelineList() {
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteJourneyTimelineItem(selectedItem.id);
-      if (res.success) {
-        toast.success("Timeline item deleted");
-        loadAll();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelectedItem(null);
-    }
-  };
-
   const columns = [
     {
       field: "icon_url",
@@ -140,11 +121,6 @@ export default function JourneyTimelineList() {
           {hasPermission("about", "timeline.update") && (
             <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/about-gdb/journey-timeline/edit/${row.id}`)}>
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
-          )}
-          {hasPermission("about", "timeline.delete") && (
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50" onClick={() => { setSelectedItem(row); setDeleteModal(true); }}>
-              <Trash2 className="h-4 w-4 text-red-500" />
             </Button>
           )}
         </div>
@@ -222,7 +198,6 @@ export default function JourneyTimelineList() {
         )}
       </div>
 
-      <ConfirmationModal isOpen={deleteModal} onClose={() => setDeleteModal(false)} onConfirm={handleDeleteConfirm} title="Delete Timeline Item" message="Are you sure you want to delete this timeline item? This action cannot be undone." confirmText="Delete" confirmButtonClass="bg-red-600 hover:bg-red-700" />
     </div>
   );
 }

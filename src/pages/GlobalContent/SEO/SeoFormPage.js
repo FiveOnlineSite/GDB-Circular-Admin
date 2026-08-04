@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getSeoById, createSeo, updateSeo } from "../../../services/globalContent/seo";
 
 const PAGES = [
@@ -139,6 +140,7 @@ export default function SeoFormPage() {
     twitter_title: "",
     twitter_description: "",
     twitter_image: "",
+    twitter_image_alt: "",
     schema_type: "",
     schema_json: "",
     status: "active",
@@ -166,6 +168,7 @@ export default function SeoFormPage() {
               twitter_title: d.twitter_title || "",
               twitter_description: d.twitter_description || "",
               twitter_image: d.twitter_image || "",
+              twitter_image_alt: d.twitter_image_alt || "",
               schema_type: d.schema_type || "",
               schema_json: d.schema_json || "",
               status: d.status || "active",
@@ -244,6 +247,9 @@ export default function SeoFormPage() {
     if (form.og_image && !form.og_image_alt.trim()) {
       newErrors.og_image_alt = "OG image alt text is required when an image is uploaded";
     }
+    if (form.twitter_image && !form.twitter_image_alt.trim()) {
+      newErrors.twitter_image_alt = "Twitter image alt text is required when an image is uploaded";
+    }
     const activeSchemaEntries = schemaEntries.filter(
       (entry) => entry.schema_type.trim() || entry.schema_json.trim()
     );
@@ -273,6 +279,7 @@ export default function SeoFormPage() {
             ...form,
             canonical_url: form.canonical_url.trim(),
             og_image_alt: form.og_image_alt.trim(),
+            twitter_image_alt: form.twitter_image_alt.trim(),
             schema_type: schemaPayload.schema_type,
             schema_json: schemaPayload.schema_json,
           })
@@ -280,6 +287,7 @@ export default function SeoFormPage() {
             ...form,
             canonical_url: form.canonical_url.trim(),
             og_image_alt: form.og_image_alt.trim(),
+            twitter_image_alt: form.twitter_image_alt.trim(),
             schema_type: schemaPayload.schema_type,
             schema_json: schemaPayload.schema_json,
           });
@@ -415,7 +423,7 @@ export default function SeoFormPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
                 Canonical URL
@@ -466,6 +474,22 @@ export default function SeoFormPage() {
                 placeholder="Open Graph title"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              OG Description
+            </label>
+            <Textarea
+              name="og_description"
+              value={form.og_description}
+              onChange={handleChange}
+              placeholder="Open Graph description"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
                 OG Image
@@ -487,25 +511,10 @@ export default function SeoFormPage() {
                 maxSizeKB={500}
               />
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-              OG Description
-            </label>
-            <Textarea
-              name="og_description"
-              value={form.og_description}
-              onChange={handleChange}
-              placeholder="Open Graph description"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-              OG Image Alt Text
-            </label>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                OG Image Alt Text
+              </label>
               <Input
                 name="og_image_alt"
                 value={form.og_image_alt}
@@ -514,6 +523,7 @@ export default function SeoFormPage() {
                 error={!!errors.og_image_alt}
                 errorMessage={errors.og_image_alt}
               />
+            </div>
           </div>
         </div>
 
@@ -523,7 +533,7 @@ export default function SeoFormPage() {
             Twitter Card
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
             <div>
               <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
                 Twitter Title
@@ -533,18 +543,6 @@ export default function SeoFormPage() {
                 value={form.twitter_title}
                 onChange={handleChange}
                 placeholder="Twitter card title"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                Twitter Image
-              </label>
-              <Upload
-                value={form.twitter_image}
-                onChange={(url) => setForm((prev) => ({ ...prev, twitter_image: url }))}
-                mediaType="image"
-                accept="image/*"
-                maxSizeKB={500}
               />
             </div>
           </div>
@@ -560,6 +558,43 @@ export default function SeoFormPage() {
               placeholder="Twitter card description"
               rows={3}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                Twitter Image
+              </label>
+              <Upload
+                value={form.twitter_image}
+                onChange={(url) => {
+                  setForm((prev) => ({ ...prev, twitter_image: url }));
+                  if (errors.twitter_image_alt) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.twitter_image_alt;
+                      return next;
+                    });
+                  }
+                }}
+                mediaType="image"
+                accept="image/*"
+                maxSizeKB={500}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                Twitter Image Alt Text
+              </label>
+              <Input
+                name="twitter_image_alt"
+                value={form.twitter_image_alt}
+                onChange={handleChange}
+                placeholder="Alt text for Twitter image"
+                error={!!errors.twitter_image_alt}
+                errorMessage={errors.twitter_image_alt}
+              />
+            </div>
           </div>
         </div>
 
@@ -636,6 +671,15 @@ export default function SeoFormPage() {
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-2">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="global.seo.delete"
+            endpoint={`/global-content/seo/${id}`}
+            redirectTo="/global-content/seo"
+            title="Delete SEO Entry"
+            message="Are you sure you want to delete this SEO entry? This action cannot be undone."
+            successMessage="SEO entry deleted"
+          />
           <Button
             type="button"
             variant="outline"

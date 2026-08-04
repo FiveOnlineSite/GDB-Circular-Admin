@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Edit2, Trash2, Search } from "lucide-react";
+import { Eye, Edit2, Search } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
-import { getFacilities, deleteFacility, toggleFacilityStatus } from "../../services/facilityService";
+import { getFacilities, toggleFacilityStatus } from "../../services/facilityService";
 import { usePermissionContext } from "../../context/PermissionContext";
 import { toast } from "sonner";
 
@@ -17,8 +16,6 @@ export default function FacilitiesList() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current_page: 1, per_page: 10, total: 0, last_page: 1 });
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [facilityType, setFacilityType] = useState("");
 
@@ -49,21 +46,6 @@ export default function FacilitiesList() {
   useEffect(() => {
     fetch();
   }, [pagination.current_page, pagination.per_page, search, facilityType]);
-
-  const handleDelete = async () => {
-    try {
-      const res = await deleteFacility(selected.id);
-      if (res.success) {
-        toast.success("Facility deleted");
-        fetch();
-      }
-    } catch (e) {
-      toast.error(e.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelected(null);
-    }
-  };
 
   const handleToggle = async (row) => {
     try {
@@ -110,7 +92,6 @@ export default function FacilitiesList() {
           {hasPermission("facilities", "view") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/facilities/view/${row.id}`)}><Eye className="h-4 w-4 text-[#981B1F]" /></Button>}
           {hasPermission("facilities", "update") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/facilities/edit/${row.id}`)}><Edit2 className="h-4 w-4 text-[#C3662D]" /></Button>}
           {hasPermission("facilities", "update") && <Button size="sm" variant="ghost" onClick={() => handleToggle(row)}>{row.status === "active" ? "Deactivate" : "Activate"}</Button>}
-          {hasPermission("facilities", "delete") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50" onClick={() => { setSelected(row); setDeleteModal(true); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>}
         </div>
       ),
     },
@@ -148,7 +129,6 @@ export default function FacilitiesList() {
         <ReusableDataTable columns={columns} rows={rows} loading={loading} pagination={pagination} handlePageChange={(p) => setPagination((prev) => ({ ...prev, current_page: p }))} handlePerPageChange={(pp) => setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))} emptyMessage="No facilities yet." />
       </div>
 
-      <ConfirmationModal isOpen={deleteModal} onClose={() => { setDeleteModal(false); setSelected(null); }} onConfirm={handleDelete} title="Delete Facility" message={`Delete ${selected?.facility_name}?`} confirmLabel="Delete" confirmVariant="destructive" />
     </div>
   );
 }

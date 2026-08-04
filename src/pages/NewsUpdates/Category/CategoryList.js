@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, Loader2, Search } from "lucide-react";
+import { Plus, Edit2, Eye, EyeOff, Save, Loader2, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/DeleteConfirmationModal";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import {
   getCategories,
   createCategory,
@@ -19,7 +19,6 @@ export default function CategoryList() {
 
   const canCreate = hasPermission("news", "category.create");
   const canUpdate = hasPermission("news", "category.update");
-  const canDelete = hasPermission("news", "category.delete");
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,10 +43,6 @@ export default function CategoryList() {
     sequence: 0,
     status: "active",
   });
-
-  // Delete Confirmation Modal
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
 
   const fetchCategoriesList = useCallback(
     async (params = {}) => {
@@ -197,26 +192,6 @@ export default function CategoryList() {
     }
   };
 
-  const handleDeleteClick = (item) => {
-    setItemToDelete(item);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteCategory(itemToDelete.id);
-      if (res.success) {
-        toast.success("Category tab deleted successfully");
-        fetchCategoriesList();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete category");
-    } finally {
-      setDeleteModalOpen(false);
-      setItemToDelete(null);
-    }
-  };
-
   const columns = [
     { field: "id", headerName: "ID", sortable: true },
     { field: "category_title", headerName: "Category Title", sortable: true },
@@ -291,17 +266,6 @@ export default function CategoryList() {
                 {row.status === "active" ? "Deactivate" : "Activate"}
               </Button>
             </>
-          )}
-          {canDelete && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => handleDeleteClick(row)}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
           )}
         </div>
       ),
@@ -469,6 +433,18 @@ export default function CategoryList() {
 
               {/* Modal Footer */}
               <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-t border-slate-100 dark:border-gray-700 flex justify-end gap-3">
+                <EditPageDeleteAction
+                  id={editingItem?.id}
+                  permission="news.category.delete"
+                  onDelete={() => deleteCategory(editingItem.id)}
+                  onDeleted={() => {
+                    setModalOpen(false);
+                    fetchCategoriesList();
+                  }}
+                  title="Delete Category Tab"
+                  message={`Are you sure you want to delete "${editingItem?.category_title}"? Associated news content may also be deleted.`}
+                  successMessage="Category tab deleted successfully"
+                />
                 <Button
                   type="button"
                   variant="outline"
@@ -500,17 +476,6 @@ export default function CategoryList() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setItemToDelete(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Category Tab"
-        message={`Are you sure you want to delete "${itemToDelete?.category_title}"? Any news content associated with this category will also be deleted.`}
-      />
     </div>
   );
 }

@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Eye, Search } from "lucide-react";
+import { Plus, Edit2, Eye, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import { getFeedstocks, deleteFeedstock, toggleFeedstockStatus } from "../../../services/sellers/feedstockService";
+import { getFeedstocks, toggleFeedstockStatus } from "../../../services/sellers/feedstockService";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 const CATEGORIES = ["LDPE", "HDPE", "PP", "Other"];
@@ -29,8 +28,6 @@ export default function FeedstockList() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchFeedstocks = useCallback(async (params = {}) => {
     try {
@@ -90,26 +87,6 @@ export default function FeedstockList() {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to toggle status");
-    }
-  };
-
-  const handleDeleteClick = (item) => {
-    setSelectedItem(item);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteFeedstock(selectedItem.id);
-      if (res.success) {
-        toast.success("Feedstock item deleted successfully");
-        fetchFeedstocks();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModalOpen(false);
-      setSelectedItem(null);
     }
   };
 
@@ -213,17 +190,6 @@ export default function FeedstockList() {
               </Button>
             </>
           )}
-          {hasPermission("sellers", "feedstock.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => handleDeleteClick(row)}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -310,19 +276,6 @@ export default function FeedstockList() {
         />
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedItem(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Feedstock Material"
-        message={`Are you sure you want to delete "${selectedItem?.material_name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

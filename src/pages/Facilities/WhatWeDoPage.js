@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, Save, Loader2, BriefcaseBusiness } from "lucide-react";
+import { Plus, Edit2, Save, Loader2, BriefcaseBusiness } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
 import {
   getFacilitiesWhatWeDo,
   updateFacilitiesWhatWeDoSection,
-  deleteFacilitiesWhatWeDoCard,
 } from "../../services/facilityService";
 import { usePermissionContext } from "../../context/PermissionContext";
 
@@ -22,8 +20,6 @@ export default function WhatWeDoPage() {
   const [sectionLoading, setSectionLoading] = useState(false);
   const [cardsLoading, setCardsLoading] = useState(false);
   const [sectionSaving, setSectionSaving] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
 
   const loadAll = async () => {
     try {
@@ -60,21 +56,6 @@ export default function WhatWeDoPage() {
       toast.error(error.response?.data?.message || "Save failed");
     } finally {
       setSectionSaving(false);
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteFacilitiesWhatWeDoCard(selectedCard.id);
-      if (res.success) {
-        toast.success("Card deleted");
-        loadAll();
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModalOpen(false);
-      setSelectedCard(null);
     }
   };
 
@@ -130,11 +111,6 @@ export default function WhatWeDoPage() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("facilities", "whatwedo.delete") && (
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 hover:bg-red-50" onClick={() => { setSelectedCard(row); setDeleteModalOpen(true); }}>
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -187,15 +163,6 @@ export default function WhatWeDoPage() {
         <ReusableDataTable columns={columns} rows={cards} loading={cardsLoading} emptyMessage="No cards added yet." />
       </div>
 
-      <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => { setDeleteModalOpen(false); setSelectedCard(null); }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Card"
-        message={`Are you sure you want to delete "${selectedCard?.card_title}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

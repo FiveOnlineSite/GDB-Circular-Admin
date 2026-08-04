@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getLifeItemById, createLifeItem, updateLifeItem } from "../../../services/team/lifeAtGdbService";
 
 export default function LifeAtGdbFormPage() {
@@ -295,6 +296,15 @@ export default function LifeAtGdbFormPage() {
 
         {/* Form Actions */}
         <div className="flex items-center justify-end gap-3 pt-2">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="team.life.delete"
+            endpoint={`/team/life-at-gdb/${id}`}
+            redirectTo="/team/life-at-gdb"
+            title="Delete Gallery Item"
+            message="Are you sure you want to delete this gallery item? This action cannot be undone."
+            successMessage="Gallery item deleted"
+          />
           <Button
             type="button"
             variant="outline"

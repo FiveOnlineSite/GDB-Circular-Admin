@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getFeedstockById, createFeedstock, updateFeedstock } from "../../../services/sellers/feedstockService";
 
 export default function FeedstockFormPage() {
@@ -195,6 +196,15 @@ export default function FeedstockFormPage() {
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="seller.feedstock.delete"
+            endpoint={`/sellers/feedstock/${id}`}
+            redirectTo="/sellers/feedstock-catalogue"
+            title="Delete Feedstock Material"
+            message="Are you sure you want to delete this feedstock material? This action cannot be undone."
+            successMessage="Feedstock material deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/sellers/feedstock-catalogue")}>{isView ? "Back" : "Cancel"}</Button>
           {!isView && (
             <Button type="submit" disabled={submitting} className="bg-[#981B1F] hover:bg-[#C3662D] text-white shadow-sm transition-colors">

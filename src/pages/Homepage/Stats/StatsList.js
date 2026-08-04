@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, BarChart3 } from "lucide-react";
+import { Plus, Edit2, BarChart3 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import { getStats, deleteStat } from "../../../services/homepage";
+import { getStats } from "../../../services/homepage";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 export default function StatsList() {
@@ -13,8 +12,6 @@ export default function StatsList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -30,18 +27,6 @@ export default function StatsList() {
   };
 
   useEffect(() => { fetchData(); }, []);
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteStat(selectedItem.id);
-      if (res.success) { toast.success("Stat deleted"); fetchData(); }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModal(false);
-      setSelectedItem(null);
-    }
-  };
 
   const columns = [
     {
@@ -94,17 +79,6 @@ export default function StatsList() {
               <Edit2 className="h-4 w-4 text-[#C3662D]" />
             </Button>
           )}
-          {hasPermission("homepage", "stats.delete") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50"
-              onClick={() => { setSelectedItem(row); setDeleteModal(true); }}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -129,15 +103,6 @@ export default function StatsList() {
         )}
       </div>
       <ReusableDataTable columns={columns} rows={rows} loading={loading} emptyMessage="No stats added yet. Click 'Add Stat' to create one." />
-      <ConfirmationModal
-        isOpen={deleteModal}
-        onClose={() => { setDeleteModal(false); setSelectedItem(null); }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Stat"
-        message={`Are you sure you want to delete "${selectedItem?.title}"?`}
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

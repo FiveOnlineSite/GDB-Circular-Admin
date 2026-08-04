@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Search, FileDown, Eye, Trash2, X, CalendarDays } from "lucide-react";
+import { Search, FileDown, Eye, X, CalendarDays } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import ConfirmationModal from "../../../components/common/DeleteConfirmationModal";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getInquiries, deleteInquiry, exportInquiries } from "../../../services/sellers/supplierInquiryService";
 import { usePermissionContext } from "../../../context/PermissionContext";
 import * as XLSX from "xlsx";
@@ -28,8 +28,6 @@ export default function SupplierInquiryList() {
   const [selectedResin, setSelectedResin] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [viewingInquiry, setViewingInquiry] = useState(null);
 
@@ -73,21 +71,6 @@ export default function SupplierInquiryList() {
     setEndDate("");
     setPagination((p) => ({ ...p, current_page: 1 }));
     fetchInquiries({ page: 1, search: "", resin_type: "", startDate: "", endDate: "" });
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteInquiry(selectedItem.id);
-      if (res.success) {
-        toast.success("Inquiry record deleted successfully");
-        fetchInquiries();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Delete failed");
-    } finally {
-      setDeleteModalOpen(false);
-      setSelectedItem(null);
-    }
   };
 
   const handleExcelExport = async () => {
@@ -170,11 +153,6 @@ export default function SupplierInquiryList() {
           <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => { setViewingInquiry(row); setDetailsModalOpen(true); }} title="View Form Details">
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
-          {hasPermission("sellers", "inquiry.delete") && (
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700 hover:bg-red-50" onClick={() => { setSelectedItem(row); setDeleteModalOpen(true); }} title="Delete">
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
         </div>
       ),
     },
@@ -281,14 +259,26 @@ export default function SupplierInquiryList() {
               </div>
             </div>
 
-            <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-t border-slate-100 dark:border-gray-700 flex justify-end">
+            <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-t border-slate-100 dark:border-gray-700 flex justify-end gap-3">
+              <EditPageDeleteAction
+                id={viewingInquiry.id}
+                permission="seller.inquiry.delete"
+                onDelete={() => deleteInquiry(viewingInquiry.id)}
+                onDeleted={() => {
+                  setDetailsModalOpen(false);
+                  setViewingInquiry(null);
+                  fetchInquiries();
+                }}
+                title="Delete Supplier Inquiry"
+                message={`Are you sure you want to delete the inquiry from "${viewingInquiry.name}"? This record will be permanently deleted.`}
+                successMessage="Inquiry record deleted successfully"
+              />
               <Button type="button" onClick={() => setDetailsModalOpen(false)} className="bg-slate-800 hover:bg-slate-700 text-white text-sm">Close Details</Button>
             </div>
           </div>
         </div>
       )}
 
-      <ConfirmationModal isOpen={deleteModalOpen} onClose={() => { setDeleteModalOpen(false); setSelectedItem(null); }} onConfirm={handleDeleteConfirm} title="Delete Supplier Inquiry" message={`Are you sure you want to delete inquiry from "${selectedItem?.name}"? This record will be permanently deleted.`} />
     </div>
   );
 }

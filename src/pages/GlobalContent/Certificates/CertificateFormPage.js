@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import {
@@ -198,6 +199,15 @@ export default function CertificateFormPage() {
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="global.certificates.delete"
+            endpoint={`/global-content/certificates/${id}`}
+            redirectTo="/global-content/certificates"
+            title="Delete Certificate"
+            message="Are you sure you want to delete this certificate?"
+            successMessage="Certificate deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/global-content/certificates")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update" : "Create"}</>}

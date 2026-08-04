@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getMemberById, createMember, updateMember } from "../../../services/team/memberService";
 
 const GROUP_OPTIONS = ["Board of Directors", "Leadership"];
@@ -365,6 +366,15 @@ export default function TeamMemberFormPage() {
 
         {/* Form Actions */}
         <div className="flex items-center justify-end gap-3 pt-2">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="team.members.delete"
+            endpoint={`/team/members/${id}`}
+            redirectTo="/team/members"
+            title="Delete Team Member"
+            message="Are you sure you want to delete this team member? This action cannot be undone."
+            successMessage="Team member deleted"
+          />
           <Button
             type="button"
             variant="outline"

@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getStatById, createStat, updateStat } from "../../../services/homepage";
 
 const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
@@ -52,6 +53,7 @@ export default function StatsFormPage() {
     const newErrors = {};
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.value_text.trim()) newErrors.value_text = "Value / Number is required";
+    if (!form.icon_url?.trim()) newErrors.icon_url = "Icon is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -128,18 +130,37 @@ export default function StatsFormPage() {
 
           {/* Icon Upload */}
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Icon Upload</label>
+            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Icon Upload <span className="text-red-500">*</span></label>
             <Upload
               value={form.icon_url}
-              onChange={(url) => setForm(p => ({ ...p, icon_url: url }))}
+              onChange={(url) => {
+                setForm(p => ({ ...p, icon_url: url }));
+                if (errors.icon_url) {
+                  setErrors(prev => {
+                    const next = { ...prev };
+                    delete next.icon_url;
+                    return next;
+                  });
+                }
+              }}
               mediaType="image"
               accept="image/*"
               maxSizeKB={30}
             />
+            {errors.icon_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.icon_url}</span>}
           </div>
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="homepage.stats.delete"
+            endpoint={`/homepage/stats/${id}`}
+            redirectTo="/homepage-management/stats"
+            title="Delete Stat"
+            message="Are you sure you want to delete this stat?"
+            successMessage="Stat deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/homepage-management/stats")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Stat" : "Create Stat"}</>}

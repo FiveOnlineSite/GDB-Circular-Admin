@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getFaqById, createFaq, updateFaq } from "../../../services/globalContent/faqs";
 
 const fieldStyle =
@@ -24,7 +25,6 @@ export default function FaqFormPage() {
     question: "",
     answer: "",
     sequence: 0,
-    faq_schema: "",
     status: "active",
   });
 
@@ -41,7 +41,6 @@ export default function FaqFormPage() {
             question: d.question || "",
             answer: d.answer || "",
             sequence: d.sequence ?? 0,
-            faq_schema: d.faq_schema || "",
             status: d.status || "active",
           });
         } else {
@@ -81,14 +80,6 @@ export default function FaqFormPage() {
     if (String(form.sequence).trim() !== "" && Number(form.sequence) < 0) {
       newErrors.sequence = "Sequence must be 0 or greater";
     }
-    if (form.faq_schema.trim()) {
-      try {
-        JSON.parse(form.faq_schema);
-      } catch (_) {
-        newErrors.faq_schema = "FAQ schema must be valid JSON";
-      }
-    }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -133,7 +124,7 @@ export default function FaqFormPage() {
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
             {isEdit ? "Edit FAQ" : "Add FAQ"}
           </h1>
-          <p className="text-slate-500 text-sm">{isEdit ? "Update FAQ content and schema" : "Add a new frequently asked question"}</p>
+          <p className="text-slate-500 text-sm">{isEdit ? "Update FAQ content" : "Add a new frequently asked question"}</p>
         </div>
       </div>
 
@@ -219,25 +210,18 @@ export default function FaqFormPage() {
             />
           </div>
 
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-              FAQ Schema (JSON-LD)
-              <span className="text-slate-400 font-normal text-xs ml-1">Optional — auto-generated if left blank</span>
-            </label>
-            <Textarea
-              name="faq_schema"
-              value={form.faq_schema}
-              onChange={handleChange}
-              placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "FAQPage"\n}'}
-              rows={6}
-              className="font-mono text-xs"
-              error={!!errors.faq_schema}
-              errorMessage={errors.faq_schema}
-            />
-          </div>
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="global.faq.delete"
+            endpoint={`/global-content/faqs/${id}`}
+            redirectTo="/global-content/faqs"
+            title="Delete FAQ"
+            message="Are you sure you want to delete this FAQ?"
+            successMessage="FAQ deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/global-content/faqs")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update FAQ" : "Create FAQ"}</>}

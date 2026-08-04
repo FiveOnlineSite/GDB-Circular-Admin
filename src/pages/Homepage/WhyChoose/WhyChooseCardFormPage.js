@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getWhyChooseCardById, createWhyChooseCard, updateWhyChooseCard } from "../../../services/homepage";
 
 const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
@@ -151,6 +152,15 @@ export default function WhyChooseCardFormPage() {
         </div>
 
         <div className="flex justify-end gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="homepage.whychoose.delete"
+            endpoint={`/homepage/whychoose/cards/${id}`}
+            redirectTo="/homepage-management/whychoose"
+            title="Delete Card"
+            message="Are you sure you want to delete this card?"
+            successMessage="Card deleted"
+          />
           <Button type="button" variant="outline" onClick={() => navigate("/homepage-management/whychoose")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Card" : "Create Card"}</>}

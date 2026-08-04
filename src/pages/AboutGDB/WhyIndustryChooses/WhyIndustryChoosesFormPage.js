@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
+import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import {
   getWhyIndustryChoosesItemById,
   createWhyIndustryChoosesItem,
@@ -240,6 +241,15 @@ export default function WhyIndustryChoosesFormPage() {
 
         {/* Submit Button */}
         <div className="flex gap-3">
+          <EditPageDeleteAction
+            id={isEdit ? id : null}
+            permission="about.industry.delete"
+            endpoint={`/about-gdb/why-industry-chooses/items/${id}`}
+            redirectTo="/about-gdb/why-industry-chooses-gdb-pcr"
+            title="Delete Item"
+            message="Are you sure you want to delete this item? This action cannot be undone."
+            successMessage="Item deleted"
+          />
           <Button
             type="submit"
             disabled={submitting}
