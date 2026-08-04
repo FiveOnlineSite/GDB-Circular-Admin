@@ -95,8 +95,8 @@ export default function CertificateList() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Certificates / Trust Logos</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage trust badges and certifications shown on the site</p>
+          <h1 className="text-2xl font-bold text-gray-900 ">Certificates / Trust Logos</h1>
+          <p className="text-sm text-gray-500  mt-1">Manage trust badges and certifications shown on the site</p>
         </div>
         {hasPermission("globalContent", "certificates.create") && (
           <Button onClick={() => navigate("/global-content/certificates/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
@@ -104,7 +104,7 @@ export default function CertificateList() {
           </Button>
         )}
       </div>
-      <ReusableDataTable columns={columns} rows={rows} loading={loading} emptyMessage="No certificates found. Click 'Add Certificate' to create one." />
+      <ReusableDataTable columns={columns} rows={rows} loading={loading} sequenceReorderScope="certificates" emptyMessage="No certificates found. Click 'Add Certificate' to create one." />
     </div>
   );
 }

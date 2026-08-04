@@ -8,7 +8,7 @@ import Upload from "../../../components/common/Upload";
 import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getStatById, createStat, updateStat } from "../../../services/homepage";
 
-const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 
 
 export default function StatsFormPage() {
@@ -79,18 +79,18 @@ export default function StatsFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{isEdit ? "Edit Stat" : "Add Stat"}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{isEdit ? "Edit Stat" : "Add Stat"}</h1>
           <p className="text-slate-500 text-sm">{isEdit ? "Update the homepage stat entry" : "Add a new stat to the value strip"}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Stat Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Stat Details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Title <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Title <span className="text-red-500">*</span></label>
               <Input
                 name="title"
                 value={form.title}
@@ -101,7 +101,7 @@ export default function StatsFormPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Value / Number <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Value / Number <span className="text-red-500">*</span></label>
               <Input
                 name="value_text"
                 value={form.value_text}
@@ -112,15 +112,7 @@ export default function StatsFormPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Icon Alt Text</label>
-              <Input name="icon_alt" value={form.icon_alt} onChange={handle} placeholder="Alt text for icon" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handle} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handle} className={selectStyle}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -129,25 +121,31 @@ export default function StatsFormPage() {
           </div>
 
           {/* Icon Upload */}
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Icon Upload <span className="text-red-500">*</span></label>
-            <Upload
-              value={form.icon_url}
-              onChange={(url) => {
-                setForm(p => ({ ...p, icon_url: url }));
-                if (errors.icon_url) {
-                  setErrors(prev => {
-                    const next = { ...prev };
-                    delete next.icon_url;
-                    return next;
-                  });
-                }
-              }}
-              mediaType="image"
-              accept="image/*"
-              maxSizeKB={30}
-            />
-            {errors.icon_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.icon_url}</span>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Icon Upload <span className="text-red-500">*</span></label>
+              <Upload
+                value={form.icon_url}
+                onChange={(url) => {
+                  setForm(p => ({ ...p, icon_url: url }));
+                  if (errors.icon_url) {
+                    setErrors(prev => {
+                      const next = { ...prev };
+                      delete next.icon_url;
+                      return next;
+                    });
+                  }
+                }}
+                mediaType="image"
+                accept="image/*"
+                maxSizeKB={500}
+              />
+              {errors.icon_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.icon_url}</span>}
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Icon Alt Text</label>
+              <Input name="icon_alt" value={form.icon_alt} onChange={handle} placeholder="Alt text for icon" />
+            </div>
           </div>
         </div>
 

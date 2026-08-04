@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
 import { PermissionProvider } from "./context/PermissionContext";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
@@ -71,8 +70,6 @@ import SupplierInquiryList from "./pages/Sellers/Inquiries/SupplierInquiryList";
 import CategoryList from "./pages/NewsUpdates/Category/CategoryList";
 import NewsList from "./pages/NewsUpdates/News/NewsList";
 import NewsFormPage from "./pages/NewsUpdates/News/NewsFormPage";
-// Settings Management
-import MediaRulesPage from "./pages/Settings/MediaRules/MediaRulesPage";
 
 
 
@@ -92,8 +89,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider>
-          <PermissionProvider>
+        <PermissionProvider>
             <Router>
               <Toaster position="top-center" richColors expand={false} />
               <Routes>
@@ -236,9 +232,6 @@ function App() {
           {/* Banners */}
           <Route path="/global-content/banners" element={
             <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="banner.view"><BannerList /></PermissionRoute></MainLayout></ProtectedRoute>
-          } />
-          <Route path="/global-content/banners/create" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="banner.create"><BannerFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
           <Route path="/global-content/banners/edit/:id" element={
             <ProtectedRoute><MainLayout><PermissionRoute module="globalContent" action="banner.update"><BannerFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
@@ -465,19 +458,11 @@ function App() {
             <ProtectedRoute><MainLayout><PermissionRoute module="news" action="content.view"><NewsFormPage /></PermissionRoute></MainLayout></ProtectedRoute>
           } />
 
-          {/* ===== SETTINGS PAGE MANAGEMENT ROUTES ===== */}
-          <Route path="/settings/media-rules" element={
-            <ProtectedRoute><MainLayout><PermissionRoute module="settings" action="rules.view"><MediaRulesPage /></PermissionRoute></MainLayout></ProtectedRoute>
-          } />
-
-
-
           {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
               </Routes>
             </Router>
-          </PermissionProvider>
-        </ThemeProvider>
+        </PermissionProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

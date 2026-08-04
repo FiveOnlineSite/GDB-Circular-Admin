@@ -135,19 +135,19 @@ export default function FeedstockFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{pageTitle}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{pageTitle}</h1>
           <p className="text-slate-500 text-sm">{isView ? "View material details" : "Provide category, description, and image details"}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Material Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Material Details</h2>
           <div className="grid grid-cols-1 gap-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Feedstock Category <span className="text-red-500">*</span></label>
-                <select name="feedstock_category" value={form.feedstock_category} onChange={handleChange} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55">
+                <label className="text-sm font-semibold text-slate-600  block mb-1">Feedstock Category <span className="text-red-500">*</span></label>
+                <select name="feedstock_category" value={form.feedstock_category} onChange={handleChange} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white    disabled:opacity-55">
                   <option value="LDPE">LDPE</option>
                   <option value="HDPE">HDPE</option>
                   <option value="PP">PP</option>
@@ -155,25 +155,21 @@ export default function FeedstockFormPage() {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Material Name <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold text-slate-600  block mb-1">Material Name <span className="text-red-500">*</span></label>
                 <Input name="material_name" value={form.material_name} onChange={handleChange} placeholder="e.g. PP Copolymer Regrind" disabled={isView} error={!!errors.material_name} errorMessage={errors.material_name} />
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description <span className="text-red-500">*</span></label>
-              <Textarea name="short_description" value={form.short_description} onChange={handleChange} placeholder="Enter quick summary of the material..." disabled={isView} rows={3} className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55" />
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Short Description <span className="text-red-500">*</span></label>
+              <Textarea name="short_description" value={form.short_description} onChange={handleChange} placeholder="Enter quick summary of the material..." disabled={isView} rows={3} className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition    disabled:opacity-55" />
               {errors.short_description && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.short_description}</span>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-                <Input type="number" name="sequence" value={form.sequence} onChange={handleChange} placeholder="0" disabled={isView} />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
-                <select name="status" value={form.status} onChange={handleChange} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55">
+                <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
+                <select name="status" value={form.status} onChange={handleChange} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white    disabled:opacity-55">
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
@@ -182,16 +178,18 @@ export default function FeedstockFormPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Cover Image Upload</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Cover Image Upload</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image (Max: 500KB) <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Image (Max: 500KB) <span className="text-red-500">*</span></label>
             <Upload value={form.image_url} onChange={handleImageUpload} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
             {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Image Alt Text <span className="text-red-500">*</span></label>
             <Input name="image_alt" value={form.image_alt} onChange={handleChange} placeholder="Describe the feedstock image" disabled={isView} error={!!errors.image_alt} errorMessage={errors.image_alt} />
+          </div>
           </div>
         </div>
 

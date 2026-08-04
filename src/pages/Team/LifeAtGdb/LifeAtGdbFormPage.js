@@ -163,7 +163,7 @@ export default function LifeAtGdbFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
             {pageTitle}
           </h1>
           <p className="text-slate-500 text-sm">
@@ -173,15 +173,15 @@ export default function LifeAtGdbFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Item Details
           </h2>
 
           <div className="grid grid-cols-1 gap-5">
             {/* Title */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Section Title <span className="text-red-500">*</span>
               </label>
               <Input
@@ -197,7 +197,7 @@ export default function LifeAtGdbFormPage() {
 
             {/* Description */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Description
               </label>
               <Textarea
@@ -207,29 +207,14 @@ export default function LifeAtGdbFormPage() {
                 placeholder="Enter item description..."
                 disabled={isView}
                 rows={4}
-                className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
+                className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition    disabled:opacity-55"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Sequence */}
-              <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                  Sequence
-                </label>
-                <Input
-                  type="number"
-                  name="sequence"
-                  value={form.sequence}
-                  onChange={handleChange}
-                  placeholder="0"
-                  disabled={isView}
-                />
-              </div>
-
               {/* Status */}
               <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold text-slate-600  block mb-1">
                   Status
                 </label>
                 <select
@@ -237,7 +222,7 @@ export default function LifeAtGdbFormPage() {
                   value={form.status}
                   onChange={handleChange}
                   disabled={isView}
-                  className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
+                  className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white    disabled:opacity-55"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -248,13 +233,14 @@ export default function LifeAtGdbFormPage() {
         </div>
 
         {/* Media Block */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Media Upload
           </h2>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
               Upload Image or Video <span className="text-red-500">*</span>
             </label>
             <Upload
@@ -263,7 +249,7 @@ export default function LifeAtGdbFormPage() {
               mediaType="both"
               accept="image/*,video/mp4,video/webm,video/quicktime"
               maxSizeKB={500}
-              maxSizeMB={50}
+              maxSizeMB={10}
               disabled={isView}
             />
             {errors.file_url && (
@@ -279,7 +265,7 @@ export default function LifeAtGdbFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
               Media Alt Text <span className="text-red-500">*</span>
             </label>
             <Input
@@ -291,6 +277,7 @@ export default function LifeAtGdbFormPage() {
               error={!!errors.alt_text}
               errorMessage={errors.alt_text}
             />
+          </div>
           </div>
         </div>
 

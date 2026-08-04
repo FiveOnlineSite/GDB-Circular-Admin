@@ -221,45 +221,45 @@ export default function SupplierInquiryList() {
 
       {detailsModalOpen && viewingInquiry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm p-4" onClick={() => setDetailsModalOpen(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl shadow-2xl transform transition-all relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center">
+          <div className="bg-white  rounded-2xl w-full max-w-2xl shadow-2xl transform transition-all relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-slate-50  px-6 py-4 border-b border-slate-100  flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-bold text-slate-800 dark:text-white">Supplier Inquiry Details</h3>
+                <h3 className="text-lg font-bold text-slate-800 ">Supplier Inquiry Details</h3>
                 <p className="text-xs text-slate-500 mt-0.5">ID: #{viewingInquiry.id} • Submitted on {viewingInquiry.created_at ? new Date(viewingInquiry.created_at).toLocaleString() : "N/A"}</p>
               </div>
-              <button onClick={() => setDetailsModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><X size={20} /></button>
+              <button onClick={() => setDetailsModalOpen(false)} className="text-slate-400 hover:text-slate-600  transition-colors"><X size={20} /></button>
             </div>
 
             <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-[#981B1F] tracking-wide uppercase">Sender Contact Profile</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 dark:bg-gray-800/50 p-4 rounded-xl border border-slate-100 dark:border-gray-800">
-                  <div><span className="text-xs text-slate-400 block">Sender Name</span><span className="text-sm font-semibold text-slate-800 dark:text-white">{viewingInquiry.name}</span></div>
-                  <div><span className="text-xs text-slate-400 block">Company Name</span><span className="text-sm font-semibold text-slate-800 dark:text-white">{viewingInquiry.company || "N/A"}</span></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50  p-4 rounded-xl border border-slate-100 ">
+                  <div><span className="text-xs text-slate-400 block">Sender Name</span><span className="text-sm font-semibold text-slate-800 ">{viewingInquiry.name}</span></div>
+                  <div><span className="text-xs text-slate-400 block">Company Name</span><span className="text-sm font-semibold text-slate-800 ">{viewingInquiry.company || "N/A"}</span></div>
                   <div><span className="text-xs text-slate-400 block">Email Address</span><a href={`mailto:${viewingInquiry.email}`} className="text-sm font-semibold text-[#981B1F] hover:underline">{viewingInquiry.email}</a></div>
-                  <div><span className="text-xs text-slate-400 block">Timeline</span><span className="text-sm font-semibold text-slate-800 dark:text-white">{viewingInquiry.timeline || "N/A"}</span></div>
+                  <div><span className="text-xs text-slate-400 block">Timeline</span><span className="text-sm font-semibold text-slate-800 ">{viewingInquiry.timeline || "N/A"}</span></div>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-[#981B1F] tracking-wide uppercase">Feedstock Offer Specifications</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 dark:bg-gray-800/50 p-4 rounded-xl border border-slate-100 dark:border-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50  p-4 rounded-xl border border-slate-100 ">
                   <div><span className="text-xs text-slate-400 block">Resin Type</span><span className="px-2 py-0.5 text-xs font-semibold bg-sky-100 text-sky-800 rounded">{viewingInquiry.resin_type || "N/A"}</span></div>
-                  <div><span className="text-xs text-slate-400 block">Estimated Volume</span><span className="text-sm font-semibold text-slate-800 dark:text-white">{viewingInquiry.volume || "N/A"}</span></div>
-                  <div className="col-span-1 md:col-span-2"><span className="text-xs text-slate-400 block">Specifications/Grades</span><span className="text-sm text-slate-700 dark:text-slate-300 block whitespace-pre-wrap mt-0.5">{viewingInquiry.specs || "No technical specs provided"}</span></div>
-                  <div className="col-span-1 md:col-span-2"><span className="text-xs text-slate-400 block">Target Application</span><span className="text-sm text-slate-700 dark:text-slate-300 block mt-0.5">{viewingInquiry.application || "N/A"}</span></div>
+                  <div><span className="text-xs text-slate-400 block">Estimated Volume</span><span className="text-sm font-semibold text-slate-800 ">{viewingInquiry.volume || "N/A"}</span></div>
+                  <div className="col-span-1 md:col-span-2"><span className="text-xs text-slate-400 block">Specifications/Grades</span><span className="text-sm text-slate-700  block whitespace-pre-wrap mt-0.5">{viewingInquiry.specs || "No technical specs provided"}</span></div>
+                  <div className="col-span-1 md:col-span-2"><span className="text-xs text-slate-400 block">Target Application</span><span className="text-sm text-slate-700  block mt-0.5">{viewingInquiry.application || "N/A"}</span></div>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-[#981B1F] tracking-wide uppercase">Inquiry Message</h4>
-                <div className="space-y-4 bg-slate-50/50 dark:bg-gray-800/50 p-4 rounded-xl border border-slate-100 dark:border-gray-800">
-                  <div><span className="text-xs text-slate-400 block">Comments / Message</span><p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap mt-1">{viewingInquiry.message || "No comments entered."}</p></div>
+                <div className="space-y-4 bg-slate-50/50  p-4 rounded-xl border border-slate-100 ">
+                  <div><span className="text-xs text-slate-400 block">Comments / Message</span><p className="text-sm text-slate-700  whitespace-pre-wrap mt-1">{viewingInquiry.message || "No comments entered."}</p></div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-t border-slate-100 dark:border-gray-700 flex justify-end gap-3">
+            <div className="bg-slate-50  px-6 py-4 border-t border-slate-100  flex justify-end gap-3">
               <EditPageDeleteAction
                 id={viewingInquiry.id}
                 permission="seller.inquiry.delete"

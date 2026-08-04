@@ -5,7 +5,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getPrefixRoute } from "../../lib/utils/routeUtils";
 import { userLogin } from "services/auth";
-import { useTheme } from "../../context/ThemeContext";
+
+const ADMIN_BRAND = {
+  companyName: "GDB circular",
+  logoUrl: "/logo.png",
+};
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +22,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
-  const { theme } = useTheme();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -120,8 +123,8 @@ const Login = () => {
           <div className="relative z-10 flex flex-col justify-center items-center text-center">
             <div className="bg-white/95 backdrop-blur-sm p-6 rounded-3xl mb-6 shadow-inner border border-white/30">
               <img
-                src={theme.logo_url}
-                alt={theme.company_name}
+                src={ADMIN_BRAND.logoUrl}
+                alt={ADMIN_BRAND.companyName}
                 width={280}
                 height={180}
                 className="object-contain"

@@ -33,8 +33,8 @@ export default function LifeAtGdbList() {
     try {
       setLoading(true);
       const res = await getLifeItems({
-        page: params.page || pagination.current_page,
-        limit: params.limit || pagination.per_page,
+        page: 1,
+        limit: 1000,
         search: params.search !== undefined ? params.search : search,
         media_type: params.media_type !== undefined ? params.media_type : selectedMediaType,
         status: params.status !== undefined ? params.status : selectedStatus,
@@ -54,7 +54,7 @@ export default function LifeAtGdbList() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.current_page, pagination.per_page, search, selectedMediaType, selectedStatus]);
+  }, [search, selectedMediaType, selectedStatus]);
 
   useEffect(() => {
     fetchLifeGallery();
@@ -287,6 +287,7 @@ export default function LifeAtGdbList() {
           handlePerPageChange={(pp) =>
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
+          sequenceReorderScope="team_life_gallery"
           emptyMessage="No gallery items found."
         />
       </div>

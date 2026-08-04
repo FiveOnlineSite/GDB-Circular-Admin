@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Save, Loader2, Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
 import { getOverview, updateOverview } from "../../../services/aboutGDB";
@@ -22,7 +23,6 @@ export default function OverviewPage() {
       { url: "", alt: "" },
       { url: "", alt: "" },
     ],
-    status: "active",
   });
 
   useEffect(() => {
@@ -36,7 +36,6 @@ export default function OverviewPage() {
           const updatedForm = {
             description: d.description || "",
             images: images.length === 6 ? images : [...images, ...Array(6 - images.length).fill({ url: "", alt: "" })],
-            status: d.status || "active",
           };
           setForm(updatedForm);
           const hasData = !!(updatedForm.description || updatedForm.images.some(img => img.url));
@@ -110,7 +109,6 @@ export default function OverviewPage() {
       const res = await updateOverview({
         description: form.description,
         images: form.images,
-        status: form.status,
       });
       if (res.success) {
         toast.success("Overview updated successfully");
@@ -138,7 +136,7 @@ export default function OverviewPage() {
   return (
     <div className="space-y-6 pb-12 w-full">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">About GDB - Overview</h1>
+        <h1 className="text-2xl font-bold text-slate-800  tracking-tight">About GDB - Overview</h1>
         <p className="text-slate-500 text-sm mt-1">Manage the overview section with description and images</p>
       </div>
 
@@ -146,9 +144,9 @@ export default function OverviewPage() {
         /* Preview Card View */
         <div className="space-y-6">
           {/* Details Card */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
             <div className="flex items-center justify-between border-b pb-3">
-              <h2 className="text-base font-semibold text-slate-700 dark:text-white">Overview Details</h2>
+              <h2 className="text-base font-semibold text-slate-700 ">Overview Details</h2>
               {hasPermission("about", "overview.update") && (
                 <Button
                   variant="outline"
@@ -161,24 +159,18 @@ export default function OverviewPage() {
             </div>
 
             <div>
-              <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider mb-1">Description</span>
-              <p className="text-sm text-slate-600 dark:text-gray-305 whitespace-pre-wrap">{form.description || "—"}</p>
+              <span className="text-xs font-semibold text-slate-400  block uppercase tracking-wider mb-1">Description</span>
+              <p className="text-sm text-slate-600  whitespace-pre-wrap">{form.description || "—"}</p>
             </div>
 
-            <div>
-              <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider mb-1">Status</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${form.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                {form.status === "active" ? "Active" : "Inactive"}
-              </span>
-            </div>
           </div>
 
           {/* Images Card */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Images</h2>
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Images</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {form.images.map((image, index) => (
-                <div key={index} className="border border-slate-100 dark:border-gray-800 rounded-xl p-3 bg-slate-50/50 dark:bg-gray-800/50 space-y-3">
+                <div key={index} className="border border-slate-100  rounded-xl p-3 bg-slate-50/50  space-y-3">
                   <span className="text-xs font-semibold text-slate-400 block uppercase">Image {index + 1}</span>
                   {image.url ? (
                     <img
@@ -187,12 +179,12 @@ export default function OverviewPage() {
                       className="w-full h-32 object-cover rounded-lg border bg-white"
                     />
                   ) : (
-                    <div className="w-full h-32 rounded-lg bg-slate-200 dark:bg-gray-800 flex items-center justify-center text-slate-400 text-xs">No image uploaded</div>
+                    <div className="w-full h-32 rounded-lg bg-slate-200  flex items-center justify-center text-slate-400 text-xs">No image uploaded</div>
                   )}
                   {image.alt && (
                     <div>
-                      <span className="text-[10px] font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider">Alt Text</span>
-                      <span className="text-xs text-slate-700 dark:text-slate-350">{image.alt}</span>
+                      <span className="text-[10px] font-semibold text-slate-400  block uppercase tracking-wider">Alt Text</span>
+                      <span className="text-xs text-slate-700 ">{image.alt}</span>
                     </div>
                   )}
                 </div>
@@ -204,11 +196,11 @@ export default function OverviewPage() {
         /* Form View */
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Description Section */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Overview Details</h2>
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Overview Details</h2>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
+              <label className="text-sm font-semibold text-slate-600  block mb-2">
                 Description <span className="text-red-500">*</span>
               </label>
               <Textarea
@@ -222,77 +214,66 @@ export default function OverviewPage() {
               <p className="text-xs text-slate-500 mt-1">Provide a comprehensive description for the overview section</p>
             </div>
 
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
-                Status
-              </label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm(p => ({ ...p, status: e.target.value }))}
-                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
           </div>
 
           {/* Images Section */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
               Images (Exactly 6 Required) <span className="text-red-500">*</span>
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {form.images.map((image, index) => (
-                <div key={index} className="border border-slate-200 dark:border-gray-600 rounded-lg p-4">
+                <div key={index} className="border border-slate-200  rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-gray-300">
+                    <label className="text-sm font-semibold text-slate-600 ">
                       Image {index + 1}
                     </label>
                   </div>
-                  <Upload
-                    value={image.url}
-                    onChange={(url) => {
-                      setForm(p => ({
-                        ...p,
-                        images: p.images.map((img, i) => i === index ? { ...img, url: url } : img)
-                      }));
-                      const errKey = `image_url_${index}`;
-                      if (errors[errKey]) {
-                        setErrors(prev => {
-                          const next = { ...prev };
-                          delete next[errKey];
-                          return next;
-                        });
-                      }
-                    }}
-                    mediaType="image"
-                    accept="image/*"
-                    maxSizeKB={500}
-                  />
-                  {errors[`image_url_${index}`] && (
-                    <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
-                      {errors[`image_url_${index}`]}
-                    </span>
-                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600  block mb-2">
+                      Image Upload
+                    </label>
+                    <Upload
+                      value={image.url}
+                      onChange={(url) => {
+                        setForm(p => ({
+                          ...p,
+                          images: p.images.map((img, i) => i === index ? { ...img, url: url } : img)
+                        }));
+                        const errKey = `image_url_${index}`;
+                        if (errors[errKey]) {
+                          setErrors(prev => {
+                            const next = { ...prev };
+                            delete next[errKey];
+                            return next;
+                          });
+                        }
+                      }}
+                      mediaType="image"
+                      accept="image/*"
+                      maxSizeKB={500}
+                    />
+                    {errors[`image_url_${index}`] && (
+                      <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                        {errors[`image_url_${index}`]}
+                      </span>
+                    )}
+                  </div>
 
-                  <div className="mt-3">
-                    <label className="text-xs font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600  block mb-2">
                       Alt Text <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <Input
                       value={image.alt}
                       onChange={(e) => handleImageAltChange(index, e.target.value)}
                       placeholder="Enter alt text for this image"
-                      className={`w-full border ${errors[`image_alt_${index}`] ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15'} rounded-lg p-2 text-sm focus:outline-none focus:ring-2 transition dark:bg-gray-800 dark:text-white`}
+                      error={!!errors[`image_alt_${index}`]}
+                      errorMessage={errors[`image_alt_${index}`]}
                     />
-                    {errors[`image_alt_${index}`] && (
-                      <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
-                        {errors[`image_alt_${index}`]}
-                      </span>
-                    )}
+                  </div>
                   </div>
                 </div>
               ))}

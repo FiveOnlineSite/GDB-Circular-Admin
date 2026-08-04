@@ -49,8 +49,8 @@ export default function CategoryList() {
       try {
         setLoading(true);
         const res = await getCategories({
-          page: params.page || pagination.current_page,
-          limit: params.limit || pagination.per_page,
+          page: 1,
+          limit: 1000,
           category_title: params.search !== undefined ? params.search : search,
           status: params.status !== undefined ? params.status : selectedStatus,
         });
@@ -70,7 +70,7 @@ export default function CategoryList() {
         setLoading(false);
       }
     },
-    [pagination.current_page, pagination.per_page, search, selectedStatus]
+    [search, selectedStatus]
   );
 
   useEffect(() => {
@@ -331,6 +331,7 @@ export default function CategoryList() {
           handlePerPageChange={(pp) =>
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
+          sequenceReorderScope="news_categories"
           emptyMessage="No categories found."
         />
       </div>
@@ -342,20 +343,20 @@ export default function CategoryList() {
           onClick={() => !submitting && setModalOpen(false)}
         >
           <div
-            className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl transform transition-all relative overflow-hidden"
+            className="bg-white  rounded-2xl w-full max-w-md shadow-2xl transform transition-all relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSaveCategory} noValidate>
               {/* Modal Header */}
-              <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+              <div className="bg-slate-50  px-6 py-4 border-b border-slate-100  flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-800 ">
                   {editingItem ? "Edit Category" : "Add Category"}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
                   disabled={submitting}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                  className="text-slate-400 hover:text-slate-600  transition-colors"
                 >
                   &times;
                 </button>
@@ -365,7 +366,7 @@ export default function CategoryList() {
               <div className="p-6 space-y-4">
                 {/* Category Title */}
                 <div>
-                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-600  block mb-1">
                     Category Title <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -379,25 +380,10 @@ export default function CategoryList() {
                   />
                 </div>
 
-                {/* Sequence */}
-                <div>
-                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                    Sequence
-                  </label>
-                  <Input
-                    type="number"
-                    name="sequence"
-                    value={form.sequence}
-                    onChange={handleFormChange}
-                    placeholder="0"
-                    disabled={submitting}
-                  />
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   {/* Visibility */}
                   <div>
-                    <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-600  block mb-1">
                       Visibility
                     </label>
                     <select
@@ -405,7 +391,7 @@ export default function CategoryList() {
                       value={form.visibility}
                       onChange={handleFormChange}
                       disabled={submitting}
-                      className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white   "
                     >
                       <option value={1}>Show</option>
                       <option value={0}>Hide</option>
@@ -414,7 +400,7 @@ export default function CategoryList() {
 
                   {/* Status */}
                   <div>
-                    <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-600  block mb-1">
                       Status
                     </label>
                     <select
@@ -422,7 +408,7 @@ export default function CategoryList() {
                       value={form.status}
                       onChange={handleFormChange}
                       disabled={submitting}
-                      className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white   "
                     >
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
@@ -432,7 +418,7 @@ export default function CategoryList() {
               </div>
 
               {/* Modal Footer */}
-              <div className="bg-slate-50 dark:bg-gray-800 px-6 py-4 border-t border-slate-100 dark:border-gray-700 flex justify-end gap-3">
+              <div className="bg-slate-50  px-6 py-4 border-t border-slate-100  flex justify-end gap-3">
                 <EditPageDeleteAction
                   id={editingItem?.id}
                   permission="news.category.delete"

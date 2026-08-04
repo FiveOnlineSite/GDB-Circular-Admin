@@ -338,24 +338,4 @@ export const MenuItems = [
       }
     ]
   },
-  {
-    title: 'Settings',
-    icon: Shield,
-    url: '/settings',
-    allowedRoles: [1, 2],
-    module: 'settings',
-    subItems: [
-      {
-        title: 'Media Rules',
-        icon: Image,
-        url: '/settings/media-rules',
-        exact: true,
-        allowedRoles: [1, 2],
-        module: 'settings',
-        action: 'rules.view'
-      }
-    ]
-  },
-
-
 ];

@@ -1,15 +1,22 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, ToggleLeft, ToggleRight, Search, X, Eye } from "lucide-react";
+import { Plus, Edit2, ToggleLeft, ToggleRight, Search, X, Eye, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import { getProducts, toggleProductStatus } from "../../../services/productListing";
+import { getProducts, toggleProductHomepage, toggleProductStatus } from "../../../services/productListing";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
 const CATEGORIES = ["LDPE", "HDPE", "PP"];
 const API_URL = process.env.REACT_APP_API_URL || "";
+
+const tabButtonClass = (active) =>
+  `rounded-full px-4 py-2 text-sm font-semibold transition ${
+    active
+      ? "bg-[#981B1F] text-white shadow-sm"
+      : "border border-slate-200 bg-white text-slate-600 hover:border-[#981B1F]/30 hover:bg-[#981B1F]/5 hover:text-[#981B1F]"
+  }`;
 
 export default function CatalogueList() {
   const { hasPermission } = usePermissionContext();
@@ -20,14 +27,28 @@ export default function CatalogueList() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [homepageToggleLoadingId, setHomepageToggleLoadingId] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getProducts({ search, category, status: statusFilter, page: pagination.current_page, limit: pagination.per_page });
+      const isCategorySequenceView = Boolean(category);
+      const res = await getProducts({
+        search,
+        category,
+        status: statusFilter,
+        page: isCategorySequenceView ? 1 : pagination.current_page,
+        limit: isCategorySequenceView ? 1000 : pagination.per_page,
+      });
       if (res.success) {
         setRows(res.data?.data || []);
-        if (res.data?.pagination) setPagination(res.data.pagination);
+        if (res.data?.pagination) {
+          setPagination((prev) =>
+            isCategorySequenceView
+              ? { ...prev, current_page: 1, total: res.data.pagination.total, last_page: 1 }
+              : res.data.pagination,
+          );
+        }
       }
     } catch { toast.error("Failed to load products"); setRows([]); }
     finally { setLoading(false); }
@@ -42,10 +63,31 @@ export default function CatalogueList() {
     } catch (err) { toast.error(err.response?.data?.message || "Failed to toggle status"); }
   };
 
+  const handleHomepageToggle = async (row) => {
+    try {
+      setHomepageToggleLoadingId(row.id);
+      const res = await toggleProductHomepage(row.id);
+      if (res.success) {
+        toast.success(res.message || "Homepage display updated");
+        fetchData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Only 3 products can be shown on homepage.");
+    } finally {
+      setHomepageToggleLoadingId(null);
+    }
+  };
+
   const clearFilters = () => { setSearch(""); setCategory(""); setStatusFilter(""); setPagination(p => ({ ...p, current_page: 1 })); };
   const hasFilters = search || category || statusFilter;
+  const canReorderSelectedCategory = Boolean(category);
 
-  const selectStyle = "border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+  const handleCategoryTabChange = (nextCategory) => {
+    setCategory(nextCategory);
+    setPagination((p) => ({ ...p, current_page: 1 }));
+  };
+
+  const selectStyle = "border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white   ";
 
   const columns = [
     {
@@ -77,11 +119,37 @@ export default function CatalogueList() {
     },
     {
       field: "show_on_homepage", headerName: "Homepage", sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.show_on_homepage ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"}`}>
-          {row.show_on_homepage ? "Yes" : "No"}
-        </span>
-      ),
+      renderCell: ({ row }) => {
+        const isShown = Number(row.show_on_homepage) === 1;
+        const isLoading = homepageToggleLoadingId === row.id;
+
+        if (!hasPermission("product", "catalogue.update")) {
+          return (
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${isShown ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"}`}>
+              {isShown ? "Yes" : "No"}
+            </span>
+          );
+        }
+
+        return (
+          <button
+            type="button"
+            onClick={() => handleHomepageToggle(row)}
+            disabled={isLoading}
+            className={`inline-flex min-w-[48px] items-center justify-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium transition disabled:cursor-wait disabled:opacity-70 ${isShown ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+            title={isLoading ? "Updating homepage display" : isShown ? "Remove from homepage" : "Show on homepage"}
+          >
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : isShown ? (
+              <ToggleRight className="h-3.5 w-3.5" />
+            ) : (
+              <ToggleLeft className="h-3.5 w-3.5" />
+            )}
+            {isLoading ? "..." : isShown ? "Yes" : "No"}
+          </button>
+        );
+      },
     },
     { field: "sequence", headerName: "Seq", sortable: true },
     {
@@ -132,12 +200,16 @@ export default function CatalogueList() {
     },
   ];
 
+  const tableColumns = category
+    ? columns
+    : columns.filter((column) => column.field !== "sequence");
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Product Catalogue</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage products by category — LDPE, HDPE, PP</p>
+          <h1 className="text-2xl font-bold text-gray-900 ">Product Catalogue</h1>
+          <p className="text-sm text-gray-500  mt-0.5">Manage products by category — LDPE, HDPE, PP</p>
         </div>
         {hasPermission("product", "catalogue.create") && (
           <Button onClick={() => navigate("/product-listing/catalogue/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
@@ -147,8 +219,8 @@ export default function CatalogueList() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-4 mb-5">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-4 mb-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
@@ -158,10 +230,6 @@ export default function CatalogueList() {
               onChange={e => { setSearch(e.target.value); setPagination(p => ({ ...p, current_page: 1 })); }}
             />
           </div>
-          <select value={category} onChange={e => { setCategory(e.target.value); setPagination(p => ({ ...p, current_page: 1 })); }} className={selectStyle}>
-            <option value="">All Categories</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
           <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPagination(p => ({ ...p, current_page: 1 })); }} className={selectStyle}>
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -175,10 +243,28 @@ export default function CatalogueList() {
         </div>
       </div>
 
+      <div className="mb-4 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => handleCategoryTabChange("")} className={tabButtonClass(!category)}>
+            All
+          </button>
+          {CATEGORIES.map((cat) => (
+            <button key={cat} type="button" onClick={() => handleCategoryTabChange(cat)} className={tabButtonClass(category === cat)}>
+              {cat}
+            </button>
+          ))}
+          <span className="ml-auto text-xs font-medium text-slate-500">
+            {canReorderSelectedCategory ? "Drag rows to change this category sequence." : "Select a category tab to reorder sequence."}
+          </span>
+        </div>
+      </div>
+
       <ReusableDataTable
-        columns={columns} rows={rows} loading={loading} pagination={pagination}
+        columns={tableColumns} rows={rows} loading={loading} pagination={pagination}
         handlePageChange={p => setPagination(prev => ({ ...prev, current_page: p }))}
         handlePerPageChange={pp => setPagination(prev => ({ ...prev, per_page: pp, current_page: 1 }))}
+        sequenceReorderScope="product_catalogue"
+        disableSequenceReorder={!canReorderSelectedCategory}
         emptyMessage="No products found. Click 'Add Product' to create one."
       />
 

@@ -92,8 +92,8 @@ export default function StatsList() {
             <BarChart3 className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Stats / Value Strip</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage homepage statistics and value highlights</p>
+            <h1 className="text-2xl font-bold text-gray-900 ">Stats / Value Strip</h1>
+            <p className="text-sm text-gray-500  mt-0.5">Manage homepage statistics and value highlights</p>
           </div>
         </div>
         {hasPermission("homepage", "stats.create") && (
@@ -102,7 +102,7 @@ export default function StatsList() {
           </Button>
         )}
       </div>
-      <ReusableDataTable columns={columns} rows={rows} loading={loading} emptyMessage="No stats added yet. Click 'Add Stat' to create one." />
+      <ReusableDataTable columns={columns} rows={rows} loading={loading} sequenceReorderScope="homepage_stats" emptyMessage="No stats added yet. Click 'Add Stat' to create one." />
     </div>
   );
 }

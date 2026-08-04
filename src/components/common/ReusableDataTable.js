@@ -17,7 +17,10 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  GripVertical,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { reorderSequence } from '../../services/reorder';
 import {
   Select,
   SelectContent,
@@ -115,10 +118,16 @@ export default function ReusableDataTable({
   resetSortTrigger,
   handleSortChange,
   sortConfig,
+  sequenceReorderScope,
+  onSequenceReorderSuccess,
+  disableSequenceReorder = false,
 }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
   const [selected, setSelected] = useState(rowSelectionModel || []);
+  const [draggedRowId, setDraggedRowId] = useState(null);
+  const [orderedRowsOverride, setOrderedRowsOverride] = useState(null);
+  const [reordering, setReordering] = useState(false);
 
   const stableSelectionModel = useMemo(
     () => rowSelectionModel || [],
@@ -137,6 +146,10 @@ export default function ReusableDataTable({
   useEffect(() => {
     setSelected(stableSelectionModel);
   }, [stableSelectionModel]);
+
+  useEffect(() => {
+    setOrderedRowsOverride(null);
+  }, [rows]);
 
   // Reset sort when resetSortTrigger changes
   useEffect(() => {
@@ -223,10 +236,22 @@ export default function ReusableDataTable({
   };
 
   // Since API returns paginated data, just sort the current page's rows if not server-side sorting
+  const tableRows = orderedRowsOverride || rows;
+
+  const displayColumns = useMemo(() => {
+    const sequenceColumn = columns.find((column) => column.field === 'sequence');
+    if (!sequenceColumn) return columns;
+
+    return [
+      sequenceColumn,
+      ...columns.filter((column) => column.field !== 'sequence'),
+    ];
+  }, [columns]);
+
   const visibleRows = useMemo(() => {
-    if (handleSortChange) return rows;
-    return [...rows].sort(getComparator(order, orderBy));
-  }, [order, orderBy, rows, handleSortChange]);
+    if (handleSortChange) return tableRows;
+    return [...tableRows].sort(getComparator(order, orderBy));
+  }, [order, orderBy, tableRows, handleSortChange]);
 
   const getCellValue = (row, column) => {
     if (column.valueGetter) {
@@ -237,6 +262,60 @@ export default function ReusableDataTable({
 
   const isAllSelected = rows.length > 0 && selected.length === rows.length;
   const isSomeSelected = selected.length > 0 && selected.length < rows.length;
+  const hasSequenceColumn = displayColumns.some((column) => column.field === 'sequence');
+  const isSequenceReorderEnabled =
+    Boolean(sequenceReorderScope) &&
+    hasSequenceColumn &&
+    !disableSequenceReorder;
+  const canReorderRows =
+    isSequenceReorderEnabled &&
+    rows.length > 1;
+  const showPagination = rows.length > 0 && !isSequenceReorderEnabled;
+
+  const handleSequenceDrop = async (targetRowId) => {
+    if (!canReorderRows || draggedRowId == null || draggedRowId === targetRowId) {
+      setDraggedRowId(null);
+      return;
+    }
+
+    const fromIndex = visibleRows.findIndex((row) => row.id === draggedRowId);
+    const toIndex = visibleRows.findIndex((row) => row.id === targetRowId);
+    if (fromIndex === -1 || toIndex === -1) {
+      setDraggedRowId(null);
+      return;
+    }
+
+    const reorderedRows = [...visibleRows];
+    const [movedRow] = reorderedRows.splice(fromIndex, 1);
+    reorderedRows.splice(toIndex, 0, movedRow);
+
+    const pageOffset = hasServerPagination ? (currentPage - 1) * perPage : 0;
+    const rowsWithSequence = reorderedRows.map((row, index) => ({
+      ...row,
+      sequence: pageOffset + index + 1,
+    }));
+    const sequenceItems = rowsWithSequence.map((row) => ({
+      id: row.id,
+      sequence: row.sequence,
+    }));
+
+    const previousOverride = orderedRowsOverride;
+    setOrderedRowsOverride(rowsWithSequence);
+    setDraggedRowId(null);
+    setReordering(true);
+
+    try {
+      await reorderSequence(sequenceReorderScope, sequenceItems);
+      toast.success('Sequence updated');
+      onSequenceReorderSuccess?.(rowsWithSequence);
+    } catch (error) {
+      setOrderedRowsOverride(previousOverride);
+      toast.error(error.response?.data?.message || 'Failed to update sequence');
+    } finally {
+      setReordering(false);
+    }
+  };
+
   const getColumnStyle = (column) => {
     if (column.field === 'actions') {
       return { width: 'auto' };
@@ -276,11 +355,24 @@ export default function ReusableDataTable({
             <Loader2 className='h-8 w-8 animate-spin text-primary' />
           </div>
         )}
+        {reordering && (
+          <div className='absolute inset-0 z-20 flex items-center justify-center bg-white/55 backdrop-blur-[1px]'>
+            <div className='flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm'>
+              <Loader2 className='h-4 w-4 animate-spin text-[#981B1F]' />
+              Updating sequence...
+            </div>
+          </div>
+        )}
 
-        <div className={cn('transition-opacity', loading && 'opacity-40')}>
+        <div className={cn('transition-opacity', (loading || reordering) && 'opacity-40')}>
           <Table className='min-w-max w-full'>
             <TableHeader>
               <TableRow className='group'>
+                {canReorderRows && (
+                  <TableHead className='w-12 text-center'>
+                    <span className='sr-only'>Drag to reorder</span>
+                  </TableHead>
+                )}
                 {checkboxSelection && (
                   <TableHead className='w-12'>
                     <Checkbox
@@ -293,14 +385,14 @@ export default function ReusableDataTable({
                     />
                   </TableHead>
                 )}
-                {columns.map((column) => (
+                {displayColumns.map((column) => (
                   <TableHead
                     key={column.headerName}
                     className={cn(
                       column.align === 'right' && 'text-right',
                       column.align === 'center' && 'text-center',
                       column.sticky === 'right' &&
-                        'sticky right-0 z-10 bg-white dark:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
+                        'sticky right-0 z-10 bg-white  shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
                       'whitespace-nowrap',
                       column.cellClassName,
                       column.headerClassName,
@@ -339,14 +431,47 @@ export default function ReusableDataTable({
                   return (
                     <TableRow
                       key={row.id}
+                      onDragOver={(e) => {
+                        if (!canReorderRows || draggedRowId == null) return;
+                        e.preventDefault();
+                      }}
+                      onDrop={(e) => {
+                        if (!canReorderRows) return;
+                        e.preventDefault();
+                        handleSequenceDrop(row.id);
+                      }}
                       onClick={() => onRowClick?.(row)}
                       className={cn(
                         onRowClick && 'cursor-pointer',
                         'hover:bg-blue-50 transition',
+                        canReorderRows && draggedRowId === row.id && 'opacity-40',
                         getRowClassName?.(row),
                         'group',
                       )}
                     >
+                      {canReorderRows && (
+                        <TableCell
+                          className='w-12 text-center'
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type='button'
+                            draggable={!reordering}
+                            onDragStart={(e) => {
+                              e.stopPropagation();
+                              setDraggedRowId(row.id);
+                              e.dataTransfer.effectAllowed = 'move';
+                              e.dataTransfer.setData('text/plain', String(row.id));
+                            }}
+                            onDragEnd={() => setDraggedRowId(null)}
+                            className='inline-flex h-8 w-8 cursor-grab items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing'
+                            title='Drag to change sequence'
+                            aria-label='Drag to change sequence'
+                          >
+                            <GripVertical className='h-4 w-4' />
+                          </button>
+                        </TableCell>
+                      )}
                       {checkboxSelection && (
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
@@ -356,7 +481,7 @@ export default function ReusableDataTable({
                         </TableCell>
                       )}
 
-                      {columns.map((column) => (
+                      {displayColumns.map((column) => (
                         <TableCell
                           key={column.headerName}
                           onClick={(e) => {
@@ -367,7 +492,7 @@ export default function ReusableDataTable({
                             column.align === 'right' && 'text-right',
                             column.align === 'center' && 'text-center',
                             column.sticky === 'right' &&
-                              'sticky right-0 z-10 bg-white dark:bg-gray-900 group-hover:bg-white dark:group-hover:bg-gray-900 shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
+                              'sticky right-0 z-10 bg-white  group-hover:bg-white  shadow-[-8px_0_12px_-10px_rgba(15,23,42,0.45)]',
                             column.field === 'actions' && 'whitespace-nowrap',
                             column.cellClassName,
                           )}
@@ -388,7 +513,11 @@ export default function ReusableDataTable({
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={columns.length + (checkboxSelection ? 1 : 0)}
+                    colSpan={
+                      displayColumns.length +
+                      (checkboxSelection ? 1 : 0) +
+                      (canReorderRows ? 1 : 0)
+                    }
                     className='h-24 text-center'
                   >
                     {emptyMessage}
@@ -401,7 +530,7 @@ export default function ReusableDataTable({
       </div>
 
       {/* Pagination */}
-      {rows.length > 0 && (
+      {showPagination && (
         <div className='flex items-center justify-between border-t border-gray-100 pb-5 p-2'>
           <div className='flex items-center gap-1.5'>
             <span className='text-sm text-gray-500'>Rows per page:</span>

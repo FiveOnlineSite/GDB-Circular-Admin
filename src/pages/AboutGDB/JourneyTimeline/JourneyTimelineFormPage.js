@@ -145,45 +145,41 @@ export default function JourneyTimelineFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{isEdit ? "Edit Timeline Item" : "Add Timeline Item"}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{isEdit ? "Edit Timeline Item" : "Add Timeline Item"}</h1>
           <p className="text-slate-500 text-sm">{isEdit ? "Update the timeline item" : "Add a new timeline item to the journey"}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Timeline Item Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Timeline Item Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Year <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Year <span className="text-red-500">*</span></label>
               <Input name="year" value={form.year} onChange={handleChange} placeholder="e.g., 2020" error={!!errors.year} errorMessage={errors.year} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence <span className="text-red-500">*</span></label>
-              <Input type="number" name="sequence" value={form.sequence} onChange={handleChange} placeholder="0" error={!!errors.sequence} errorMessage={errors.sequence} />
-              <p className="text-xs text-slate-500 mt-1">Items are ordered by this value (0=first)</p>
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Description <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600  block mb-1">Description <span className="text-red-500">*</span></label>
             <Textarea name="description" value={form.description} onChange={handleChange} placeholder="Enter timeline item description" rows={4} />
             {errors.description && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.description}</span>}
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
-            <select name="status" value={form.status} onChange={handleChange} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
+            <select name="status" value={form.status} onChange={handleChange} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ">
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Timeline Media</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Timeline Media</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Icon <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Icon <span className="text-red-500">*</span></label>
             <Upload value={form.icon_url} onChange={(url) => {
               setForm((prev) => ({ ...prev, icon_url: url }));
               if (errors.icon_url) {
@@ -197,11 +193,13 @@ export default function JourneyTimelineFormPage() {
             {errors.icon_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.icon_url}</span>}
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Icon Alt Text</label>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Icon Alt Text</label>
             <Input name="icon_alt" value={form.icon_alt} onChange={handleChange} placeholder="Describe the icon" />
           </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Image <span className="text-red-500">*</span></label>
             <Upload value={form.image_url} onChange={(url) => {
               setForm((prev) => ({ ...prev, image_url: url }));
               if (errors.image_url) {
@@ -215,8 +213,9 @@ export default function JourneyTimelineFormPage() {
             {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Image Alt Text</label>
             <Input name="image_alt" value={form.image_alt} onChange={handleChange} placeholder="Describe the image" />
+          </div>
           </div>
         </div>
 

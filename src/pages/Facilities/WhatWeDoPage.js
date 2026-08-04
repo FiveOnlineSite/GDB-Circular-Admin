@@ -123,21 +123,21 @@ export default function WhatWeDoPage() {
           <BriefcaseBusiness className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Facilities What We Do</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">Facilities What We Do</h1>
           <p className="text-slate-500 text-sm">Manage the facilities service cards shown on the website</p>
         </div>
       </div>
 
       {!sectionLoading && (
         <form onSubmit={handleSectionSave}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Section Header</h2>
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Section Header</h2>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Title</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Section Title</label>
               <Input value={section.section_title} onChange={(e) => setSection((prev) => ({ ...prev, section_title: e.target.value }))} placeholder="What we do" />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Description</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Section Description</label>
               <Textarea value={section.section_description} onChange={(e) => setSection((prev) => ({ ...prev, section_description: e.target.value }))} rows={3} placeholder="Overview text for the facilities support cards" />
             </div>
             {hasPermission("facilities", "whatwedo.update") && (
@@ -151,16 +151,16 @@ export default function WhatWeDoPage() {
         </form>
       )}
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white">What We Do Cards</h2>
+          <h2 className="text-base font-semibold text-slate-700 ">What We Do Cards</h2>
           {hasPermission("facilities", "whatwedo.create") && (
             <Button onClick={() => navigate("/facilities/what-we-do/cards/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" size="sm">
               <Plus className="w-4 h-4 mr-2" />Add Card
             </Button>
           )}
         </div>
-        <ReusableDataTable columns={columns} rows={cards} loading={cardsLoading} emptyMessage="No cards added yet." />
+        <ReusableDataTable columns={columns} rows={cards} loading={cardsLoading} sequenceReorderScope="facilities_what_we_do_cards" emptyMessage="No cards added yet." />
       </div>
 
     </div>

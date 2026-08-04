@@ -13,7 +13,7 @@ import {
 } from "../../../services/globalContent/certificates";
 
 const fieldStyle =
-  "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+  "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 
 
 
@@ -122,7 +122,7 @@ export default function CertificateFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
             {isEdit ? "Edit Certificate" : "Add Certificate"}
           </h1>
           <p className="text-slate-500 text-sm">{isEdit ? "Update trust logo details" : "Add a new trust logo or certificate"}</p>
@@ -130,12 +130,12 @@ export default function CertificateFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Certificate Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Certificate Details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Certificate Title <span className="text-red-500">*</span>
               </label>
               <Input
@@ -148,21 +148,13 @@ export default function CertificateFormPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
-              <Input name="image_alt" value={form.image_alt} onChange={handleChange} placeholder="ISO certification logo" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 External / Internal Link
               </label>
               <Input name="link" value={form.link} onChange={handleChange} placeholder="https://certifibody.org/verify/..." />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handleChange} placeholder="0" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handleChange} className={fieldStyle}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -170,8 +162,9 @@ export default function CertificateFormPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
               Certificate Image <span className="text-red-500">*</span>
             </label>
             <Upload
@@ -195,6 +188,11 @@ export default function CertificateFormPage() {
                 {errors.image_url}
               </span>
             )}
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">Image Alt Text</label>
+            <Input name="image_alt" value={form.image_alt} onChange={handleChange} placeholder="ISO certification logo" />
+          </div>
           </div>
         </div>
 

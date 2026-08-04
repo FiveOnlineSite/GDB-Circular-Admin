@@ -10,14 +10,17 @@ import {
   compressVideo,
   getFileSizeMB,
 } from "../../utils/videoCompression";
-import { getMediaRules } from "../../services/settings/mediaRulesService";
+
+const STATIC_MAX_IMAGE_SIZE_KB = 500;
+const STATIC_MAX_VIDEO_SIZE_MB = 10;
+const STATIC_ALLOWED_IMAGE_EXTS = ["jpg", "jpeg", "png", "webp", "svg"];
+const STATIC_ALLOWED_VIDEO_EXTS = ["mp4", "webm", "mov"];
 
 export default function Upload({
   value = "",
   onChange,
+  className = "",
   accept = "image/*,video/mp4,application/pdf",
-  maxSizeKB = 500, // Default for images: 500KB
-  maxSizeMB = 50,  // Default for videos: 50MB
   compressBeforeUpload = true,
   mediaType = "both", // "image" | "video" | "both" | "document"
   onUploadStart,
@@ -33,8 +36,6 @@ export default function Upload({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [compressing, setCompressing] = useState(false);
 
-  // Dynamic Media Rules State
-  const [rules, setRules] = useState(null);
   const sessionUploadedUrlsRef = useRef(new Set());
   const latestValueRef = useRef(value);
 
@@ -52,25 +53,8 @@ export default function Upload({
   };
 
   const getAllowedImageExts = () => {
-    const configuredExts = rules
-      ? rules.allowed_image_ext.split(",").map((x) => x.trim().toLowerCase())
-      : ["jpg", "jpeg", "png", "webp", "svg"];
-
-    return Array.from(new Set([...configuredExts, "svg"]));
+    return STATIC_ALLOWED_IMAGE_EXTS;
   };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await getMediaRules();
-        if (res.success && res.data && res.data.status === "active") {
-          setRules(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to load global upload settings, using defaults.", err);
-      }
-    })();
-  }, []);
 
   const handleFileChange = async (e) => {
     const file = e.target.files ? e.target.files[0] : null;
@@ -85,16 +69,14 @@ export default function Upload({
     // 1. Resolve Rules
     const allowedImageExts = getAllowedImageExts();
 
-    const allowedVideoExts = rules
-      ? rules.allowed_video_ext.split(",").map((x) => x.trim().toLowerCase())
-      : ["mp4", "webm", "mov"];
+    const allowedVideoExts = STATIC_ALLOWED_VIDEO_EXTS;
 
-    const activeMaxImageKB = rules ? rules.max_image_size_kb : maxSizeKB;
-    const activeMaxVideoMB = rules ? rules.max_video_size_mb : maxSizeMB;
+    const activeMaxImageKB = STATIC_MAX_IMAGE_SIZE_KB;
+    const activeMaxVideoMB = STATIC_MAX_VIDEO_SIZE_MB;
 
-    const autoCompress = rules ? rules.auto_compression_before_upload === 1 : compressBeforeUpload;
-    const imageCompressEnabled = rules ? rules.image_compression_enabled === 1 : true;
-    const videoCompressEnabled = rules ? rules.video_compression_enabled === 1 : true;
+    const autoCompress = compressBeforeUpload;
+    const imageCompressEnabled = true;
+    const videoCompressEnabled = true;
     // 2. Validate based on file type and extensions
     if (isImage) {
       if (mediaType === "video" || mediaType === "document") {
@@ -281,9 +263,11 @@ export default function Upload({
   };
 
   useEffect(() => {
+    const sessionUploadedUrls = sessionUploadedUrlsRef.current;
+
     return () => {
-      const pendingUrls = Array.from(sessionUploadedUrlsRef.current);
-      sessionUploadedUrlsRef.current.clear();
+      const pendingUrls = Array.from(sessionUploadedUrls);
+      sessionUploadedUrls.clear();
       pendingUrls.forEach((fileUrl) => {
         deleteUploadedFile(fileUrl);
       });
@@ -296,7 +280,7 @@ export default function Upload({
       : `${process.env.REACT_APP_API_URL || ""}${value}`
     : null;
 
-  const showPreview = rules ? rules.enable_file_preview === 1 : true;
+  const showPreview = true;
 
   const getFileTypeIcon = () => {
     if (mediaType === "video") return <Video className="w-8 h-8 text-slate-300" />;
@@ -304,14 +288,14 @@ export default function Upload({
     return <ImageIcon className="w-8 h-8 text-slate-300" />;
   };
 
-  const maxImageLimitKB = rules ? rules.max_image_size_kb : maxSizeKB;
-  const maxVideoLimitMB = rules ? rules.max_video_size_mb : maxSizeMB;
+  const maxImageLimitKB = STATIC_MAX_IMAGE_SIZE_KB;
+  const maxVideoLimitMB = STATIC_MAX_VIDEO_SIZE_MB;
 
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${className}`}>
       {/* File Preview and Details */}
       {previewSrc && showPreview ? (
-        <div className="relative border border-slate-200 dark:border-gray-700 rounded-xl p-4 flex flex-col md:flex-row items-center gap-4 bg-slate-50 dark:bg-gray-800">
+        <div className="relative border border-slate-200  rounded-xl p-4 flex flex-col md:flex-row items-center gap-4 bg-slate-50 ">
           <div className="shrink-0">
             {value.includes("video") || value.endsWith(".mp4") || value.endsWith(".webm") || value.endsWith(".mov") ? (
               <video src={previewSrc} className="h-24 w-24 object-cover rounded-lg border bg-black" controls muted />
@@ -335,7 +319,7 @@ export default function Upload({
           )}
         </div>
       ) : (
-        <div className="border-2 border-dashed border-slate-200 dark:border-gray-700 rounded-xl p-6 text-center hover:border-[#981B1F]/40 transition relative bg-white dark:bg-gray-900">
+        <div className="border-2 border-dashed border-slate-200  rounded-xl p-6 text-center hover:border-[#981B1F]/40 transition relative bg-white ">
           {compressing ? (
             <div className="flex flex-col items-center justify-center py-4 space-y-2">
               <Loader2 className="w-10 h-10 animate-spin text-[#981B1F]" />
@@ -368,7 +352,7 @@ export default function Upload({
               <span className="text-sm font-bold text-slate-500">Click to upload {mediaType === "both" ? "media" : mediaType}</span>
               <span className="text-xs text-slate-400 font-medium">
                 {mediaType === "image" && `Image formats: ${getAllowedImageExts().join(", ").toUpperCase()} — max ${maxImageLimitKB}KB`}
-                {mediaType === "video" && `Video formats: ${rules ? rules.allowed_video_ext.toUpperCase() : "MP4, WEBM, MOV"} — max ${maxVideoLimitMB}MB`}
+                {mediaType === "video" && `Video formats: ${STATIC_ALLOWED_VIDEO_EXTS.join(", ").toUpperCase()} — max ${maxVideoLimitMB}MB`}
                 {mediaType === "document" && "PDF — max 5MB"}
                 {mediaType === "both" && `Images max ${maxImageLimitKB}KB · Videos max ${maxVideoLimitMB}MB · PDFs max 5MB`}
               </span>

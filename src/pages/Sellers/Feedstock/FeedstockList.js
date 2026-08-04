@@ -11,6 +11,13 @@ import { usePermissionContext } from "../../../context/PermissionContext";
 const CATEGORIES = ["LDPE", "HDPE", "PP", "Other"];
 const STATUS_OPTIONS = ["active", "inactive"];
 
+const tabButtonClass = (active) =>
+  `rounded-full px-4 py-2 text-sm font-semibold transition ${
+    active
+      ? "bg-[#981B1F] text-white shadow-sm"
+      : "border border-slate-200 bg-white text-slate-600 hover:border-[#981B1F]/30 hover:bg-[#981B1F]/5 hover:text-[#981B1F]"
+  }`;
+
 export default function FeedstockList() {
   const { hasPermission } = usePermissionContext();
   const navigate = useNavigate();
@@ -32,18 +39,24 @@ export default function FeedstockList() {
   const fetchFeedstocks = useCallback(async (params = {}) => {
     try {
       setLoading(true);
+      const nextCategory = params.category !== undefined ? params.category : selectedCategory;
+      const isCategorySequenceView = Boolean(nextCategory);
       const res = await getFeedstocks({
-        page: params.page || pagination.current_page,
-        limit: params.limit || pagination.per_page,
+        page: isCategorySequenceView ? 1 : params.page || pagination.current_page,
+        limit: isCategorySequenceView ? 1000 : params.limit || pagination.per_page,
         material_name: params.search !== undefined ? params.search : search,
-        feedstock_category: params.category !== undefined ? params.category : selectedCategory,
+        feedstock_category: nextCategory,
         status: params.status !== undefined ? params.status : selectedStatus,
       });
 
       if (res.success) {
         setRows(res.data || []);
         if (res.pagination) {
-          setPagination(res.pagination);
+          setPagination((prev) =>
+            isCategorySequenceView
+              ? { ...prev, current_page: 1, total: res.pagination.total, last_page: 1 }
+              : res.pagination,
+          );
         }
       } else {
         setRows([]);
@@ -66,8 +79,7 @@ export default function FeedstockList() {
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
-  const handleCategoryFilterChange = (e) => {
-    const cat = e.target.value;
+  const handleCategoryTabChange = (cat) => {
     setSelectedCategory(cat);
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
@@ -119,7 +131,7 @@ export default function FeedstockList() {
       headerName: "Category",
       sortable: true,
       renderCell: ({ row }) => (
-        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 dark:bg-gray-800 dark:text-gray-200 border border-slate-200 dark:border-gray-700">
+        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800   border border-slate-200 ">
           {row.feedstock_category}
         </span>
       ),
@@ -195,6 +207,10 @@ export default function FeedstockList() {
     },
   ];
 
+  const tableColumns = selectedCategory
+    ? columns
+    : columns.filter((column) => column.field !== "sequence");
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -231,20 +247,6 @@ export default function FeedstockList() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Category Filter */}
-          <select
-            value={selectedCategory}
-            onChange={handleCategoryFilterChange}
-            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[150px] cursor-pointer"
-          >
-            <option value="">All Categories</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-
           {/* Status Filter */}
           <select
             value={selectedStatus}
@@ -263,8 +265,21 @@ export default function FeedstockList() {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4">
+          <button type="button" onClick={() => handleCategoryTabChange("")} className={tabButtonClass(!selectedCategory)}>
+            All
+          </button>
+          {CATEGORIES.map((cat) => (
+            <button key={cat} type="button" onClick={() => handleCategoryTabChange(cat)} className={tabButtonClass(selectedCategory === cat)}>
+              {cat}
+            </button>
+          ))}
+          <span className="ml-auto text-xs font-medium text-slate-500">
+            {selectedCategory ? "Drag rows to change this category sequence." : "Select a category tab to reorder sequence."}
+          </span>
+        </div>
         <ReusableDataTable
-          columns={columns}
+          columns={tableColumns}
           rows={rows}
           loading={loading}
           pagination={pagination}
@@ -272,6 +287,8 @@ export default function FeedstockList() {
           handlePerPageChange={(pp) =>
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
+          sequenceReorderScope="seller_feedstock"
+          disableSequenceReorder={!selectedCategory}
           emptyMessage="No feedstock catalogue items found."
         />
       </div>

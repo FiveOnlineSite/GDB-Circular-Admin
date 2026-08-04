@@ -24,7 +24,6 @@ const modulePermissionPrefixes = {
   sellers: ["seller"],
   seller: ["seller"],
   news: ["news"],
-  settings: ["media"],
 };
 
 const getPermissionNames = (moduleOrPerm, action) => {

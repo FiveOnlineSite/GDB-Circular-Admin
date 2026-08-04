@@ -133,14 +133,6 @@ export default function WhatWeDoCardForm() {
               <Textarea name="card_description" value={form.card_description} onChange={handleChange} rows={4} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Icon Alt Text</label>
-              <Input name="icon_alt" value={form.icon_alt} onChange={handleChange} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handleChange} />
-            </div>
-            <div>
               <label className="text-sm font-semibold text-slate-600 block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handleChange} className={selectStyle}>
                 <option value="active">Active</option>
@@ -148,10 +140,16 @@ export default function WhatWeDoCardForm() {
               </select>
             </div>
           </div>
-          <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-2">Icon Upload <span className="text-red-500">*</span></label>
-            <Upload value={form.icon_url} onChange={(url) => { setForm((prev) => ({ ...prev, icon_url: url })); setErrors((prev) => ({ ...prev, icon_url: undefined })); }} mediaType="image" accept="image/*" maxSizeKB={500} />
-            {errors.icon_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.icon_url}</span>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-2">Icon Upload <span className="text-red-500">*</span></label>
+              <Upload value={form.icon_url} onChange={(url) => { setForm((prev) => ({ ...prev, icon_url: url })); setErrors((prev) => ({ ...prev, icon_url: undefined })); }} mediaType="image" accept="image/*" maxSizeKB={500} />
+              {errors.icon_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.icon_url}</span>}
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-2">Icon Alt Text</label>
+              <Input name="icon_alt" value={form.icon_alt} onChange={handleChange} />
+            </div>
           </div>
         </div>
 

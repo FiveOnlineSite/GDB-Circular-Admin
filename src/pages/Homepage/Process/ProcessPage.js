@@ -119,7 +119,7 @@ export default function ProcessPage() {
           <GitBranch className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Process Section</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">Process Section</h1>
           <p className="text-slate-500 text-sm">Manage the homepage process/workflow section</p>
         </div>
       </div>
@@ -127,14 +127,14 @@ export default function ProcessPage() {
       {/* Section Header Form */}
       {!sectionLoading && (
         <form onSubmit={handleSectionSave}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Section Header</h2>
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Section Header</h2>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Title</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Section Title</label>
               <Input value={section.section_title} onChange={e => setSection(p => ({ ...p, section_title: e.target.value }))} placeholder="Our Process" />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Description</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Section Description</label>
               <Textarea value={section.section_description} onChange={e => setSection(p => ({ ...p, section_description: e.target.value }))} rows={3} placeholder="Brief description of the process..." />
             </div>
             {hasPermission("homepage", "process.update") && (
@@ -149,16 +149,16 @@ export default function ProcessPage() {
       )}
 
       {/* Steps CRUD */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white">Process Steps</h2>
+          <h2 className="text-base font-semibold text-slate-700 ">Process Steps</h2>
           {hasPermission("homepage", "process.create") && (
             <Button onClick={() => navigate("/homepage-management/process/steps/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" size="sm">
               <Plus className="w-4 h-4 mr-2" />Add Step
             </Button>
           )}
         </div>
-        <ReusableDataTable columns={columns} rows={steps} loading={stepsLoading} emptyMessage="No steps added yet. Click 'Add Step' to create one." />
+        <ReusableDataTable columns={columns} rows={steps} loading={stepsLoading} sequenceReorderScope="homepage_process_steps" emptyMessage="No steps added yet. Click 'Add Step' to create one." />
       </div>
 
     </div>

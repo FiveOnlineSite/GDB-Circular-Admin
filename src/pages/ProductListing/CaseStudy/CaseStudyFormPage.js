@@ -11,7 +11,7 @@ import { Textarea } from "../../../components/ui/textarea";
 import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getCaseStudyById, createCaseStudy, updateCaseStudy } from "../../../services/productListing";
 
-const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 const QUILL_MODULES = {
   toolbar: [
     [{ header: [1, 2, 3, false] }],
@@ -127,38 +127,30 @@ export default function CaseStudyFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{pageTitle}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{pageTitle}</h1>
           <p className="text-slate-500 text-sm">{isView ? "Case study details" : isEdit ? "Update case study" : "Add a new case study"}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Case Study Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Case Study Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Title <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Title <span className="text-red-500">*</span></label>
               <Input name="title" value={form.title} onChange={handle} placeholder="Case study title" disabled={isView} error={!!errors.title} errorMessage={errors.title} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Tag</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Tag</label>
               <Input name="tag" value={form.tag} onChange={handle} placeholder="e.g. Film Recycling / Packaging" disabled={isView} />
             </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
-              <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the image" disabled={isView} />
-            </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Short Description <span className="text-red-500">*</span></label>
               <Textarea name="short_description" value={form.short_description} onChange={handle} rows={3} placeholder="Brief summary of the case study..." disabled={isView} />
               {errors.short_description && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.short_description}</span>}
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handle} disabled={isView} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handle} className={ss} disabled={isView}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -167,15 +159,24 @@ export default function CaseStudyFormPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Cover Image</h2>
-          <Upload value={form.image_url} onChange={(url) => setForm((p) => ({ ...p, image_url: url }))} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Cover Image</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload</label>
+              <Upload value={form.image_url} onChange={(url) => setForm((p) => ({ ...p, image_url: url }))} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Alt Text</label>
+              <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the image" disabled={isView} />
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Description</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Description</h2>
           {isView ? (
-            <div className="prose max-w-none text-slate-700 dark:text-gray-200 ql-editor" dangerouslySetInnerHTML={{ __html: form.description || "<p class='text-slate-400'>No description provided</p>" }} />
+            <div className="prose max-w-none text-slate-700  ql-editor" dangerouslySetInnerHTML={{ __html: form.description || "<p class='text-slate-400'>No description provided</p>" }} />
           ) : (
             <div className="rounded-xl overflow-hidden border border-slate-200">
               <ReactQuill ref={quillRef} theme="snow" value={form.description} onChange={(val) => setForm((p) => ({ ...p, description: val }))} modules={QUILL_MODULES} formats={QUILL_FORMATS} placeholder="Write the case study description here..." style={{ minHeight: 300 }} />
@@ -183,8 +184,8 @@ export default function CaseStudyFormPage() {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Sources</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Sources</h2>
           <Textarea name="sources" value={form.sources} onChange={handle} rows={4} placeholder="Enter source links, notes, or citations..." disabled={isView} />
         </div>
 

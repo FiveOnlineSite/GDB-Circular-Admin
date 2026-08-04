@@ -40,7 +40,7 @@ const SCHEMA_TYPES = [
 ];
 
 const formStyle =
-  "w-full cursor-pointer border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+  "w-full cursor-pointer border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 
 const createEmptySchemaEntry = () => ({
   schema_type: "",
@@ -333,7 +333,7 @@ export default function SeoFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
             {isEdit ? "Edit SEO Entry" : "Create SEO Entry"}
           </h1>
           <p className="text-slate-500 text-sm">
@@ -346,15 +346,15 @@ export default function SeoFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Basic SEO */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Basic SEO
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Page */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Page <span className="text-red-500">*</span>
               </label>
               <select
@@ -380,7 +380,7 @@ export default function SeoFormPage() {
 
             {/* Status */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Status
               </label>
               <select
@@ -397,7 +397,7 @@ export default function SeoFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               Meta Title
             </label>
             <Input
@@ -410,7 +410,7 @@ export default function SeoFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               Meta Description
             </label>
             <Textarea
@@ -425,7 +425,7 @@ export default function SeoFormPage() {
 
           <div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Canonical URL
               </label>
               <Input
@@ -438,7 +438,7 @@ export default function SeoFormPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Robots Tag
               </label>
               <select
@@ -457,14 +457,14 @@ export default function SeoFormPage() {
         </div>
 
         {/* Open Graph */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Open Graph (OG)
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 OG Title
               </label>
               <Input
@@ -477,7 +477,7 @@ export default function SeoFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               OG Description
             </label>
             <Textarea
@@ -491,7 +491,7 @@ export default function SeoFormPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-2">
                 OG Image
               </label>
               <Upload
@@ -512,7 +512,7 @@ export default function SeoFormPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-2">
                 OG Image Alt Text
               </label>
               <Input
@@ -528,14 +528,14 @@ export default function SeoFormPage() {
         </div>
 
         {/* Twitter Card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Twitter Card
           </h2>
 
           <div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Twitter Title
               </label>
               <Input
@@ -548,7 +548,7 @@ export default function SeoFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               Twitter Description
             </label>
             <Textarea
@@ -562,7 +562,7 @@ export default function SeoFormPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-2">
                 Twitter Image
               </label>
               <Upload
@@ -583,7 +583,7 @@ export default function SeoFormPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-2">
                 Twitter Image Alt Text
               </label>
               <Input
@@ -599,9 +599,9 @@ export default function SeoFormPage() {
         </div>
 
         {/* Schema */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
           <div className="flex items-center justify-between border-b pb-3">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white">
+            <h2 className="text-base font-semibold text-slate-700 ">
               Schema Markup
             </h2>
             <Button type="button" variant="outline" onClick={addSchemaEntry}>
@@ -612,9 +612,9 @@ export default function SeoFormPage() {
 
           <div className="space-y-4">
             {schemaEntries.map((entry, index) => (
-              <div key={index} className="rounded-xl border border-slate-200 dark:border-gray-700 p-4 space-y-4">
+              <div key={index} className="rounded-xl border border-slate-200  p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-white">
+                  <h3 className="text-sm font-semibold text-slate-700 ">
                     Schema {index + 1}
                   </h3>
                   <Button
@@ -630,7 +630,7 @@ export default function SeoFormPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-600  block mb-1">
                     Schema Type
                   </label>
                   <select
@@ -647,7 +647,7 @@ export default function SeoFormPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-600  block mb-1">
                     Schema JSON
                   </label>
                   <Textarea

@@ -11,6 +11,13 @@ import { usePermissionContext } from "../../../context/PermissionContext";
 const GROUP_OPTIONS = ["Board of Directors", "Leadership"];
 const STATUS_OPTIONS = ["active", "inactive"];
 
+const tabButtonClass = (active) =>
+  `rounded-full px-4 py-2 text-sm font-semibold transition ${
+    active
+      ? "bg-[#981B1F] text-white shadow-sm"
+      : "border border-slate-200 bg-white text-slate-600 hover:border-[#981B1F]/30 hover:bg-[#981B1F]/5 hover:text-[#981B1F]"
+  }`;
+
 export default function TeamMemberList() {
   const { hasPermission } = usePermissionContext();
   const navigate = useNavigate();
@@ -32,18 +39,24 @@ export default function TeamMemberList() {
   const fetchMembersList = useCallback(async (params = {}) => {
     try {
       setLoading(true);
+      const nextGroup = params.group_name !== undefined ? params.group_name : selectedGroup;
+      const isGroupSequenceView = Boolean(nextGroup);
       const res = await getMembers({
-        page: params.page || pagination.current_page,
-        limit: params.limit || pagination.per_page,
+        page: isGroupSequenceView ? 1 : params.page || pagination.current_page,
+        limit: isGroupSequenceView ? 1000 : params.limit || pagination.per_page,
         name: params.name !== undefined ? params.name : search,
-        group_name: params.group_name !== undefined ? params.group_name : selectedGroup,
+        group_name: nextGroup,
         status: params.status !== undefined ? params.status : selectedStatus,
       });
 
       if (res.success) {
         setRows(res.data || []);
         if (res.pagination) {
-          setPagination(res.pagination);
+          setPagination((prev) =>
+            isGroupSequenceView
+              ? { ...prev, current_page: 1, total: res.pagination.total, last_page: 1 }
+              : res.pagination,
+          );
         }
       } else {
         setRows([]);
@@ -66,8 +79,7 @@ export default function TeamMemberList() {
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
-  const handleGroupFilterChange = (e) => {
-    const group = e.target.value;
+  const handleGroupTabChange = (group) => {
     setSelectedGroup(group);
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
@@ -214,6 +226,10 @@ export default function TeamMemberList() {
     },
   ];
 
+  const tableColumns = selectedGroup
+    ? columns
+    : columns.filter((column) => column.field !== "sequence");
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -250,20 +266,6 @@ export default function TeamMemberList() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Group Filter */}
-          <select
-            value={selectedGroup}
-            onChange={handleGroupFilterChange}
-            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[150px] cursor-pointer"
-          >
-            <option value="">All Groups</option>
-            {GROUP_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-
           {/* Status Filter */}
           <select
             value={selectedStatus}
@@ -282,8 +284,21 @@ export default function TeamMemberList() {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4">
+          <button type="button" onClick={() => handleGroupTabChange("")} className={tabButtonClass(!selectedGroup)}>
+            All
+          </button>
+          {GROUP_OPTIONS.map((group) => (
+            <button key={group} type="button" onClick={() => handleGroupTabChange(group)} className={tabButtonClass(selectedGroup === group)}>
+              {group}
+            </button>
+          ))}
+          <span className="ml-auto text-xs font-medium text-slate-500">
+            {selectedGroup ? "Drag rows to change this group sequence." : "Select a group tab to reorder sequence."}
+          </span>
+        </div>
         <ReusableDataTable
-          columns={columns}
+          columns={tableColumns}
           rows={rows}
           loading={loading}
           pagination={pagination}
@@ -291,6 +306,8 @@ export default function TeamMemberList() {
           handlePerPageChange={(pp) =>
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
+          sequenceReorderScope="team_members"
+          disableSequenceReorder={!selectedGroup}
           emptyMessage="No team members found."
         />
       </div>

@@ -7,9 +7,9 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
 import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
-import { getProcessStepById, createProcessStep, updateProcessStep } from "../../../services/homepage";
+import { getProcessStepById, getProcessSteps, createProcessStep, updateProcessStep } from "../../../services/homepage";
 
-const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 
 
 export default function ProcessStepFormPage() {
@@ -19,6 +19,7 @@ export default function ProcessStepFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ step_title: "", step_description: "", file_url: "", alt_text: "", sequence: 0, status: "active" });
+  const [processSteps, setProcessSteps] = useState([]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -34,6 +35,17 @@ export default function ProcessStepFormPage() {
       finally { setPageLoading(false); }
     })();
   }, [id, isEdit, navigate]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getProcessSteps();
+        setProcessSteps(res.success && Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setProcessSteps([]);
+      }
+    })();
+  }, []);
 
   const [errors, setErrors] = useState({});
 
@@ -71,6 +83,12 @@ export default function ProcessStepFormPage() {
 
   if (pageLoading) return <div className="flex justify-center items-center h-64"><div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" /></div>;
 
+  const activeStepCount = processSteps.filter((step) => step.status === "active").length;
+  const isLastActiveStep = isEdit && form.status === "active" && activeStepCount <= 1;
+  const cannotKeepInactive = isEdit && form.status === "inactive" && activeStepCount === 0;
+  const cannotSetInactive = isLastActiveStep || cannotKeepInactive || (!isEdit && activeStepCount === 0);
+  const cannotDeleteStep = isEdit && (processSteps.length <= 1 || activeStepCount <= (form.status === "active" ? 1 : 0));
+
   return (
     <div className="space-y-6 pb-12 w-full">
       <div className="flex items-center gap-3">
@@ -78,17 +96,17 @@ export default function ProcessStepFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{isEdit ? "Edit Process Step" : "Add Process Step"}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{isEdit ? "Edit Process Step" : "Add Process Step"}</h1>
           <p className="text-slate-500 text-sm">Manage a step in the process section</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Step Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Step Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Step Title <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Step Title <span className="text-red-500">*</span></label>
               <Input
                 name="step_title"
                 value={form.step_title}
@@ -99,54 +117,59 @@ export default function ProcessStepFormPage() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Step Description</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Step Description</label>
               <Textarea name="step_description" value={form.step_description} onChange={handle} rows={4} placeholder="Describe this process step..." />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Alt Text</label>
-              <Input name="alt_text" value={form.alt_text} onChange={handle} placeholder="Image/video description" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handle} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handle} className={selectStyle}>
                 <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="inactive" disabled={cannotSetInactive}>Inactive</option>
               </select>
+              {cannotSetInactive && (
+                <span className="text-xs text-slate-500 mt-1.5 block">
+                  At least one process step must remain active.
+                </span>
+              )}
             </div>
           </div>
 
           {/* File Upload */}
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
-              Image / Video Upload
-            </label>
-            <Upload
-              value={form.file_url}
-              onChange={(url) => {
-                setForm((prev) => ({ ...prev, file_url: url }));
-              }}
-              mediaType="both"
-              accept="image/*,video/mp4,video/webm,video/quicktime"
-              maxSizeKB={500}
-              maxSizeMB={50}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">
+                Image / Video Upload
+              </label>
+              <Upload
+                value={form.file_url}
+                onChange={(url) => {
+                  setForm((prev) => ({ ...prev, file_url: url }));
+                }}
+                mediaType="both"
+                accept="image/*,video/mp4,video/webm,video/quicktime"
+                maxSizeKB={500}
+                maxSizeMB={10}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Alt Text</label>
+              <Input name="alt_text" value={form.alt_text} onChange={handle} placeholder="Image/video description" />
+            </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-3">
-          <EditPageDeleteAction
-            id={isEdit ? id : null}
-            permission="homepage.process.delete"
-            endpoint={`/homepage/process/steps/${id}`}
-            redirectTo="/homepage-management/process"
-            title="Delete Process Step"
-            message="Are you sure you want to delete this process step?"
-            successMessage="Process step deleted"
-          />
+          {!cannotDeleteStep && (
+            <EditPageDeleteAction
+              id={isEdit ? id : null}
+              permission="homepage.process.delete"
+              endpoint={`/homepage/process/steps/${id}`}
+              redirectTo="/homepage-management/process"
+              title="Delete Process Step"
+              message="Are you sure you want to delete this process step?"
+              successMessage="Process step deleted"
+            />
+          )}
           <Button type="button" variant="outline" onClick={() => navigate("/homepage-management/process")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Step" : "Create Step"}</>}

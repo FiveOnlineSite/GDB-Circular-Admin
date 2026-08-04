@@ -9,6 +9,7 @@ export const createProduct = (data) => api.post(`${base}/catalogue`, data).then(
 export const updateProduct = (id, data) => api.put(`${base}/catalogue/${id}`, data).then(r => r.data);
 export const deleteProduct = (id) => api.delete(`${base}/catalogue/${id}`).then(r => r.data);
 export const toggleProductStatus = (id) => api.patch(`${base}/catalogue/${id}/toggle-status`).then(r => r.data);
+export const toggleProductHomepage = (id) => api.patch(`${base}/catalogue/${id}/toggle-homepage`).then(r => r.data);
 
 // Quality Assurance
 export const getQualityAssuranceSection = () => api.get(`${base}/quality-assurance`).then(r => r.data);

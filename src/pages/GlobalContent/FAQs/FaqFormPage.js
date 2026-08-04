@@ -9,9 +9,15 @@ import EditPageDeleteAction from "../../../components/common/EditPageDeleteActio
 import { getFaqById, createFaq, updateFaq } from "../../../services/globalContent/faqs";
 
 const fieldStyle =
-  "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+  "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 
-const PAGES = ["home", "product-listing", "sellers", "about", "contact", "services", "faq"];
+const PAGE_OPTIONS = [
+  { value: "home", label: "Home" },
+  { value: "product-listing", label: "Product Listing" },
+  { value: "seller", label: "Seller" },
+];
+
+const ALLOWED_PAGES = PAGE_OPTIONS.map(({ value }) => value);
 
 export default function FaqFormPage() {
   const navigate = useNavigate();
@@ -75,11 +81,9 @@ export default function FaqFormPage() {
     e.preventDefault();
     const newErrors = {};
     if (!form.page) newErrors.page = "Page is required";
+    else if (!ALLOWED_PAGES.includes(form.page)) newErrors.page = "Select a valid page";
     if (!form.question.trim()) newErrors.question = "Question is required";
     if (!form.answer.trim()) newErrors.answer = "Answer is required";
-    if (String(form.sequence).trim() !== "" && Number(form.sequence) < 0) {
-      newErrors.sequence = "Sequence must be 0 or greater";
-    }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -87,7 +91,7 @@ export default function FaqFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, sequence: Number(form.sequence) };
+      const payload = { ...form, sequence: Number(form.sequence ?? 0) };
       const res = isEdit ? await updateFaq(id, payload) : await createFaq(payload);
       if (res.success) {
         toast.success(isEdit ? "FAQ updated" : "FAQ created");
@@ -121,7 +125,7 @@ export default function FaqFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
             {isEdit ? "Edit FAQ" : "Add FAQ"}
           </h1>
           <p className="text-slate-500 text-sm">{isEdit ? "Update FAQ content" : "Add a new frequently asked question"}</p>
@@ -129,12 +133,12 @@ export default function FaqFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">FAQ Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">FAQ Details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Page <span className="text-red-500">*</span>
               </label>
               <select
@@ -145,8 +149,8 @@ export default function FaqFormPage() {
                 className={`${fieldStyle} ${errors.page ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : ''}`}
               >
                 <option value="">Select Page</option>
-                {PAGES.map((p) => (
-                  <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, " ")}</option>
+                {PAGE_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
                 ))}
               </select>
               {errors.page && (
@@ -156,19 +160,7 @@ export default function FaqFormPage() {
               )}
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input
-                type="number"
-                min="0"
-                name="sequence"
-                value={form.sequence}
-                onChange={handleChange}
-                error={!!errors.sequence}
-                errorMessage={errors.sequence}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select
                 name="status"
                 value={form.status}
@@ -182,7 +174,7 @@ export default function FaqFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               Question <span className="text-red-500">*</span>
             </label>
             <Input
@@ -196,7 +188,7 @@ export default function FaqFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               Answer <span className="text-red-500">*</span>
             </label>
             <Textarea

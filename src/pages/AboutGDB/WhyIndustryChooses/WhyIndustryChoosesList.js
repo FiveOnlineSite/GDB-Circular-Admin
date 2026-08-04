@@ -121,7 +121,7 @@ export default function WhyIndustryChoosesList() {
     <div className="space-y-6 pb-12 w-full">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Why Industry Chooses GDB PCR</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">Why Industry Chooses GDB PCR</h1>
           <p className="text-slate-500 text-sm mt-1">Manage the reasons why the industry chooses GDB PCR</p>
         </div>
         {hasPermission("about", "industry.create") && (
@@ -138,9 +138,9 @@ export default function WhyIndustryChoosesList() {
       {/* Section Edit Panel */}
       {hasPermission("about", "industry.update") && !sectionLoading && (
         !isEditingSection && (section.section_title || section.section_description) ? (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
-              <h2 className="text-base font-semibold text-slate-700 dark:text-white">Section Details</h2>
+              <h2 className="text-base font-semibold text-slate-700 ">Section Details</h2>
               <Button
                 variant="outline"
                 className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5 gap-2"
@@ -150,21 +150,21 @@ export default function WhyIndustryChoosesList() {
               </Button>
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider mb-1">Section Title</span>
-              <p className="text-sm font-medium text-slate-800 dark:text-gray-200">{section.section_title || "—"}</p>
+              <span className="text-xs font-semibold text-slate-400  block uppercase tracking-wider mb-1">Section Title</span>
+              <p className="text-sm font-medium text-slate-800 ">{section.section_title || "—"}</p>
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider mb-1">Section Description</span>
-              <p className="text-sm text-slate-600 dark:text-gray-300 whitespace-pre-wrap">{section.section_description || "—"}</p>
+              <span className="text-xs font-semibold text-slate-400  block uppercase tracking-wider mb-1">Section Description</span>
+              <p className="text-sm text-slate-600  whitespace-pre-wrap">{section.section_description || "—"}</p>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSectionSave} className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Section Details</h2>
+          <form onSubmit={handleSectionSave} className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Section Details</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold text-slate-600  block mb-1">
                   Section Title
                 </label>
                 <Input
@@ -174,7 +174,7 @@ export default function WhyIndustryChoosesList() {
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold text-slate-600  block mb-1">
                   Section Description
                 </label>
                 <Textarea
@@ -182,7 +182,7 @@ export default function WhyIndustryChoosesList() {
                   onChange={(e) => setSection(p => ({ ...p, section_description: e.target.value }))}
                   placeholder="Enter section description"
                   rows={2}
-                  className="w-full border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  className="w-full border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition   "
                 />
               </div>
             </div>
@@ -216,19 +216,19 @@ export default function WhyIndustryChoosesList() {
       )}
 
       {/* Items Table */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm overflow-hidden">
         {itemsLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : rows.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
-            <TrendingUp className="w-12 h-12 text-slate-300 dark:text-gray-600 mb-3" />
-            <p className="text-slate-500 dark:text-gray-400 font-medium">No items yet</p>
-            <p className="text-slate-400 dark:text-gray-500 text-sm">Add your first reason to get started</p>
+            <TrendingUp className="w-12 h-12 text-slate-300  mb-3" />
+            <p className="text-slate-500  font-medium">No items yet</p>
+            <p className="text-slate-400  text-sm">Add your first reason to get started</p>
           </div>
         ) : (
-          <ReusableDataTable columns={columns} rows={rows} pageSize={10} />
+          <ReusableDataTable columns={columns} rows={rows} pageSize={10} sequenceReorderScope="about_gdb_why_industry_chooses_items" />
         )}
       </div>
 

@@ -60,8 +60,8 @@ export default function NewsList() {
       try {
         setLoading(true);
         const queryParams = {
-          page: params.page || pagination.current_page,
-          limit: params.limit || pagination.per_page,
+          page: 1,
+          limit: 1000,
           title: params.search !== undefined ? params.search : search,
           category_id: params.category_id !== undefined ? params.category_id : selectedCategory,
           publish_status: params.publish_status !== undefined ? params.publish_status : selectedStatus,
@@ -85,7 +85,7 @@ export default function NewsList() {
         setLoading(false);
       }
     },
-    [pagination.current_page, pagination.per_page, search, selectedCategory, selectedStatus, startDate, endDate]
+    [search, selectedCategory, selectedStatus, startDate, endDate]
   );
 
   useEffect(() => {
@@ -221,6 +221,7 @@ export default function NewsList() {
         </span>
       ),
     },
+    { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "publish_status",
       headerName: "Status",
@@ -394,6 +395,7 @@ export default function NewsList() {
           handlePerPageChange={(pp) =>
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
+          sequenceReorderScope="news_content"
           emptyMessage="No news or updates articles found."
         />
       </div>

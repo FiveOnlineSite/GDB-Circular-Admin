@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,15 +8,21 @@ import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 import { useUserPermissions } from '../../hooks/usePermission';
 import { Button } from 'components/ui/button';
-import { useTheme } from '../../context/ThemeContext';
 
+const ADMIN_BRAND = {
+  companyName: 'GDB circular',
+  logoUrl: '/logo.png',
+};
+
+const SUB_ITEM_ROUTE_ALIASES = {
+  '/facilities/listing': ['/facilities/create', '/facilities/edit', '/facilities/view'],
+};
 
 const Sidebar = () => {
   const { isOpen, setIsOpen } = useLayout();
   const location = useLocation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { theme } = useTheme();
   const [expandedMenus, setExpandedMenus] = useState({});
 
 
@@ -27,14 +33,13 @@ const Sidebar = () => {
 
   const toggleMenu = (title) => {
     setExpandedMenus((prev) => ({
-      ...prev,
       [title]: !prev[title],
     }));
   };
 
 
   // Filter menu items based on user role_id or module permissions
-  const visibleItems = MenuItems.filter((item) => {
+  const visibleItems = useMemo(() => MenuItems.filter((item) => {
     // 1. Dashboard is ALWAYS visible to everyone logged in
     if (item.url === "/dashboard" || item.title === "Dashboard") return true;
 
@@ -65,7 +70,7 @@ const Sidebar = () => {
 
     // Default to false for custom roles without explicit permission
     return false;
-  });
+  }), [hasPermission, user?.role_id]);
 
   const handleLogout = () => {
     logout();
@@ -76,12 +81,37 @@ const Sidebar = () => {
     }
   };
 
-  const isLinkActive = (url, exact = false) => {
-    if (url === '/dashboard' || exact) {
+  const doesPathMatchUrl = (url) =>
+    location.pathname === url || location.pathname.startsWith(`${url}/`);
+
+  const isLinkActive = (url) => {
+    if (url === '/dashboard') {
       return location.pathname === url;
     }
-    return location.pathname === url || location.pathname.startsWith(`${url}/`);
+    return doesPathMatchUrl(url);
   };
+
+  const getSubItemMatchUrls = (subItem) => [
+    subItem.url,
+    ...(SUB_ITEM_ROUTE_ALIASES[subItem.url] || []),
+  ];
+
+  const getActiveSubItem = (subItems = []) => {
+    return [...subItems]
+      .sort((a, b) => b.url.length - a.url.length)
+      .find((subItem) =>
+        getSubItemMatchUrls(subItem).some((url) => doesPathMatchUrl(url)),
+      );
+  };
+
+  const activeParentTitle = visibleItems.find((item) => {
+    if (!item.subItems?.length) return false;
+    return Boolean(getActiveSubItem(item.subItems));
+  })?.title;
+
+  useEffect(() => {
+    setExpandedMenus(activeParentTitle ? { [activeParentTitle]: true } : {});
+  }, [activeParentTitle]);
 
   return (
     <>
@@ -105,8 +135,8 @@ const Sidebar = () => {
           {isOpen ? (
             <div className="flex items-center gap-2 overflow-hidden">
               <img
-                src={theme.logo_url}
-                alt={theme.company_name}
+                src={ADMIN_BRAND.logoUrl}
+                alt={ADMIN_BRAND.companyName}
                 className={`h-auto max-h-[60px] w-full object-contain max-w-[200px]`}
                 onError={(e) => { e.target.src = '/logo.svg'; }}
               />
@@ -114,8 +144,8 @@ const Sidebar = () => {
             </div>
           ) : (
             <img
-              src={theme.logo_url}
-              alt={theme.company_name}
+              src={ADMIN_BRAND.logoUrl}
+              alt={ADMIN_BRAND.companyName}
               className="h-10 w-10 object-contain"
               onError={(e) => { e.target.src = '/logo.svg'; }}
             />
@@ -128,10 +158,9 @@ const Sidebar = () => {
             const Icon = item.icon;
             const hasSubItems = item.subItems && item.subItems.length > 0;
             const isExpanded = expandedMenus[item.title];
-            const isParentActive =
-              hasSubItems &&
-              item.subItems.some((sub) => isLinkActive(sub.url, sub.exact));
-            const isActive = !hasSubItems && isLinkActive(item.url, item.exact);
+            const activeSubItem = hasSubItems ? getActiveSubItem(item.subItems) : null;
+            const isParentActive = Boolean(activeSubItem);
+            const isActive = !hasSubItems && isLinkActive(item.url);
 
             const handleNavClick = () => {
               if (window.innerWidth < 768 && !hasSubItems) {
@@ -199,10 +228,7 @@ const Sidebar = () => {
                             return null;
                           }
 
-                          const isSubActive = isLinkActive(
-                            subItem.url,
-                            subItem.exact,
-                          );
+                          const isSubActive = activeSubItem?.url === subItem.url;
                           const SubIcon = subItem.icon;
 
                           return (

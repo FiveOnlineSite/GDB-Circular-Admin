@@ -104,10 +104,6 @@ export default function TeamMemberFormPage() {
     if (!form.designation.trim()) newErrors.designation = "Designation is required";
     if (!form.photo_url) newErrors.photo_url = "Profile photo is required";
     if (!form.photo_alt.trim()) newErrors.photo_alt = "Photo alt text is required";
-    if (!Number.isInteger(Number(form.sequence)) || Number(form.sequence) < 0) {
-      newErrors.sequence = "Sequence must be a non-negative integer";
-    }
-
     // Validate URL format if provided
     if (form.linkedin_url.trim()) {
       try {
@@ -131,7 +127,7 @@ export default function TeamMemberFormPage() {
         photo_alt: form.photo_alt.trim(),
         linkedin_url: form.linkedin_url.trim() || null,
         show_on_homepage: form.show_on_homepage ? 1 : 0,
-        sequence: Number(form.sequence),
+        sequence: Number(form.sequence ?? 0),
       };
 
       const res = isEdit
@@ -178,7 +174,7 @@ export default function TeamMemberFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
             {pageTitle}
           </h1>
           <p className="text-slate-500 text-sm">
@@ -188,15 +184,15 @@ export default function TeamMemberFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-6">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-6">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Profile Details
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Group */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Select Group <span className="text-red-500">*</span>
               </label>
               <select
@@ -205,7 +201,7 @@ export default function TeamMemberFormPage() {
                 onChange={handleChange}
                 disabled={isView}
                 aria-invalid={errors.group_name ? "true" : "false"}
-                className={`w-full border ${errors.group_name ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55`}
+                className={`w-full border ${errors.group_name ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white    disabled:opacity-55`}
               >
                 <option value="">Select Group</option>
                 {GROUP_OPTIONS.map((g) => (
@@ -223,7 +219,7 @@ export default function TeamMemberFormPage() {
 
             {/* Name */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Name <span className="text-red-500">*</span>
               </label>
               <Input
@@ -239,7 +235,7 @@ export default function TeamMemberFormPage() {
 
             {/* Designation */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Designation <span className="text-red-500">*</span>
               </label>
               <Input
@@ -255,7 +251,7 @@ export default function TeamMemberFormPage() {
 
             {/* LinkedIn URL */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 LinkedIn URL
               </label>
               <Input
@@ -269,26 +265,9 @@ export default function TeamMemberFormPage() {
               />
             </div>
 
-            {/* Sequence */}
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                Sequence
-              </label>
-              <Input
-                type="number"
-                name="sequence"
-                value={form.sequence}
-                onChange={handleChange}
-                placeholder="0"
-                disabled={isView}
-                error={!!errors.sequence}
-                errorMessage={errors.sequence}
-              />
-            </div>
-
             {/* Status */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Status
               </label>
               <select
@@ -296,7 +275,7 @@ export default function TeamMemberFormPage() {
                 value={form.status}
                 onChange={handleChange}
                 disabled={isView}
-                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55 cursor-pointer"
+                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white    disabled:opacity-55 cursor-pointer"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -316,7 +295,7 @@ export default function TeamMemberFormPage() {
             />
             <label
               htmlFor="show_on_homepage"
-              className="text-sm font-semibold text-slate-700 dark:text-gray-300 select-none cursor-pointer"
+              className="text-sm font-semibold text-slate-700  select-none cursor-pointer"
             >
               Show on Homepage
             </label>
@@ -324,13 +303,14 @@ export default function TeamMemberFormPage() {
         </div>
 
         {/* Media Block */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Profile Photo
           </h2>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
               Photo Upload <span className="text-red-500">*</span>
             </label>
             <Upload
@@ -349,7 +329,7 @@ export default function TeamMemberFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
               Photo Alt Text <span className="text-red-500">*</span>
             </label>
             <Input
@@ -361,6 +341,7 @@ export default function TeamMemberFormPage() {
               error={!!errors.photo_alt}
               errorMessage={errors.photo_alt}
             />
+          </div>
           </div>
         </div>
 

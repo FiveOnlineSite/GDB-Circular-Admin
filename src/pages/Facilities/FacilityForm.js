@@ -194,22 +194,19 @@ export default function FacilityForm() {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-semibold text-slate-600 block mb-1">Image Alt Text</label>
-            <Input value={form.image_alt} onChange={(e) => updateField("image_alt", e.target.value)} disabled={isView} />
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Image Upload {!form.is_development && <span className="text-red-500">*</span>}</label>
-            <Upload value={form.image_url} onChange={(url) => updateField("image_url", url)} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
-            {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload {!form.is_development && <span className="text-red-500">*</span>}</label>
+              <Upload value={form.image_url} onChange={(url) => updateField("image_url", url)} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
+              {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-2">Image Alt Text</label>
+              <Input value={form.image_alt} onChange={(e) => updateField("image_alt", e.target.value)} disabled={isView} />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Sequence</label>
-              <Input type="number" value={form.sequence} onChange={(e) => updateField("sequence", Number(e.target.value))} disabled={isView} />
-            </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 block mb-1">Status</label>
               <select value={form.status} onChange={(e) => updateField("status", e.target.value)} disabled={isView} className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white disabled:opacity-55">

@@ -13,7 +13,7 @@ export const getFileSizeMB = (file) => {
  * @param {number} maxSizeMB
  * @returns {{valid: boolean, error?: string}}
  */
-export const validateVideo = (file, maxSizeMB = 50) => {
+export const validateVideo = (file, maxSizeMB = 10) => {
   const allowedTypes = ["video/mp4", "video/webm", "video/quicktime"]; // MP4, WEBM, MOV
   if (!allowedTypes.includes(file.type)) {
     return {

@@ -13,7 +13,7 @@ import {
   updateSellerLogisticsCard,
 } from "../../../services/sellers/logisticsService";
 
-const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+const selectStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 
 export default function SellerLogisticsCardFormPage() {
   const navigate = useNavigate();
@@ -109,33 +109,25 @@ export default function SellerLogisticsCardFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{isEdit ? "Edit Card" : "Add Card"}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{isEdit ? "Edit Card" : "Add Card"}</h1>
           <p className="text-slate-500 text-sm">Manage a seller logistics card</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Card Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Card Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Card Title <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Card Title <span className="text-red-500">*</span></label>
               <Input name="card_title" value={form.card_title} onChange={handle} placeholder="e.g. Scheduled Pickups" error={!!errors.card_title} errorMessage={errors.card_title} />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Card Description</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Card Description</label>
               <Textarea name="card_description" value={form.card_description} onChange={handle} rows={4} placeholder="Describe this logistics capability..." />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Icon Alt Text</label>
-              <Input name="icon_alt" value={form.icon_alt} onChange={handle} placeholder="Alt text for icon/image" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handle} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handle} className={selectStyle}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -143,9 +135,15 @@ export default function SellerLogisticsCardFormPage() {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">Icon / Image</label>
-            <Upload value={form.icon_url} onChange={(url) => setForm((p) => ({ ...p, icon_url: url }))} mediaType="image" accept="image/*" maxSizeKB={30} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Icon / Image</label>
+              <Upload value={form.icon_url} onChange={(url) => setForm((p) => ({ ...p, icon_url: url }))} mediaType="image" accept="image/*" maxSizeKB={500} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Icon Alt Text</label>
+              <Input name="icon_alt" value={form.icon_alt} onChange={handle} placeholder="Alt text for icon/image" />
+            </div>
           </div>
         </div>
 

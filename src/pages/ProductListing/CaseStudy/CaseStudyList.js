@@ -22,18 +22,18 @@ export default function CaseStudyList() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getCaseStudies({ search, status: statusFilter, page: pagination.current_page, limit: pagination.per_page });
+      const res = await getCaseStudies({ search, status: statusFilter, page: 1, limit: 1000 });
       if (res.success) {
         setRows(res.data?.data || []);
         if (res.data?.pagination) setPagination(res.data.pagination);
       }
     } catch { toast.error("Failed to load case studies"); setRows([]); }
     finally { setLoading(false); }
-  }, [search, statusFilter, pagination.current_page, pagination.per_page]);
+  }, [search, statusFilter]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const selectStyle = "border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+  const selectStyle = "border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white   ";
 
   const columns = [
     {
@@ -91,8 +91,8 @@ export default function CaseStudyList() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Case Studies</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage customer case studies and success stories</p>
+          <h1 className="text-2xl font-bold text-gray-900 ">Case Studies</h1>
+          <p className="text-sm text-gray-500  mt-0.5">Manage customer case studies and success stories</p>
         </div>
         {hasPermission("product", "casestudy.create") && (
           <Button onClick={() => navigate("/product-listing/case-study/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
@@ -102,7 +102,7 @@ export default function CaseStudyList() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-4 mb-5">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-4 mb-5">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -130,6 +130,7 @@ export default function CaseStudyList() {
         columns={columns} rows={rows} loading={loading} pagination={pagination}
         handlePageChange={p => setPagination(prev => ({ ...prev, current_page: p }))}
         handlePerPageChange={pp => setPagination(prev => ({ ...prev, per_page: pp, current_page: 1 }))}
+        sequenceReorderScope="case_studies"
         emptyMessage="No case studies found. Click 'Add Case Study' to create one."
       />
 

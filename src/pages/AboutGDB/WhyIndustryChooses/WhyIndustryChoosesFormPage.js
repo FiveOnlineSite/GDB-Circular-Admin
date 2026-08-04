@@ -151,7 +151,7 @@ export default function WhyIndustryChoosesFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
             {isEdit ? "Edit Item" : "Add Item"}
           </h1>
           <p className="text-slate-500 text-sm">
@@ -162,12 +162,12 @@ export default function WhyIndustryChoosesFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Details Section */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Item Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Item Details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Stat / Value
               </label>
               <Input
@@ -179,7 +179,7 @@ export default function WhyIndustryChoosesFormPage() {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Title <span className="text-red-500">*</span>
               </label>
               <Input
@@ -193,28 +193,14 @@ export default function WhyIndustryChoosesFormPage() {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
-                Sequence <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                name="sequence"
-                value={form.sequence}
-                onChange={handleChange}
-                placeholder="0"
-              />
-              <p className="text-xs text-slate-500 mt-1">Items are ordered by this value (0=first)</p>
-            </div>
-
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Status
               </label>
               <select
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   "
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -223,7 +209,7 @@ export default function WhyIndustryChoosesFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-1">
               Description <span className="text-red-500">*</span>
             </label>
             <Textarea
@@ -232,7 +218,7 @@ export default function WhyIndustryChoosesFormPage() {
               onChange={handleChange}
               placeholder="Enter short description about this reason"
               rows={4}
-              className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition   "
               error={!!errors.description}
               errorMessage={errors.description}
             />

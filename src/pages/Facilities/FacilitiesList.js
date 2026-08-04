@@ -24,8 +24,8 @@ export default function FacilitiesList() {
       setLoading(true);
       const res = await getFacilities({
         ...params,
-        page: params.page ?? pagination.current_page,
-        limit: params.limit ?? pagination.per_page,
+        page: 1,
+        limit: 1000,
         search: params.search ?? search,
         facility_type: params.facility_type ?? facilityType,
       });
@@ -126,7 +126,7 @@ export default function FacilitiesList() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <ReusableDataTable columns={columns} rows={rows} loading={loading} pagination={pagination} handlePageChange={(p) => setPagination((prev) => ({ ...prev, current_page: p }))} handlePerPageChange={(pp) => setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))} emptyMessage="No facilities yet." />
+        <ReusableDataTable columns={columns} rows={rows} loading={loading} pagination={pagination} handlePageChange={(p) => setPagination((prev) => ({ ...prev, current_page: p }))} handlePerPageChange={(pp) => setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))} sequenceReorderScope="facilities" emptyMessage="No facilities yet." />
       </div>
 
     </div>

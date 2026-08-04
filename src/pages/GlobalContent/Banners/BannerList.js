@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import { getBanners } from "../../../services/globalContent/banners";
@@ -83,16 +83,11 @@ export default function BannerList() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Banner Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage page banners with images and videos</p>
+          <h1 className="text-2xl font-bold text-gray-900 ">Banner Management</h1>
+          <p className="text-sm text-gray-500  mt-1">Manage page banners with images and videos</p>
         </div>
-        {hasPermission("globalContent", "banner.create") && (
-          <Button onClick={() => navigate("/global-content/banners/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
-            <Plus className="w-4 h-4 mr-2" />Add Banner
-          </Button>
-        )}
       </div>
-      <ReusableDataTable columns={columns} rows={rows} loading={loading} emptyMessage="No banners found. Click 'Add Banner' to create one." />
+      <ReusableDataTable columns={columns} rows={rows} loading={loading} emptyMessage="No banners found." />
     </div>
   );
 }

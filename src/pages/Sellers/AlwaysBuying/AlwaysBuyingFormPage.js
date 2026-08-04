@@ -15,6 +15,7 @@ export default function AlwaysBuyingFormPage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [draggedPointIndex, setDraggedPointIndex] = useState(null);
 
   const [form, setForm] = useState({
     section_title: "",
@@ -93,7 +94,7 @@ export default function AlwaysBuyingFormPage() {
         ...prev.points,
         {
           point_title: "",
-          sequence: prev.points.length,
+          sequence: prev.points.length + 1,
           status: "active",
         },
       ],
@@ -110,8 +111,32 @@ export default function AlwaysBuyingFormPage() {
   const handleRemovePoint = (index) => {
     setForm((prev) => ({
       ...prev,
-      points: prev.points.filter((_, i) => i !== index),
+      points: prev.points
+        .filter((_, i) => i !== index)
+        .map((point, nextIndex) => ({ ...point, sequence: nextIndex + 1 })),
     }));
+  };
+
+  const handlePointDrop = (targetIndex) => {
+    if (draggedPointIndex === null || draggedPointIndex === targetIndex) {
+      setDraggedPointIndex(null);
+      return;
+    }
+
+    setForm((prev) => {
+      const updatedPoints = [...prev.points];
+      const [movedPoint] = updatedPoints.splice(draggedPointIndex, 1);
+      updatedPoints.splice(targetIndex, 0, movedPoint);
+
+      return {
+        ...prev,
+        points: updatedPoints.map((point, index) => ({
+          ...point,
+          sequence: index + 1,
+        })),
+      };
+    });
+    setDraggedPointIndex(null);
   };
 
   const handlePointChange = (index, field, value) => {
@@ -165,9 +190,10 @@ export default function AlwaysBuyingFormPage() {
         section_title: form.section_title.trim(),
         section_description: form.section_description.trim(),
         alt_text: form.alt_text.trim(),
-        points: form.points.map((pt) => ({
+        points: form.points.map((pt, index) => ({
           ...pt,
           point_title: pt.point_title.trim(),
+          sequence: index + 1,
         })),
       };
 
@@ -208,7 +234,7 @@ export default function AlwaysBuyingFormPage() {
   return (
     <div className="space-y-6 pb-12 w-full p-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+        <h1 className="text-2xl font-bold text-slate-800  tracking-tight">
           We're Always Buying Section Management
         </h1>
         <p className="text-slate-500 text-sm">
@@ -218,8 +244,8 @@ export default function AlwaysBuyingFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Section Main Information */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3 flex items-center gap-2">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3 flex items-center gap-2">
             <CheckCircle2 size={18} className="text-[#981B1F]" />
             Main Section Content
           </h2>
@@ -227,7 +253,7 @@ export default function AlwaysBuyingFormPage() {
           <div className="grid grid-cols-1 gap-5">
             {/* Title */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Section Title <span className="text-red-500">*</span>
               </label>
               <Input
@@ -243,7 +269,7 @@ export default function AlwaysBuyingFormPage() {
 
             {/* Description */}
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-600  block mb-1">
                 Section Description <span className="text-red-500">*</span>
               </label>
               <Textarea
@@ -253,7 +279,7 @@ export default function AlwaysBuyingFormPage() {
                 placeholder="Describe what feedstock requirements GDB constantly purchases..."
                 disabled={!canUpdate}
                 rows={4}
-                className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-55"
+                className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition    disabled:opacity-55"
                 error={!!errors.section_description}
                 errorMessage={errors.section_description}
               />
@@ -262,14 +288,15 @@ export default function AlwaysBuyingFormPage() {
         </div>
 
         {/* Media Block */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
             Media Upload
           </h2>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-2">
-              Upload Image or Video (Max Image: 500KB, Max Video: 50MB) <span className="text-red-500">*</span>
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
+              Upload Image or Video (Max Image: 500KB, Max Video: 10MB) <span className="text-red-500">*</span>
             </label>
             <Upload
               value={form.file_url}
@@ -277,7 +304,7 @@ export default function AlwaysBuyingFormPage() {
               mediaType="both"
               accept="image/*,video/mp4,video/webm,video/quicktime"
               maxSizeKB={500}
-              maxSizeMB={50}
+              maxSizeMB={10}
               disabled={!canUpdate}
             />
             {errors.file_url && (
@@ -293,7 +320,7 @@ export default function AlwaysBuyingFormPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-600  block mb-2">
               Media Alt Text <span className="text-red-500">*</span>
             </label>
             <Input
@@ -306,12 +333,13 @@ export default function AlwaysBuyingFormPage() {
               errorMessage={errors.alt_text}
             />
           </div>
+          </div>
         </div>
 
         {/* Purchasing Points Block */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
           <div className="flex justify-between items-center border-b pb-3">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white flex items-center gap-2">
+            <h2 className="text-base font-semibold text-slate-700  flex items-center gap-2">
               <AlertCircle size={18} className="text-[#981B1F]" />
               Purchasing Requirements / Points List
             </h2>
@@ -340,13 +368,36 @@ export default function AlwaysBuyingFormPage() {
             <div className="space-y-4">
               {form.points.map((point, index) => (
                 <div
-                  key={index}
-                  className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 border border-slate-100 dark:border-gray-700 rounded-xl bg-slate-50/50 dark:bg-gray-800/50"
+                  key={point.id || index}
+                  onDragOver={(e) => {
+                    if (draggedPointIndex === null || !canUpdate) return;
+                    e.preventDefault();
+                  }}
+                  onDrop={(e) => {
+                    if (!canUpdate) return;
+                    e.preventDefault();
+                    handlePointDrop(index);
+                  }}
+                  className={`flex flex-col md:flex-row items-start md:items-center gap-3 p-4 border border-slate-100 rounded-xl bg-slate-50/50 ${draggedPointIndex === index ? "opacity-50" : ""}`}
                 >
-                  <span className="text-slate-400 font-semibold text-sm shrink-0 flex items-center gap-1">
-                    <GripVertical size={14} className="hidden md:inline" />
+                  <button
+                    type="button"
+                    draggable={canUpdate}
+                    onDragStart={(e) => {
+                      if (!canUpdate) return;
+                      setDraggedPointIndex(index);
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", String(index));
+                    }}
+                    onDragEnd={() => setDraggedPointIndex(null)}
+                    disabled={!canUpdate}
+                    className="text-slate-400 font-semibold text-sm shrink-0 flex items-center gap-1 rounded-md px-2 py-1 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-grab active:cursor-grabbing"
+                    title="Drag to change sequence"
+                    aria-label="Drag to change sequence"
+                  >
+                    <GripVertical size={14} />
                     #{index + 1}
-                  </span>
+                  </button>
 
                   <div className="flex-1 w-full">
                     <input
@@ -355,7 +406,7 @@ export default function AlwaysBuyingFormPage() {
                       onChange={(e) => handlePointChange(index, "point_title", e.target.value)}
                       placeholder="e.g. Contamination: Max 2% total paper/label content allowed."
                       disabled={!canUpdate}
-                      className={`w-full border ${errors[`points.${index}.point_title`] ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 dark:bg-gray-900 dark:border-gray-600 dark:text-white`}
+                      className={`w-full border ${errors[`points.${index}.point_title`] ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1   `}
                     />
                     {errors[`points.${index}.point_title`] && (
                       <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
@@ -365,23 +416,12 @@ export default function AlwaysBuyingFormPage() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
-                    <div className="w-24">
-                      <input
-                        type="number"
-                        value={point.sequence}
-                        onChange={(e) => handlePointChange(index, "sequence", e.target.value)}
-                        placeholder="Seq"
-                        disabled={!canUpdate}
-                        className="w-full border border-[#E6E6E6] rounded-lg px-2.5 py-2 text-sm focus:border-[#981B1F] focus:outline-none dark:bg-gray-900 dark:border-gray-600 dark:text-white text-center"
-                      />
-                    </div>
-
                     <div className="w-28">
                       <select
                         value={point.status}
                         onChange={(e) => handlePointChange(index, "status", e.target.value)}
                         disabled={!canUpdate}
-                        className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white dark:bg-gray-900 dark:border-gray-600 dark:text-white"
+                        className="w-full border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white   "
                       >
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
@@ -394,7 +434,7 @@ export default function AlwaysBuyingFormPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemovePoint(index)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 shrink-0"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50  shrink-0"
                       >
                         <Trash2 size={16} />
                       </Button>

@@ -131,15 +131,15 @@ export default function LogisticsPage() {
           <ShieldCheck className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Quality Assurance</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">Quality Assurance</h1>
           <p className="text-slate-500 text-sm">Manage the quality assurance section and cards</p>
         </div>
       </div>
 
       {!isEditingSection && (section.section_title || section.section_description) ? (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between border-b pb-3">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white">Section Header</h2>
+            <h2 className="text-base font-semibold text-slate-700 ">Section Header</h2>
             {hasPermission("product", "quality.update") && (
               <Button variant="outline" className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5 gap-2" onClick={() => setIsEditingSection(true)}>
                 <Edit2 className="w-4 h-4" /> Edit Section
@@ -147,24 +147,24 @@ export default function LogisticsPage() {
             )}
           </div>
           <div>
-            <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider mb-1">Section Title</span>
-            <p className="text-sm font-medium text-slate-800 dark:text-gray-200">{section.section_title || "-"}</p>
+            <span className="text-xs font-semibold text-slate-400  block uppercase tracking-wider mb-1">Section Title</span>
+            <p className="text-sm font-medium text-slate-800 ">{section.section_title || "-"}</p>
           </div>
           <div>
-            <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 block uppercase tracking-wider mb-1">Section Description</span>
-            <p className="text-sm text-slate-600 dark:text-gray-300 whitespace-pre-wrap">{section.section_description || "-"}</p>
+            <span className="text-xs font-semibold text-slate-400  block uppercase tracking-wider mb-1">Section Description</span>
+            <p className="text-sm text-slate-600  whitespace-pre-wrap">{section.section_description || "-"}</p>
           </div>
         </div>
       ) : (
         <form onSubmit={handleSectionSave}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Section Header</h2>
+          <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Section Header</h2>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Title</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Section Title</label>
               <Input value={section.section_title} onChange={(e) => setSection((p) => ({ ...p, section_title: e.target.value }))} placeholder="Quality Assurance" />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Section Description</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Section Description</label>
               <Textarea value={section.section_description} onChange={(e) => setSection((p) => ({ ...p, section_description: e.target.value }))} rows={3} placeholder="Describe the section..." />
             </div>
             {hasPermission("product", "quality.update") && (
@@ -181,16 +181,16 @@ export default function LogisticsPage() {
         </form>
       )}
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white">Quality Cards</h2>
+          <h2 className="text-base font-semibold text-slate-700 ">Quality Cards</h2>
           {hasPermission("product", "quality.create") && (
             <Button onClick={() => navigate("/product-listing/quality-assurance/cards/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90" size="sm">
               <Plus className="w-4 h-4 mr-2" />Add Card
             </Button>
           )}
         </div>
-        <ReusableDataTable columns={columns} rows={cards} loading={loading} emptyMessage="No cards added yet." />
+        <ReusableDataTable columns={columns} rows={cards} loading={loading} sequenceReorderScope="quality_assurance_cards" emptyMessage="No cards added yet." />
       </div>
 
     </div>

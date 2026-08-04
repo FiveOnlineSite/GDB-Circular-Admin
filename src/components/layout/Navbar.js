@@ -3,12 +3,10 @@ import { Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 import { Button } from 'components/ui/button';
-import { useTheme } from '../../context/ThemeContext';
 
 const Navbar = () => {
   const { toggleSidebar } = useLayout();
   const { user } = useAuth();
-  const { theme, isDefault } = useTheme();
 
   const getInitials = () => {
     const firstInitial = user?.first_name?.[0] || user?.name?.[0] || 'U';
@@ -28,11 +26,6 @@ const Navbar = () => {
         >
           <Menu className='w-6 h-6' />
         </Button>
-        {!isDefault && (
-          <span className="text-sm font-black text-slate-800 tracking-wider uppercase hidden sm:inline-block border-l border-slate-200 pl-3">
-            {theme.company_name}
-          </span>
-        )}
       </div>
 
       <div className='flex items-center gap-2 sm:gap-4'>

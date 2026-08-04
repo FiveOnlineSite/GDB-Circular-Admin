@@ -7,9 +7,9 @@ import { Input } from "../../../components/ui/input";
 import Upload from "../../../components/common/Upload";
 import { Textarea } from "../../../components/ui/textarea";
 import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
-import { getProductById, createProduct, updateProduct } from "../../../services/productListing";
+import { getProducts, getProductById, createProduct, updateProduct } from "../../../services/productListing";
 
-const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+const ss = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 const CATEGORIES = ["LDPE", "HDPE", "PP"];
 const INIT = {
   product_category: "",
@@ -39,6 +39,7 @@ export default function CatalogueFormPage() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(INIT);
   const [errors, setErrors] = useState({});
+  const [homepageProductCount, setHomepageProductCount] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -78,6 +79,23 @@ export default function CatalogueFormPage() {
     })();
   }, [id, navigate]);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getProducts({ limit: 1000 });
+        const products = Array.isArray(res.data?.data)
+          ? res.data.data
+          : Array.isArray(res.data)
+            ? res.data
+            : [];
+        const count = products.filter((item) => Number(item.show_on_homepage) === 1 && String(item.id) !== String(id || "")).length;
+        setHomepageProductCount(count);
+      } catch {
+        setHomepageProductCount(0);
+      }
+    })();
+  }, [id]);
+
   const handle = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
@@ -97,7 +115,9 @@ export default function CatalogueFormPage() {
     if (!form.product_name.trim()) newErrors.product_name = "Product name is required";
     if (!form.short_description.trim()) newErrors.short_description = "Short description is required";
     if (!form.image_url) newErrors.image_url = "Product image is required";
-    if (!Number.isInteger(Number(form.sequence)) || Number(form.sequence) < 0) newErrors.sequence = "Sequence must be a non-negative integer";
+    if (form.show_on_homepage && homepageProductCount >= 3) {
+      newErrors.show_on_homepage = "Only 3 products can be shown on homepage";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -117,7 +137,7 @@ export default function CatalogueFormPage() {
         mfi_g_10min: form.mfi_g_10min.trim(),
         ash_percent: form.ash_percent.trim(),
         pcr_content_percent: form.pcr_content_percent.trim(),
-        sequence: Number(form.sequence),
+        sequence: Number(form.sequence ?? 0),
         show_on_homepage: form.show_on_homepage ? 1 : 0,
         fda_lno: form.fda_lno ? 1 : 0,
       };
@@ -142,6 +162,7 @@ export default function CatalogueFormPage() {
   if (pageLoading) return <div className="flex justify-center items-center h-64"><div className="w-10 h-10 border-4 border-[#981B1F] border-t-transparent rounded-full animate-spin" /></div>;
 
   const title = isView ? "View Product" : isEdit ? "Edit Product" : "Add Product";
+  const homepageLimitReached = homepageProductCount >= 3 && !form.show_on_homepage;
 
   return (
     <div className="space-y-6 pb-12 w-full">
@@ -150,17 +171,17 @@ export default function CatalogueFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{title}</h1>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">{title}</h1>
           <p className="text-slate-500 text-sm">{isView ? "Product details" : isEdit ? "Update product information" : "Add a new product to the catalogue"}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Product Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Product Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Product Category <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Product Category <span className="text-red-500">*</span></label>
               <select name="product_category" value={form.product_category} onChange={handle} aria-invalid={errors.product_category ? "true" : "false"} className={`${ss} ${errors.product_category ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : ""}`} disabled={isView}>
                 <option value="">Select Category</option>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -168,43 +189,35 @@ export default function CatalogueFormPage() {
               {errors.product_category && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.product_category}</span>}
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Product Name <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Product Name <span className="text-red-500">*</span></label>
               <Input name="product_name" value={form.product_name} onChange={handle} placeholder="e.g. Food Grade LLDPE PCR" disabled={isView} error={!!errors.product_name} errorMessage={errors.product_name} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Grade No.</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Grade No.</label>
               <Input name="grade_no" value={form.grade_no} onChange={handle} placeholder="e.g. GDB-LDPE-101" disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Color</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Color</label>
               <Input name="color" value={form.color} onChange={handle} placeholder="e.g. Natural / Black" disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Density (g/cm3)</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Density (g/cm3)</label>
               <Input name="density_g_cm3" value={form.density_g_cm3} onChange={handle} placeholder="e.g. 0.910 - 0.935" disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">MFI (g/10min)</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">MFI (g/10min)</label>
               <Input name="mfi_g_10min" value={form.mfi_g_10min} onChange={handle} placeholder="e.g. 1.50 - 2.30" disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Ash (%)</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Ash (%)</label>
               <Input name="ash_percent" value={form.ash_percent} onChange={handle} placeholder="e.g. < 1.0%" disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">PCR Content (%)</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">PCR Content (%)</label>
               <Input name="pcr_content_percent" value={form.pcr_content_percent} onChange={handle} placeholder="e.g. 100%" disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Image Alt Text</label>
-              <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the product image" disabled={isView} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Sequence</label>
-              <Input type="number" min="0" name="sequence" value={form.sequence} onChange={handle} disabled={isView} error={!!errors.sequence} errorMessage={errors.sequence} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handle} className={`${ss} cursor-pointer`} disabled={isView}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -212,42 +225,64 @@ export default function CatalogueFormPage() {
             </div>
             <div className="space-y-3 md:col-span-2">
               <label className="flex items-center gap-3">
-                <input type="checkbox" id="show_on_homepage" name="show_on_homepage" checked={form.show_on_homepage} onChange={handle} disabled={isView} className="w-4 h-4 cursor-pointer accent-[#981B1F]" />
-                <span className="text-sm font-semibold text-slate-600 dark:text-gray-300">Show on Homepage</span>
+                <input
+                  type="checkbox"
+                  id="show_on_homepage"
+                  name="show_on_homepage"
+                  checked={form.show_on_homepage}
+                  onChange={handle}
+                  disabled={isView || homepageLimitReached}
+                  className="w-4 h-4 cursor-pointer accent-[#981B1F] disabled:cursor-not-allowed"
+                />
+                <span className="text-sm font-semibold text-slate-600 ">Show on Homepage</span>
               </label>
+              {(homepageLimitReached || errors.show_on_homepage) && (
+                <span className={`text-xs font-semibold block ${errors.show_on_homepage ? "text-red-500" : "text-slate-500"}`}>
+                  {errors.show_on_homepage || "Maximum 3 products can be shown on homepage."}
+                </span>
+              )}
               <label className="flex items-center gap-3">
                 <input type="checkbox" id="fda_lno" name="fda_lno" checked={form.fda_lno} onChange={handle} disabled={isView} className="w-4 h-4 cursor-pointer accent-[#981B1F]" />
-                <span className="text-sm font-semibold text-slate-600 dark:text-gray-300">FDA LNO Available</span>
+                <span className="text-sm font-semibold text-slate-600 ">FDA LNO Available</span>
               </label>
             </div>
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Short Description <span className="text-red-500">*</span></label>
+            <label className="text-sm font-semibold text-slate-600  block mb-1">Short Description <span className="text-red-500">*</span></label>
             <Textarea name="short_description" value={form.short_description} onChange={handle} rows={4} placeholder="Brief product description..." disabled={isView} />
             {errors.short_description && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.short_description}</span>}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Product Image <span className="text-red-500">*</span></h2>
-          <Upload
-            value={form.image_url}
-            onChange={(url) => {
-              setForm((p) => ({ ...p, image_url: url }));
-              if (errors.image_url) {
-                setErrors((prev) => {
-                  const next = { ...prev };
-                  delete next.image_url;
-                  return next;
-                });
-              }
-            }}
-            mediaType="image"
-            accept="image/*"
-            maxSizeKB={500}
-            disabled={isView}
-          />
-          {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Product Image <span className="text-red-500">*</span></h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload</label>
+              <Upload
+                value={form.image_url}
+                onChange={(url) => {
+                  setForm((p) => ({ ...p, image_url: url }));
+                  if (errors.image_url) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.image_url;
+                      return next;
+                    });
+                  }
+                }}
+                mediaType="image"
+                accept="image/*"
+                maxSizeKB={500}
+                disabled={isView}
+              />
+              {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Alt Text</label>
+            <Input name="image_alt" value={form.image_alt} onChange={handle} placeholder="Describe the product image" disabled={isView} />
+            </div>
+          </div>
         </div>
 
         {!isView ? (

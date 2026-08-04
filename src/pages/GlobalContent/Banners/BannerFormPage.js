@@ -4,11 +4,10 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import Upload from "../../../components/common/Upload";
-import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { Input } from "../../../components/ui/input";
-import { createBanner, updateBanner, getBannerById } from "../../../services/globalContent/banners";
+import { updateBanner, getBannerById } from "../../../services/globalContent/banners";
 
-const fieldStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white";
+const fieldStyle = "w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white   ";
 const PAGES = ["home", "about-us", "products", "seller", "teams", "facilities", "news-events"];
 
 export default function BannerFormPage() {
@@ -27,7 +26,10 @@ export default function BannerFormPage() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (!isEdit) return;
+    if (!isEdit) {
+      navigate("/global-content/banners");
+      return;
+    }
     const fetch = async () => {
       try {
         setPageLoading(true);
@@ -86,9 +88,9 @@ export default function BannerFormPage() {
         title: form.title.trim(),
         alt_text: form.alt_text.trim(),
       };
-      const res = isEdit ? await updateBanner(id, payload) : await createBanner(payload);
+      const res = await updateBanner(id, payload);
       if (res.success) {
-        toast.success(isEdit ? "Banner updated" : "Banner created");
+        toast.success("Banner updated");
         navigate("/global-content/banners");
       } else {
         toast.error(res.message || "Operation failed");
@@ -115,33 +117,36 @@ export default function BannerFormPage() {
           <ArrowLeft className="h-4 w-4 text-slate-700" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{isEdit ? "Edit Banner" : "Add Banner"}</h1>
-          <p className="text-slate-500 text-sm">{isEdit ? "Update banner content and settings" : "Create a new page banner"}</p>
+          <h1 className="text-2xl font-bold text-slate-800  tracking-tight">Edit Banner</h1>
+          <p className="text-slate-500 text-sm">Update banner content and settings</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Banner Details</h2>
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Banner Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Page <span className="text-red-500">*</span></label>
-              <select name="page" value={form.page} onChange={handleChange} aria-invalid={errors.page ? "true" : "false"} className={`${fieldStyle} ${errors.page ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : ""}`}>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Page <span className="text-red-500">*</span></label>
+              <select
+                name="page"
+                value={form.page}
+                onChange={handleChange}
+                disabled
+                aria-invalid={errors.page ? "true" : "false"}
+                className={`${fieldStyle} cursor-not-allowed opacity-70 ${errors.page ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : ""}`}
+              >
                 <option value="">Select Page</option>
                 {PAGES.map((p) => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, " ")}</option>)}
               </select>
               {errors.page && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.page}</span>}
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Title <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Title <span className="text-red-500">*</span></label>
               <Input name="title" value={form.title} onChange={handleChange} placeholder="Banner headline text" error={!!errors.title} errorMessage={errors.title} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Alt Text</label>
-              <Input name="alt_text" value={form.alt_text} onChange={handleChange} placeholder="Describe the banner image/video" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-slate-600 dark:text-gray-300 block mb-1">Status</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
               <select name="status" value={form.status} onChange={handleChange} className={`${fieldStyle} cursor-pointer`}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -150,34 +155,34 @@ export default function BannerFormPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-700 dark:text-white border-b pb-3">Background Image / Video <span className="text-red-500">*</span></h2>
-          <Upload value={form.file_url} onChange={(url) => {
-            setForm((prev) => ({ ...prev, file_url: url }));
-            if (errors.file_url) {
-              setErrors((prev) => {
-                const next = { ...prev };
-                delete next.file_url;
-                return next;
-              });
-            }
-          }} mediaType="both" accept="image/*,video/mp4,video/webm,video/quicktime" maxSizeKB={500} maxSizeMB={50} />
-          {errors.file_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.file_url}</span>}
+        <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Background Image / Video <span className="text-red-500">*</span></h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Media Upload</label>
+              <Upload value={form.file_url} onChange={(url) => {
+                setForm((prev) => ({ ...prev, file_url: url }));
+                if (errors.file_url) {
+                  setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.file_url;
+                    return next;
+                  });
+                }
+              }} mediaType="both" accept="image/*,video/mp4,video/webm,video/quicktime" maxSizeKB={500} maxSizeMB={10} />
+              {errors.file_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.file_url}</span>}
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Alt Text</label>
+              <Input name="alt_text" value={form.alt_text} onChange={handleChange} placeholder="Describe the banner image/video" />
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3">
-          <EditPageDeleteAction
-            id={isEdit ? id : null}
-            permission="global.banner.delete"
-            endpoint={`/global-content/banners/${id}`}
-            redirectTo="/global-content/banners"
-            title="Delete Banner"
-            message="Are you sure you want to delete this banner?"
-            successMessage="Banner deleted"
-          />
           <Button type="button" variant="outline" onClick={() => navigate("/global-content/banners")}>Cancel</Button>
           <Button type="submit" disabled={submitting} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
-            {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? "Update Banner" : "Create Banner"}</>}
+            {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Update Banner</>}
           </Button>
         </div>
       </form>

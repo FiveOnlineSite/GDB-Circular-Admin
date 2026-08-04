@@ -12,17 +12,7 @@ export const getBannerById = async (id) => {
   return res.data;
 };
 
-export const createBanner = async (data) => {
-  const res = await api.post(basePath, data);
-  return res.data;
-};
-
 export const updateBanner = async (id, data) => {
   const res = await api.put(`${basePath}/${id}`, data);
-  return res.data;
-};
-
-export const deleteBanner = async (id) => {
-  const res = await api.delete(`${basePath}/${id}`);
   return res.data;
 };

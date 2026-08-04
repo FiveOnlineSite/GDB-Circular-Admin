@@ -152,15 +152,15 @@ export default function InquiryList() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inquiry Form Submissions</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">View and manage all contact form submissions</p>
+          <h1 className="text-2xl font-bold text-gray-900 ">Inquiry Form Submissions</h1>
+          <p className="text-sm text-gray-500  mt-1">View and manage all contact form submissions</p>
         </div>
         <Button onClick={handleExport} variant="outline" className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5">
           <Download className="w-4 h-4 mr-2" />Export CSV
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm p-4 mb-6 space-y-3">
+      <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-4 mb-6 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -196,7 +196,7 @@ export default function InquiryList() {
 
       {viewModal && viewItem && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setViewModal(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white  rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-lg font-bold">Inquiry Details</h2>
               <Button variant="ghost" size="icon" onClick={() => setViewModal(false)}><X className="w-4 h-4" /></Button>
@@ -214,13 +214,13 @@ export default function InquiryList() {
               ].map(([label, value]) => (
                 <div key={label} className="flex gap-3">
                   <span className="text-sm font-semibold text-slate-500 w-32 shrink-0">{label}</span>
-                  <span className="text-sm text-slate-800 dark:text-gray-200">{value}</span>
+                  <span className="text-sm text-slate-800 ">{value}</span>
                 </div>
               ))}
               {viewItem.message && (
                 <div>
                   <span className="text-sm font-semibold text-slate-500 block mb-1">Message</span>
-                  <p className="text-sm text-slate-800 dark:text-gray-200 bg-slate-50 dark:bg-gray-800 rounded-lg p-3 whitespace-pre-wrap">{viewItem.message}</p>
+                  <p className="text-sm text-slate-800  bg-slate-50  rounded-lg p-3 whitespace-pre-wrap">{viewItem.message}</p>
                 </div>
               )}
             </div>
