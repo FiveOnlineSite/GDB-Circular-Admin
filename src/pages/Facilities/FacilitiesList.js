@@ -75,6 +75,16 @@ export default function FacilitiesList() {
     { field: "facility_type", headerName: "Facility Type", sortable: true },
     { field: "state", headerName: "State", sortable: true },
     { field: "phone", headerName: "Phone", sortable: false },
+    {
+      field: "show_on_facility_page",
+      headerName: "Facility Page",
+      sortable: true,
+      renderCell: ({ row }) => (
+        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${row.show_on_facility_page ? "bg-indigo-50 text-indigo-700 border border-indigo-100" : "bg-slate-50 text-slate-500 border border-slate-100"}`}>
+          {row.show_on_facility_page ? "Yes" : "No"}
+        </span>
+      ),
+    },
     { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "status",

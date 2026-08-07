@@ -15,6 +15,7 @@ const INITIAL_FORM = {
   facility_name: "",
   facility_type: "GDB Circular",
   is_development: false,
+  show_on_facility_page: false,
   address: "",
   phone: "",
   state: "",
@@ -47,6 +48,7 @@ export default function FacilityForm() {
           facility_name: facility.facility_name || "",
           facility_type: facility.facility_type || "GDB Circular",
           is_development: Boolean(facility.is_development),
+          show_on_facility_page: Boolean(facility.show_on_facility_page),
           address: facility.address || "",
           phone: facility.phone || "",
           state: facility.state || "",
@@ -74,6 +76,12 @@ export default function FacilityForm() {
         );
       }
 
+      if (field === "show_on_facility_page" && !value) {
+        ["phone", "state", "image_url"].forEach(
+          (optionalField) => delete next[optionalField]
+        );
+      }
+
       return next;
     });
   };
@@ -87,6 +95,8 @@ export default function FacilityForm() {
     if (!form.facility_type.trim()) newErrors.facility_type = "Facility type is required";
     if (!form.is_development) {
       if (!form.address.trim()) newErrors.address = "Address is required";
+    }
+    if (form.show_on_facility_page && !form.is_development) {
       if (!form.phone.trim()) newErrors.phone = "Phone is required";
       if (!form.state.trim()) newErrors.state = "State is required";
       if (!form.image_url) newErrors.image_url = "Image Upload is required";
@@ -108,6 +118,7 @@ export default function FacilityForm() {
         ...form,
         facility_name: form.facility_name.trim(),
         is_development: Boolean(form.is_development),
+        show_on_facility_page: Boolean(form.show_on_facility_page),
         address: form.address.trim(),
         phone: form.phone.trim(),
         state: form.state.trim(),
@@ -167,6 +178,22 @@ export default function FacilityForm() {
             </span>
           </label>
 
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-4">
+            <input
+              type="checkbox"
+              checked={form.show_on_facility_page}
+              onChange={(e) => updateField("show_on_facility_page", e.target.checked)}
+              disabled={isView}
+              className="mt-0.5 h-4 w-4 accent-[#981B1F] disabled:opacity-55"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-slate-700">Show on Facility Page</span>
+              <span className="mt-1 block text-xs text-slate-500">
+                Display this facility in the facility cards. Map visibility is controlled by latitude and longitude.
+              </span>
+            </span>
+          </label>
+
           <div>
             <label className="text-sm font-semibold text-slate-600 block mb-1">Address {!form.is_development && <span className="text-red-500">*</span>}</label>
             <Textarea value={form.address} onChange={(e) => updateField("address", e.target.value)} error={!!errors.address} errorMessage={errors.address} disabled={isView} />
@@ -174,11 +201,11 @@ export default function FacilityForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Phone {!form.is_development && <span className="text-red-500">*</span>}</label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Phone {form.show_on_facility_page && !form.is_development && <span className="text-red-500">*</span>}</label>
               <Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} error={!!errors.phone} errorMessage={errors.phone} disabled={isView} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600 block mb-1">State {!form.is_development && <span className="text-red-500">*</span>}</label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">State {form.show_on_facility_page && !form.is_development && <span className="text-red-500">*</span>}</label>
               <Input value={form.state} onChange={(e) => updateField("state", e.target.value)} error={!!errors.state} errorMessage={errors.state} disabled={isView} />
             </div>
           </div>
@@ -196,7 +223,7 @@ export default function FacilityForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload {!form.is_development && <span className="text-red-500">*</span>}</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload {form.show_on_facility_page && !form.is_development && <span className="text-red-500">*</span>}</label>
               <Upload value={form.image_url} onChange={(url) => updateField("image_url", url)} mediaType="image" accept="image/*" maxSizeKB={500} disabled={isView} />
               {errors.image_url && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.image_url}</span>}
             </div>
