@@ -7,7 +7,7 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
 import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
-import { getNewsById, createNews, updateNews } from "../../../services/news/newsService";
+import { getNews, getNewsById, createNews, updateNews } from "../../../services/news/newsService";
 import { getCategories } from "../../../services/news/newsCategoryService";
 
 function formatDisplayDate(value) {
@@ -26,6 +26,7 @@ export default function NewsFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [featuredArticle, setFeaturedArticle] = useState(null);
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     category_id: "",
@@ -38,6 +39,7 @@ export default function NewsFormPage() {
     logo_alt: "",
     external_url: "",
     featured_homepage: 0,
+    featured_listing: 0,
     publish_status: "draft",
     sequence: 0,
   });
@@ -59,6 +61,21 @@ export default function NewsFormPage() {
   }, [isEdit, isView]);
 
   useEffect(() => {
+    (async () => {
+      try {
+        const res = await getNews({ limit: 1000, page: 1 });
+        if (res.success && Array.isArray(res.data)) {
+          setFeaturedArticle(
+            res.data.find((article) => Number(article.featured_listing) === 1) || null,
+          );
+        }
+      } catch (err) {
+        console.error("Failed to fetch featured top article", err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     if (!isEdit && !isView) return;
     (async () => {
       try {
@@ -77,6 +94,7 @@ export default function NewsFormPage() {
             logo_alt: d.logo_alt || "",
             external_url: d.external_url || "",
             featured_homepage: d.featured_homepage ?? 0,
+            featured_listing: d.featured_listing ?? 0,
             publish_status: d.publish_status || "draft",
             sequence: d.sequence ?? 0,
           });
@@ -98,6 +116,7 @@ export default function NewsFormPage() {
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? (checked ? 1 : 0) : name === "sequence" || name === "category_id" ? Number(value) : value,
+      ...(name === "publish_status" && value === "draft" ? { featured_listing: 0 } : {}),
     }));
     if (errors[name]) {
       setErrors((prev) => {
@@ -119,6 +138,9 @@ export default function NewsFormPage() {
     if (!form.short_description.trim()) newErrors.short_description = "Short Description is required";
     if (!form.image_url) newErrors.image_url = "Cover Image is required";
     if (!form.image_alt.trim()) newErrors.image_alt = "Image Alt Text is required";
+    if (form.featured_listing === 1 && form.publish_status !== "published") {
+      newErrors.featured_listing = "The featured top article must be published";
+    }
     if (form.logo_url && !form.logo_alt.trim()) newErrors.logo_alt = "Logo alt text is required when a logo is uploaded";
     if (form.external_url) {
       try {
@@ -167,6 +189,8 @@ export default function NewsFormPage() {
   }
 
   const pageTitle = isView ? "View News Article" : isEdit ? "Edit News Article" : "Add News Article";
+  const anotherFeaturedArticle =
+    featuredArticle && String(featuredArticle.id) !== String(id || "");
 
   return (
     <div className="space-y-6 pb-12 w-full p-6">
@@ -241,6 +265,30 @@ export default function NewsFormPage() {
                   <span className="text-xs text-slate-400 block mt-0.5">If enabled, this article is showcased inside the homepage insights section.</span>
                 </div>
               </label>
+              <label className={`flex items-center gap-3 select-none ${anotherFeaturedArticle || form.publish_status !== "published" ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
+                <input
+                  type="checkbox"
+                  name="featured_listing"
+                  checked={form.featured_listing === 1}
+                  onChange={handleChange}
+                  disabled={isView || anotherFeaturedArticle || form.publish_status !== "published"}
+                  className="rounded border-[#E6E6E6] text-[#981B1F] focus:ring-[#981B1F]/15 h-4.5 w-4.5 cursor-pointer disabled:cursor-not-allowed"
+                />
+                <div>
+                  <span className="text-sm font-semibold text-slate-700">Featured Top Article</span>
+                  <span className="text-xs text-slate-400 block mt-0.5">
+                    Show this article in the large top section of the News & Updates page. Only one article can be selected.
+                  </span>
+                </div>
+              </label>
+              {anotherFeaturedArticle ? (
+                <p className="text-xs font-semibold text-amber-700">
+                  “{featuredArticle.title}” is currently selected. Uncheck it before selecting another article.
+                </p>
+              ) : form.publish_status !== "published" ? (
+                <p className="text-xs text-slate-500">Publish this article before selecting it as the featured top article.</p>
+              ) : null}
+              {errors.featured_listing && <span className="text-red-500 text-xs font-semibold block text-left">{errors.featured_listing}</span>}
             </div>
           </div>
         </div>

@@ -221,6 +221,24 @@ export default function NewsList() {
         </span>
       ),
     },
+    {
+      field: "featured_listing",
+      headerName: "Top Article",
+      sortable: true,
+      renderCell: ({ row }) => (
+        <span className="flex justify-center w-full">
+          {Number(row.featured_listing) === 1 ? (
+            <span className="text-green-600 bg-green-50 rounded-full p-0.5 border border-green-150">
+              <Check size={12} />
+            </span>
+          ) : (
+            <span className="text-slate-300">
+              <X size={12} />
+            </span>
+          )}
+        </span>
+      ),
+    },
     { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "publish_status",
