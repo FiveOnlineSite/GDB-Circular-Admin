@@ -18,6 +18,13 @@ import { StatusActionButton, StatusBadge } from "../../../components/common/Stat
 const STATUS_OPTIONS = ["active", "inactive"];
 const SLIDER_GROUPS = ["1", "2"];
 
+const tabButtonClass = (active) =>
+  `rounded-full px-4 py-2 text-sm font-semibold transition ${
+    active
+      ? "bg-[#981B1F] text-white shadow-sm"
+      : "border border-slate-200 bg-white text-slate-600 hover:border-[#981B1F]/30 hover:bg-[#981B1F]/5 hover:text-[#981B1F]"
+  }`;
+
 export default function LifeAtGdbList() {
   const { hasPermission } = usePermissionContext();
   const navigate = useNavigate();
@@ -36,7 +43,9 @@ export default function LifeAtGdbList() {
   const [selectedSliderGroup, setSelectedSliderGroup] = useState("");
   const [section, setSection] = useState({ section_title: "", section_description: "" });
   const [isEditingSection, setIsEditingSection] = useState(false);
+  const [sectionLoading, setSectionLoading] = useState(true);
   const [sectionSaving, setSectionSaving] = useState(false);
+  const hasSectionDetails = Boolean(section.section_title || section.section_description);
 
 
   const fetchLifeGallery = useCallback(async (params = {}) => {
@@ -73,6 +82,7 @@ export default function LifeAtGdbList() {
   useEffect(() => {
     (async () => {
       try {
+        setSectionLoading(true);
         const res = await getLifeSection();
         if (res.success && res.data) {
           const nextSection = {
@@ -87,6 +97,8 @@ export default function LifeAtGdbList() {
       } catch (err) {
         toast.error(err.response?.data?.message || "Failed to load section header");
         setIsEditingSection(true);
+      } finally {
+        setSectionLoading(false);
       }
     })();
   }, []);
@@ -97,8 +109,7 @@ export default function LifeAtGdbList() {
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
-  const handleSliderGroupFilterChange = (e) => {
-    const sliderGroup = e.target.value;
+  const handleSliderGroupTabChange = (sliderGroup) => {
     setSelectedSliderGroup(sliderGroup);
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
@@ -127,8 +138,13 @@ export default function LifeAtGdbList() {
       setSectionSaving(true);
       const res = await updateLifeSection(section);
       if (res.success) {
+        const nextSection = {
+          section_title: res.data?.section_title || section.section_title || "",
+          section_description: res.data?.section_description || section.section_description || "",
+        };
+        setSection(nextSection);
         toast.success("Section header saved");
-        setIsEditingSection(false);
+        setIsEditingSection(!(nextSection.section_title || nextSection.section_description));
       } else {
         toast.error(res.message || "Failed to save section header");
       }
@@ -231,6 +247,10 @@ export default function LifeAtGdbList() {
     },
   ];
 
+  const tableColumns = selectedSliderGroup
+    ? columns
+    : columns.filter((column) => column.field !== "sequence");
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -251,7 +271,14 @@ export default function LifeAtGdbList() {
         )}
       </div>
 
-      {!isEditingSection && (section.section_title || section.section_description) ? (
+      {sectionLoading ? (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 min-h-44 flex items-center justify-center mb-6">
+          <div className="flex flex-col items-center gap-3 text-slate-500" role="status" aria-live="polite">
+            <Loader2 className="h-8 w-8 animate-spin text-[#981B1F]" />
+            <span className="text-sm font-medium">Loading section header...</span>
+          </div>
+        </div>
+      ) : !isEditingSection && hasSectionDetails ? (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4 mb-6">
           <div className="flex items-center justify-between border-b pb-3">
             <h2 className="text-base font-semibold text-slate-700">Section Header</h2>
@@ -293,7 +320,7 @@ export default function LifeAtGdbList() {
             </div>
             {hasPermission("team", "life.update") && (
               <div className="flex justify-end gap-3">
-                {(section.section_title || section.section_description) && (
+                {hasSectionDetails && (
                   <Button type="button" variant="outline" onClick={() => setIsEditingSection(false)}>Cancel</Button>
                 )}
                 <Button type="submit" disabled={sectionSaving} className="bg-[#981B1F] hover:bg-[#C3662D] text-white">
@@ -321,20 +348,6 @@ export default function LifeAtGdbList() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Slider Filter */}
-          <select
-            value={selectedSliderGroup}
-            onChange={handleSliderGroupFilterChange}
-            className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[150px] cursor-pointer"
-          >
-            <option value="">All Sliders</option>
-            {SLIDER_GROUPS.map((opt) => (
-              <option key={opt} value={opt}>
-                Slider {opt}
-              </option>
-            ))}
-          </select>
-
           {/* Status Filter */}
           <select
             value={selectedStatus}
@@ -353,8 +366,26 @@ export default function LifeAtGdbList() {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4">
+          <button type="button" onClick={() => handleSliderGroupTabChange("")} className={tabButtonClass(!selectedSliderGroup)}>
+            All
+          </button>
+          {SLIDER_GROUPS.map((sliderGroup) => (
+            <button
+              key={sliderGroup}
+              type="button"
+              onClick={() => handleSliderGroupTabChange(sliderGroup)}
+              className={tabButtonClass(selectedSliderGroup === sliderGroup)}
+            >
+              Slider {sliderGroup}
+            </button>
+          ))}
+          <span className="ml-auto text-xs font-medium text-slate-500">
+            {selectedSliderGroup ? "Drag rows to change this slider sequence." : "Select a slider tab to reorder sequence."}
+          </span>
+        </div>
         <ReusableDataTable
-          columns={columns}
+          columns={tableColumns}
           rows={rows}
           loading={loading}
           pagination={pagination}
@@ -363,6 +394,8 @@ export default function LifeAtGdbList() {
             setPagination((prev) => ({ ...prev, per_page: pp, current_page: 1 }))
           }
           sequenceReorderScope="team_life_gallery"
+          disableSequenceReorder={!selectedSliderGroup}
+          onSequenceReorderSuccess={(updatedRows) => setRows(updatedRows)}
           emptyMessage="No gallery items found."
         />
       </div>

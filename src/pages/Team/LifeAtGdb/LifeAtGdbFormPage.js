@@ -21,10 +21,7 @@ export default function LifeAtGdbFormPage() {
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
-    section_title: "",
-    description: "",
     file_url: "",
-    media_type: "image",
     alt_text: "",
     slider_group: 1,
     sequence: 0,
@@ -41,10 +38,7 @@ export default function LifeAtGdbFormPage() {
         if (res.success && res.data) {
           const d = res.data;
           setForm({
-            section_title: d.section_title || "",
-            description: d.description || "",
             file_url: d.file_url || "",
-            media_type: "image",
             alt_text: d.alt_text || "",
             slider_group: Number(d.slider_group) === 2 ? 2 : 1,
             sequence: d.sequence ?? 0,
@@ -82,7 +76,6 @@ export default function LifeAtGdbFormPage() {
     setForm((prev) => ({
       ...prev,
       file_url: url,
-      media_type: "image",
     }));
     if (errors.file_url) {
       setErrors((prev) => {
@@ -111,9 +104,6 @@ export default function LifeAtGdbFormPage() {
       setSubmitting(true);
       const payload = {
         ...form,
-        section_title: null,
-        description: null,
-        media_type: "image",
         alt_text: form.alt_text.trim(),
         slider_group: Number(form.slider_group) === 2 ? 2 : 1,
         sequence: Number(form.sequence),

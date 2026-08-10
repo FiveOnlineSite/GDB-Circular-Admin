@@ -175,26 +175,13 @@ export default function ReusableDataTable({
     Number.isFinite(pagination?.last_page) &&
     (pagination.total > 0 || pagination.last_page > 1 || currentPage > 1);
 
-  const inferredLastPage =
-    rows.length === 0 ? currentPage : rows.length < perPage ? currentPage : currentPage + 1;
-
   const totalItems = hasServerPagination ? pagination.total : rows.length;
-  const lastPage = hasServerPagination
-    ? pagination.last_page
-    : Math.max(1, inferredLastPage);
+  const lastPage = hasServerPagination ? pagination.last_page : Math.max(1, Math.ceil(totalItems / perPage));
 
   // Derived total pages
   const totalPages = lastPage;
-  const displayFrom = rows.length === 0 ? 0 : (currentPage - 1) * perPage + 1;
-  const displayTo = rows.length === 0 ? 0 : (currentPage - 1) * perPage + rows.length;
-  const displaySummary = hasServerPagination
-    ? `Showing ${displayFrom.toLocaleString()} to ${Math.min(
-        currentPage * perPage,
-        totalItems,
-      ).toLocaleString()} of ${totalItems.toLocaleString()} entries`
-    : `Showing ${displayFrom.toLocaleString()} to ${displayTo.toLocaleString()}${
-        rows.length === perPage ? "+" : ""
-      } entries`;
+  const perPageOptions = useMemo(() => [10, 20, 50, 100], []);
+  const selectPerPage = perPageOptions.includes(perPage) ? perPage : pageSize;
 
   const handleSelectAllClick = (e) => {
     const checked = e.target.checked;
@@ -248,7 +235,7 @@ export default function ReusableDataTable({
     ];
   }, [columns]);
 
-  const visibleRows = useMemo(() => {
+  const sortedRows = useMemo(() => {
     if (handleSortChange) return tableRows;
     return [...tableRows].sort(getComparator(order, orderBy));
   }, [order, orderBy, tableRows, handleSortChange]);
@@ -271,6 +258,17 @@ export default function ReusableDataTable({
     isSequenceReorderEnabled &&
     rows.length > 1;
   const showPagination = rows.length > 0 && !isSequenceReorderEnabled;
+  const visibleRows = useMemo(() => {
+    if (isSequenceReorderEnabled || hasServerPagination) {
+      return sortedRows;
+    }
+
+    const startIndex = (currentPage - 1) * perPage;
+    return sortedRows.slice(startIndex, startIndex + perPage);
+  }, [currentPage, hasServerPagination, isSequenceReorderEnabled, perPage, sortedRows]);
+  const displayFrom = visibleRows.length === 0 ? 0 : (currentPage - 1) * perPage + 1;
+  const displayTo = visibleRows.length === 0 ? 0 : displayFrom + visibleRows.length - 1;
+  const displaySummary = `Showing ${displayFrom.toLocaleString()} to ${displayTo.toLocaleString()} of ${totalItems.toLocaleString()} entries`;
 
   const handleSequenceDrop = async (targetRowId) => {
     if (!canReorderRows || draggedRowId == null || draggedRowId === targetRowId) {
@@ -535,7 +533,7 @@ export default function ReusableDataTable({
           <div className='flex items-center gap-1.5'>
             <span className='text-sm text-gray-500'>Rows per page:</span>
             <Select
-              value={perPage.toString()}
+              value={selectPerPage.toString()}
               onValueChange={(value) => {
                 const newPerPage = Number(value);
                 if (handlePerPageChange) {
@@ -549,10 +547,11 @@ export default function ReusableDataTable({
                 <SelectValue placeholder={perPage} />
               </SelectTrigger>
               <SelectContent className='bg-white'>
-                <SelectItem value='10'>10</SelectItem>
-                <SelectItem value='20'>20</SelectItem>
-                <SelectItem value='50'>50</SelectItem>
-                <SelectItem value='100'>100</SelectItem>
+                {perPageOptions.map((option) => (
+                  <SelectItem key={option} value={option.toString()}>
+                    {option}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <span className='text-sm text-gray-500 ml-8'>{displaySummary}</span>
