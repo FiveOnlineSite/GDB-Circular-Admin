@@ -8,7 +8,7 @@ import { getFacilities, toggleFacilityStatus } from "../../services/facilityServ
 import { usePermissionContext } from "../../context/PermissionContext";
 import { toast } from "sonner";
 
-const FACILITY_TYPES = ["", "GDB International", "GDB Circular", "GDB Paint & Coatings"];
+const FACILITY_TYPES = ["", "Headquarter", "GDB Circular", "GDB Paint & Coatings"];
 
 export default function FacilitiesList() {
   const { hasPermission } = usePermissionContext();

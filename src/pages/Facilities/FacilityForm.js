@@ -9,7 +9,7 @@ import EditPageDeleteAction from "../../components/common/EditPageDeleteAction";
 import { getFacility, createFacility, updateFacility } from "../../services/facilityService";
 import { toast } from "sonner";
 
-const FACILITY_TYPES = ["GDB International", "GDB Circular", "GDB Paint & Coatings"];
+const FACILITY_TYPES = ["Headquarter", "GDB Circular", "GDB Paint & Coatings"];
 
 const INITIAL_FORM = {
   facility_name: "",
@@ -46,7 +46,9 @@ export default function FacilityForm() {
         const facility = response?.data || response || {};
         setForm({
           facility_name: facility.facility_name || "",
-          facility_type: facility.facility_type || "GDB Circular",
+          facility_type: facility.facility_type === "GDB International"
+            ? "Headquarter"
+            : facility.facility_type || "GDB Circular",
           is_development: Boolean(facility.is_development),
           show_on_facility_page: Boolean(facility.show_on_facility_page),
           address: facility.address || "",
