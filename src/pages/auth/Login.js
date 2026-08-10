@@ -147,7 +147,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               <div>
                 <label className="text-sm font-semibold text-gray-700 block mb-2">
-                  Email Address
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -172,7 +172,7 @@ const Login = () => {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-semibold text-gray-700 block">
-                    Password
+                    Password <span className="text-red-500">*</span>
                   </label>
                 </div>
                 <div className="relative">

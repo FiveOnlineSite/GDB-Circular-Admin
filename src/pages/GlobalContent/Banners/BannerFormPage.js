@@ -159,7 +159,7 @@ export default function BannerFormPage() {
           <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Background Image / Video <span className="text-red-500">*</span></h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-2">Media Upload</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Media Upload <span className="text-red-500">*</span></label>
               <Upload value={form.file_url} onChange={(url) => {
                 setForm((prev) => ({ ...prev, file_url: url }));
                 if (errors.file_url) {

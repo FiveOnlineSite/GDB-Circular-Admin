@@ -258,7 +258,7 @@ export default function CatalogueFormPage() {
           <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Product Image <span className="text-red-500">*</span></h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Image Upload <span className="text-red-500">*</span></label>
               <Upload
                 value={form.image_url}
                 onChange={(url) => {

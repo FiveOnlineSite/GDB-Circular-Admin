@@ -233,7 +233,7 @@ export default function OverviewPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                   <div>
                     <label className="text-xs font-semibold text-slate-600  block mb-2">
-                      Image Upload
+                      Image Upload <span className="text-red-500">*</span>
                     </label>
                     <Upload
                       value={image.url}

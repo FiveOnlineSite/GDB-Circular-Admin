@@ -513,7 +513,7 @@ export default function SeoFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-2">
-                OG Image Alt Text
+                OG Image Alt Text {form.og_image && <span className="text-red-500">*</span>}
               </label>
               <Input
                 name="og_image_alt"
@@ -584,7 +584,7 @@ export default function SeoFormPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-2">
-                Twitter Image Alt Text
+                Twitter Image Alt Text {form.twitter_image && <span className="text-red-500">*</span>}
               </label>
               <Input
                 name="twitter_image_alt"
