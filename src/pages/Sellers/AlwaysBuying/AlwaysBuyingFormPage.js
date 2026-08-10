@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Save, Plus, Trash2, Loader2, GripVertical, CheckCircle2, AlertCircle } from "lucide-react";
+import { Save, Plus, Trash2, Loader2, GripVertical, CheckCircle2, AlertCircle, Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
@@ -12,10 +12,12 @@ export default function AlwaysBuyingFormPage() {
   const { hasPermission } = usePermissionContext();
   const canUpdate = hasPermission("sellers", "buying.update");
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [draggedPointIndex, setDraggedPointIndex] = useState(null);
+  const [isEditingSection, setIsEditingSection] = useState(false);
+  const [savedForm, setSavedForm] = useState(null);
 
   const [form, setForm] = useState({
     section_title: "",
@@ -33,17 +35,30 @@ export default function AlwaysBuyingFormPage() {
         const res = await getAlwaysBuying();
         if (res.success && res.data) {
           const { section, points } = res.data;
-          setForm({
-            section_title: section.section_title || "",
-            section_description: section.section_description || "",
-            file_url: section.file_url || "",
-            media_type: section.media_type || "image",
-            alt_text: section.alt_text || "",
+          const loadedForm = {
+            section_title: section?.section_title || "",
+            section_description: section?.section_description || "",
+            file_url: section?.file_url || "",
+            media_type: section?.media_type || "image",
+            alt_text: section?.alt_text || "",
             points: points || [],
-          });
+          };
+          const hasExistingData = !!(
+            loadedForm.section_title ||
+            loadedForm.section_description ||
+            loadedForm.file_url ||
+            loadedForm.alt_text ||
+            loadedForm.points.length
+          );
+          setForm(loadedForm);
+          setSavedForm(loadedForm);
+          setIsEditingSection(!hasExistingData);
+        } else {
+          setIsEditingSection(true);
         }
       } catch (err) {
         toast.error("Failed to load section data.");
+        setIsEditingSection(true);
       } finally {
         setLoading(false);
       }
@@ -204,14 +219,17 @@ export default function AlwaysBuyingFormPage() {
         const reloadRes = await getAlwaysBuying();
         if (reloadRes.success && reloadRes.data) {
           const { section, points } = reloadRes.data;
-          setForm({
-            section_title: section.section_title || "",
-            section_description: section.section_description || "",
-            file_url: section.file_url || "",
-            media_type: section.media_type || "image",
-            alt_text: section.alt_text || "",
+          const loadedForm = {
+            section_title: section?.section_title || "",
+            section_description: section?.section_description || "",
+            file_url: section?.file_url || "",
+            media_type: section?.media_type || "image",
+            alt_text: section?.alt_text || "",
             points: points || [],
-          });
+          };
+          setForm(loadedForm);
+          setSavedForm(loadedForm);
+          setIsEditingSection(false);
         }
       } else {
         toast.error(res.message || "Operation failed");
@@ -231,6 +249,25 @@ export default function AlwaysBuyingFormPage() {
     );
   }
 
+  const hasExistingData = !!(
+    form.section_title ||
+    form.section_description ||
+    form.file_url ||
+    form.alt_text ||
+    form.points.length
+  );
+  const mediaUrl = !form.file_url || /^(data:|https?:\/\/)/i.test(form.file_url)
+    ? form.file_url
+    : `${process.env.REACT_APP_API_URL || ""}${form.file_url}`;
+
+  const handleCancel = () => {
+    if (savedForm) {
+      setForm({ ...savedForm, points: savedForm.points.map((point) => ({ ...point })) });
+    }
+    setErrors({});
+    setIsEditingSection(false);
+  };
+
   return (
     <div className="space-y-6 pb-12 w-full p-6">
       <div>
@@ -242,6 +279,72 @@ export default function AlwaysBuyingFormPage() {
         </p>
       </div>
 
+      {!isEditingSection && hasExistingData ? (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h2 className="text-base font-semibold text-slate-700 flex items-center gap-2">
+                <CheckCircle2 size={18} className="text-[#981B1F]" />
+                Main Section Content
+              </h2>
+              {canUpdate && (
+                <Button variant="outline" className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5 gap-2" onClick={() => setIsEditingSection(true)}>
+                  <Edit2 className="w-4 h-4" /> Edit Section
+                </Button>
+              )}
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider mb-1">Section Title</span>
+              <p className="text-sm font-medium text-slate-800">{form.section_title || "-"}</p>
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider mb-1">Section Description</span>
+              <p className="text-sm text-slate-600 whitespace-pre-wrap">{form.section_description || "-"}</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700 border-b pb-3">Media</h2>
+            {mediaUrl ? (
+              form.media_type === "video" ? (
+                <video src={mediaUrl} controls className="max-h-72 w-full max-w-xl rounded-xl border object-contain bg-slate-50" />
+              ) : (
+                <img src={mediaUrl} alt={form.alt_text || ""} className="max-h-72 w-full max-w-xl rounded-xl border object-contain bg-slate-50" />
+              )
+            ) : (
+              <p className="text-sm text-slate-400">No media uploaded.</p>
+            )}
+            <div>
+              <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider mb-1">Media Alt Text</span>
+              <p className="text-sm text-slate-600">{form.alt_text || "-"}</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700 border-b pb-3 flex items-center gap-2">
+              <AlertCircle size={18} className="text-[#981B1F]" />
+              Purchasing Requirements / Points List
+            </h2>
+            {form.points.length ? (
+              <div className="space-y-3">
+                {form.points.map((point, index) => (
+                  <div key={point.id || index} className="flex items-start justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-sm font-semibold text-slate-400">#{index + 1}</span>
+                      <p className="text-sm text-slate-700">{point.point_title || "-"}</p>
+                    </div>
+                    <span className={`shrink-0 px-2 py-1 rounded-full text-xs font-medium ${point.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                      {point.status === "active" ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">No purchasing requirements added.</p>
+            )}
+          </div>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Section Main Information */}
         <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
@@ -449,6 +552,11 @@ export default function AlwaysBuyingFormPage() {
         {/* Submit */}
         {canUpdate && (
           <div className="flex items-center justify-end gap-3 pt-2">
+            {savedForm && (
+              <Button type="button" variant="outline" onClick={handleCancel} disabled={submitting}>
+                Cancel
+              </Button>
+            )}
             <Button
               type="submit"
               disabled={submitting}
@@ -469,6 +577,7 @@ export default function AlwaysBuyingFormPage() {
           </div>
         )}
       </form>
+      )}
     </div>
   );
 }

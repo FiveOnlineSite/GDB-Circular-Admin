@@ -143,6 +143,13 @@ export default function WhyChooseCardFormPage() {
                 value={form.cover_image_url}
                 onChange={(url) => {
                   setForm((prev) => ({ ...prev, cover_image_url: url }));
+                  if (!url && errors.cover_image_alt) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.cover_image_alt;
+                      return next;
+                    });
+                  }
                 }}
                 mediaType="image"
                 accept="image/*"
@@ -151,8 +158,20 @@ export default function WhyChooseCardFormPage() {
               <p className="mt-1 text-xs text-slate-500">Shown while the card video is loading on the homepage.</p>
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-2">Cover Image Alt Text</label>
-              <Input name="cover_image_alt" value={form.cover_image_alt} onChange={handle} placeholder="Describe the cover image" error={!!errors.cover_image_alt} errorMessage={errors.cover_image_alt} />
+              <label className="text-sm font-semibold text-slate-600 block mb-2">
+                Cover Image Alt Text
+                {form.cover_image_url && <span className="text-red-500"> *</span>}
+              </label>
+              <Input
+                name="cover_image_alt"
+                value={form.cover_image_alt}
+                onChange={handle}
+                placeholder="Describe the cover image"
+                required={Boolean(form.cover_image_url)}
+                aria-required={Boolean(form.cover_image_url)}
+                error={!!errors.cover_image_alt}
+                errorMessage={errors.cover_image_alt}
+              />
             </div>
           </div>
         </div>

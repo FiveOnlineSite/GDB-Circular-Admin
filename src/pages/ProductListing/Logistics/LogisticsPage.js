@@ -20,7 +20,7 @@ export default function LogisticsPage() {
   const [sectionSaving, setSectionSaving] = useState(false);
   const [section, setSection] = useState({ section_title: "", section_description: "" });
   const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isEditingSection, setIsEditingSection] = useState(false);
 
   const load = async () => {
@@ -136,7 +136,14 @@ export default function LogisticsPage() {
         </div>
       </div>
 
-      {!isEditingSection && (section.section_title || section.section_description) ? (
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 min-h-48 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-slate-500" role="status" aria-live="polite">
+            <Loader2 className="h-8 w-8 animate-spin text-[#981B1F]" />
+            <span className="text-sm font-medium">Loading section header...</span>
+          </div>
+        </div>
+      ) : !isEditingSection && (section.section_title || section.section_description) ? (
         <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between border-b pb-3">
             <h2 className="text-base font-semibold text-slate-700 ">Section Header</h2>
