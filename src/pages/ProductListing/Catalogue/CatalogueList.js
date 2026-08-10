@@ -7,6 +7,7 @@ import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import { getProducts, toggleProductHomepage, toggleProductStatus } from "../../../services/productListing";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 const CATEGORIES = ["LDPE", "HDPE", "PP"];
 const API_URL = process.env.REACT_APP_API_URL || "";
@@ -154,11 +155,7 @@ export default function CatalogueList() {
     { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "status", headerName: "Status", sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions", headerName: "Actions", sortable: false, sticky: "right",
@@ -185,15 +182,7 @@ export default function CatalogueList() {
             </Button>
           )}
           {hasPermission("product", "catalogue.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              title={row.status === "active" ? "Deactivate" : "Activate"}
-              onClick={() => handleToggle(row)}
-            >
-              {row.status === "active" ? <ToggleRight className="h-4 w-4 text-green-600" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
-            </Button>
+            <StatusActionButton row={row} entityName="product" onConfirm={handleToggle} />
           )}
         </div>
       ),

@@ -9,3 +9,4 @@ export const getSellerLogisticsCardById = (id) => api.get(`${base}/cards/${id}`)
 export const createSellerLogisticsCard = (data) => api.post(`${base}/cards`, data).then((r) => r.data);
 export const updateSellerLogisticsCard = (id, data) => api.put(`${base}/cards/${id}`, data).then((r) => r.data);
 export const deleteSellerLogisticsCard = (id) => api.delete(`${base}/cards/${id}`).then((r) => r.data);
+export const toggleSellerLogisticsCardStatus = (id) => api.patch(`${base}/cards/${id}/status`).then((r) => r.data);

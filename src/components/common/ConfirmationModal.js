@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2, X } from 'lucide-react';
 
 const ConfirmationModal = ({
@@ -40,9 +41,9 @@ const ConfirmationModal = ({
     }
   }
 
-  return (
+  const modalContent = (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm'
+      className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm'
       onClick={!loading ? onClose : undefined}
     >
       <div
@@ -94,6 +95,12 @@ const ConfirmationModal = ({
       </div>
     </div>
   );
+
+  if (typeof document === 'undefined') {
+    return modalContent;
+  }
+
+  return createPortal(modalContent, document.body);
 };
 
 export default ConfirmationModal;

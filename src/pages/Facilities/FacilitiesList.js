@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Edit2, Search } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -7,6 +7,7 @@ import ReusableDataTable from "../../components/common/ReusableDataTable";
 import { getFacilities, toggleFacilityStatus } from "../../services/facilityService";
 import { usePermissionContext } from "../../context/PermissionContext";
 import { toast } from "sonner";
+import { StatusActionButton, StatusBadge } from "../../components/common/StatusControls";
 
 const FACILITY_TYPES = ["", "Headquarter", "GDB Circular", "GDB Paint & Coatings"];
 
@@ -19,7 +20,7 @@ export default function FacilitiesList() {
   const [search, setSearch] = useState("");
   const [facilityType, setFacilityType] = useState("");
 
-  const fetch = async (params = {}) => {
+  const fetch = useCallback(async (params = {}) => {
     try {
       setLoading(true);
       const res = await getFacilities({
@@ -41,11 +42,11 @@ export default function FacilitiesList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [facilityType, search]);
 
   useEffect(() => {
     fetch();
-  }, [pagination.current_page, pagination.per_page, search, facilityType]);
+  }, [fetch]);
 
   const handleToggle = async (row) => {
     try {
@@ -90,7 +91,7 @@ export default function FacilitiesList() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => <span className={`px-3 py-1 rounded-full text-sm font-semibold ${row.status === "active" ? "bg-green-50 text-green-700 border border-green-100" : "bg-red-50 text-red-700 border border-red-100"}`}>{row.status === "active" ? "Active" : "Inactive"}</span>,
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -101,7 +102,9 @@ export default function FacilitiesList() {
         <div className="flex items-center gap-2">
           {hasPermission("facilities", "view") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/facilities/view/${row.id}`)}><Eye className="h-4 w-4 text-[#981B1F]" /></Button>}
           {hasPermission("facilities", "update") && <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-700" onClick={() => navigate(`/facilities/edit/${row.id}`)}><Edit2 className="h-4 w-4 text-[#C3662D]" /></Button>}
-          {hasPermission("facilities", "update") && <Button size="sm" variant="ghost" onClick={() => handleToggle(row)}>{row.status === "active" ? "Deactivate" : "Activate"}</Button>}
+          {hasPermission("facilities", "update") && (
+            <StatusActionButton row={row} entityName="facility" onConfirm={handleToggle} />
+          )}
         </div>
       ),
     },

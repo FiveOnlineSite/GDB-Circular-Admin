@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
 import Upload from "../../../components/common/Upload";
 import EditPageDeleteAction from "../../../components/common/EditPageDeleteAction";
 import { getLifeItemById, createLifeItem, updateLifeItem } from "../../../services/team/lifeAtGdbService";
@@ -27,6 +26,7 @@ export default function LifeAtGdbFormPage() {
     file_url: "",
     media_type: "image",
     alt_text: "",
+    slider_group: 1,
     sequence: 0,
     status: "active",
   });
@@ -44,8 +44,9 @@ export default function LifeAtGdbFormPage() {
             section_title: d.section_title || "",
             description: d.description || "",
             file_url: d.file_url || "",
-            media_type: d.media_type || "image",
+            media_type: "image",
             alt_text: d.alt_text || "",
+            slider_group: Number(d.slider_group) === 2 ? 2 : 1,
             sequence: d.sequence ?? 0,
             status: d.status || "active",
           });
@@ -66,7 +67,7 @@ export default function LifeAtGdbFormPage() {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "sequence" ? Number(value) : value,
+      [name]: name === "sequence" || name === "slider_group" ? Number(value) : value,
     }));
     if (errors[name]) {
       setErrors((prev) => {
@@ -78,16 +79,10 @@ export default function LifeAtGdbFormPage() {
   };
 
   const handleMediaUpload = (url) => {
-    const isVideo =
-      url.includes("video") ||
-      url.endsWith(".mp4") ||
-      url.endsWith(".webm") ||
-      url.endsWith(".mov");
-
     setForm((prev) => ({
       ...prev,
       file_url: url,
-      media_type: isVideo ? "video" : "image",
+      media_type: "image",
     }));
     if (errors.file_url) {
       setErrors((prev) => {
@@ -104,9 +99,8 @@ export default function LifeAtGdbFormPage() {
     if (isView) return;
 
     const newErrors = {};
-    if (!form.section_title.trim()) newErrors.section_title = "Section Title is required";
-    if (!form.file_url) newErrors.file_url = "Media file is required";
-    if (!form.alt_text.trim()) newErrors.alt_text = "Media Alt Text is required";
+    if (!form.file_url) newErrors.file_url = "Image is required";
+    if (!form.alt_text.trim()) newErrors.alt_text = "Image Alt Text is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -117,9 +111,11 @@ export default function LifeAtGdbFormPage() {
       setSubmitting(true);
       const payload = {
         ...form,
-        section_title: form.section_title.trim(),
-        description: form.description.trim() || null,
+        section_title: null,
+        description: null,
+        media_type: "image",
         alt_text: form.alt_text.trim(),
+        slider_group: Number(form.slider_group) === 2 ? 2 : 1,
         sequence: Number(form.sequence),
       };
 
@@ -167,51 +163,33 @@ export default function LifeAtGdbFormPage() {
             {pageTitle}
           </h1>
           <p className="text-slate-500 text-sm">
-            {isView ? "View details of this gallery item" : "Provide gallery element details and upload media"}
+            {isView ? "View this slider image" : "Upload an image, add alt text, and choose slider row 1 or 2"}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="bg-white  rounded-2xl border border-slate-100  shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">
-            Item Details
-          </h2>
+          <h2 className="text-base font-semibold text-slate-700  border-b pb-3">Slider Image Details</h2>
 
           <div className="grid grid-cols-1 gap-5">
-            {/* Title */}
-            <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-1">
-                Section Title <span className="text-red-500">*</span>
-              </label>
-              <Input
-                name="section_title"
-                value={form.section_title}
-                onChange={handleChange}
-                placeholder="e.g. Dynamic Work Culture"
-                disabled={isView}
-                error={!!errors.section_title}
-                errorMessage={errors.section_title}
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-1">
-                Description
-              </label>
-              <Textarea
-                name="description"
-                value={form.description || ""}
-                onChange={handleChange}
-                placeholder="Enter item description..."
-                disabled={isView}
-                rows={4}
-                className="w-full border border-[#E6E6E6] rounded-lg p-3 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition    disabled:opacity-55"
-              />
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-sm font-semibold text-slate-600  block mb-1">
+                  Slider Row <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="slider_group"
+                  value={form.slider_group}
+                  onChange={handleChange}
+                  disabled={isView}
+                  className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none focus:ring-2 focus:ring-[#981B1F]/15 transition bg-white    disabled:opacity-55"
+                >
+                  <option value={1}>Slider 1</option>
+                  <option value={2}>Slider 2</option>
+                </select>
+              </div>
+
               {/* Status */}
               <div>
                 <label className="text-sm font-semibold text-slate-600  block mb-1">
@@ -241,15 +219,14 @@ export default function LifeAtGdbFormPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
             <label className="text-sm font-semibold text-slate-600  block mb-2">
-              Upload Image or Video <span className="text-red-500">*</span>
+              Upload Image <span className="text-red-500">*</span>
             </label>
             <Upload
               value={form.file_url}
               onChange={handleMediaUpload}
-              mediaType="both"
-              accept="image/*,video/mp4,video/webm,video/quicktime"
+              mediaType="image"
+              accept="image/*"
               maxSizeKB={500}
-              maxSizeMB={10}
               disabled={isView}
             />
             {errors.file_url && (
@@ -257,16 +234,11 @@ export default function LifeAtGdbFormPage() {
                 {errors.file_url}
               </span>
             )}
-            {form.file_url && (
-              <p className="text-xs text-indigo-600 font-semibold mt-2 capitalize">
-                Detected Media Type: {form.media_type}
-              </p>
-            )}
           </div>
 
           <div>
             <label className="text-sm font-semibold text-slate-600  block mb-2">
-              Media Alt Text <span className="text-red-500">*</span>
+              Image Alt Text <span className="text-red-500">*</span>
             </label>
             <Input
               name="alt_text"

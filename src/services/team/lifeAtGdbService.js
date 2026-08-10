@@ -2,6 +2,8 @@ import api from "../../lib/utils/apiConfig";
 
 const base = "/team/life-at-gdb";
 
+export const getLifeSection = () => api.get(`${base}/section`).then(r => r.data);
+export const updateLifeSection = (data) => api.put(`${base}/section`, data).then(r => r.data);
 export const getLifeItems = (params) => api.get(base, { params }).then(r => r.data);
 export const getLifeItemById = (id) => api.get(`${base}/${id}`).then(r => r.data);
 export const createLifeItem = (data) => api.post(base, data).then(r => r.data);

@@ -8,9 +8,11 @@ import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import {
   getSellerLogisticsSection,
+  toggleSellerLogisticsCardStatus,
   updateSellerLogisticsSection,
 } from "../../../services/sellers/logisticsService";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
@@ -68,6 +70,18 @@ export default function SellerLogisticsPage() {
     }
   };
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await toggleSellerLogisticsCardStatus(row.id);
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        load();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to toggle status");
+    }
+  };
+
   const columns = [
     {
       field: "icon_url",
@@ -95,11 +109,7 @@ export default function SellerLogisticsPage() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -109,15 +119,22 @@ export default function SellerLogisticsPage() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("sellers", "logistics.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/sellers/logistics/cards/edit/${row.id}`)}
-              title="Edit"
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/sellers/logistics/cards/edit/${row.id}`)}
+                title="Edit"
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton
+                row={row}
+                entityName="logistics card"
+                onConfirm={handleToggleStatus}
+              />
+            </>
           )}
         </div>
       ),

@@ -1,15 +1,22 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Video, Image as ImageIcon, Eye, Search } from "lucide-react";
+import { Plus, Edit2, Image as ImageIcon, Eye, Search, Loader2, Save } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import { getLifeItems, toggleLifeItemStatus } from "../../../services/team/lifeAtGdbService";
+import {
+  getLifeItems,
+  getLifeSection,
+  toggleLifeItemStatus,
+  updateLifeSection,
+} from "../../../services/team/lifeAtGdbService";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
-const MEDIA_TYPES = ["image", "video"];
 const STATUS_OPTIONS = ["active", "inactive"];
+const SLIDER_GROUPS = ["1", "2"];
 
 export default function LifeAtGdbList() {
   const { hasPermission } = usePermissionContext();
@@ -25,8 +32,11 @@ export default function LifeAtGdbList() {
   });
 
   const [search, setSearch] = useState("");
-  const [selectedMediaType, setSelectedMediaType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedSliderGroup, setSelectedSliderGroup] = useState("");
+  const [section, setSection] = useState({ section_title: "", section_description: "" });
+  const [isEditingSection, setIsEditingSection] = useState(false);
+  const [sectionSaving, setSectionSaving] = useState(false);
 
 
   const fetchLifeGallery = useCallback(async (params = {}) => {
@@ -36,7 +46,7 @@ export default function LifeAtGdbList() {
         page: 1,
         limit: 1000,
         search: params.search !== undefined ? params.search : search,
-        media_type: params.media_type !== undefined ? params.media_type : selectedMediaType,
+        slider_group: params.slider_group !== undefined ? params.slider_group : selectedSliderGroup,
         status: params.status !== undefined ? params.status : selectedStatus,
       });
 
@@ -54,11 +64,32 @@ export default function LifeAtGdbList() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedMediaType, selectedStatus]);
+  }, [search, selectedSliderGroup, selectedStatus]);
 
   useEffect(() => {
     fetchLifeGallery();
   }, [fetchLifeGallery]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getLifeSection();
+        if (res.success && res.data) {
+          const nextSection = {
+            section_title: res.data.section_title || "",
+            section_description: res.data.section_description || "",
+          };
+          setSection(nextSection);
+          setIsEditingSection(!(nextSection.section_title || nextSection.section_description));
+        } else {
+          setIsEditingSection(true);
+        }
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Failed to load section header");
+        setIsEditingSection(true);
+      }
+    })();
+  }, []);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -66,9 +97,9 @@ export default function LifeAtGdbList() {
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
-  const handleMediaTypeFilterChange = (e) => {
-    const type = e.target.value;
-    setSelectedMediaType(type);
+  const handleSliderGroupFilterChange = (e) => {
+    const sliderGroup = e.target.value;
+    setSelectedSliderGroup(sliderGroup);
     setPagination((p) => ({ ...p, current_page: 1 }));
   };
 
@@ -90,6 +121,24 @@ export default function LifeAtGdbList() {
     }
   };
 
+  const handleSectionSave = async (e) => {
+    e.preventDefault();
+    try {
+      setSectionSaving(true);
+      const res = await updateLifeSection(section);
+      if (res.success) {
+        toast.success("Section header saved");
+        setIsEditingSection(false);
+      } else {
+        toast.error(res.message || "Failed to save section header");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to save section header");
+    } finally {
+      setSectionSaving(false);
+    }
+  };
+
   const columns = [
     {
       field: "file_url",
@@ -104,48 +153,33 @@ export default function LifeAtGdbList() {
 
         if (!fileSrc) return <span className="text-slate-400">—</span>;
 
-        if (row.media_type === "video") {
-          return (
-            <video
-              src={fileSrc}
-              className="w-16 h-10 object-cover rounded border bg-black"
-              muted
-            />
-          );
-        }
-
         return (
           <img
             src={fileSrc}
-            alt={row.alt_text || row.section_title}
+            alt={row.alt_text || "Life at GDB gallery image"}
             className="w-16 h-10 object-cover rounded border border-slate-200 bg-white"
           />
         );
       },
     },
-    { field: "section_title", headerName: "Title", sortable: true },
     {
-      field: "description",
-      headerName: "Description",
-      sortable: false,
+      field: "alt_text",
+      headerName: "Alt Text",
+      sortable: true,
       renderCell: ({ row }) => (
-        <span className="truncate max-w-[200px] block">
-          {row.description || "—"}
+        <span className="truncate max-w-[220px] block">
+          {row.alt_text || "—"}
         </span>
       ),
     },
     {
-      field: "media_type",
-      headerName: "Media Type",
+      field: "slider_group",
+      headerName: "Slider",
       sortable: true,
       renderCell: ({ row }) => (
         <span className="flex items-center gap-1.5 capitalize font-medium text-slate-700 text-sm">
-          {row.media_type === "video" ? (
-            <Video size={16} className="text-rose-500" />
-          ) : (
-            <ImageIcon size={16} className="text-sky-500" />
-          )}
-          {row.media_type}
+          <ImageIcon size={16} className="text-sky-500" />
+          Slider {Number(row.slider_group) === 2 ? 2 : 1}
         </span>
       ),
     },
@@ -154,17 +188,7 @@ export default function LifeAtGdbList() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span
-          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-            row.status === "active"
-              ? "bg-green-50 text-green-700 border border-green-100"
-              : "bg-red-50 text-red-700 border border-red-100"
-          }`}
-        >
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -195,14 +219,11 @@ export default function LifeAtGdbList() {
               >
                 <Edit2 className="h-4 w-4 text-[#C3662D]" />
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs text-[#C3662D] hover:bg-[#C3662D]/10 h-8"
-                onClick={() => handleToggleStatus(row)}
-              >
-                {row.status === "active" ? "Deactivate" : "Activate"}
-              </Button>
+              <StatusActionButton
+                row={row}
+                entityName="gallery item"
+                onConfirm={handleToggleStatus}
+              />
             </>
           )}
         </div>
@@ -216,7 +237,7 @@ export default function LifeAtGdbList() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Life at GDB Circular</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage gallery images, videos, and titles representing life at GDB Circular</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage the section header and gallery slider images</p>
         </div>
 
         {hasPermission("team", "life.create") && (
@@ -230,6 +251,60 @@ export default function LifeAtGdbList() {
         )}
       </div>
 
+      {!isEditingSection && (section.section_title || section.section_description) ? (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4 mb-6">
+          <div className="flex items-center justify-between border-b pb-3">
+            <h2 className="text-base font-semibold text-slate-700">Section Header</h2>
+            {hasPermission("team", "life.update") && (
+              <Button variant="outline" className="border-[#981B1F] text-[#981B1F] hover:bg-[#981B1F]/5 gap-2" onClick={() => setIsEditingSection(true)}>
+                <Edit2 className="w-4 h-4" /> Edit Section
+              </Button>
+            )}
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider mb-1">Main Title</span>
+            <p className="text-sm font-medium text-slate-800">{section.section_title || "-"}</p>
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider mb-1">Description</span>
+            <p className="text-sm text-slate-600 whitespace-pre-wrap">{section.section_description || "-"}</p>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSectionSave} className="mb-6">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-semibold text-slate-700 border-b pb-3">Section Header</h2>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Main Title</label>
+              <Input
+                value={section.section_title}
+                onChange={(e) => setSection((prev) => ({ ...prev, section_title: e.target.value }))}
+                placeholder="Life at GDB Circular"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Description</label>
+              <Textarea
+                value={section.section_description}
+                onChange={(e) => setSection((prev) => ({ ...prev, section_description: e.target.value }))}
+                rows={3}
+                placeholder="A workplace shaped by teamwork, innovation..."
+              />
+            </div>
+            {hasPermission("team", "life.update") && (
+              <div className="flex justify-end gap-3">
+                {(section.section_title || section.section_description) && (
+                  <Button type="button" variant="outline" onClick={() => setIsEditingSection(false)}>Cancel</Button>
+                )}
+                <Button type="submit" disabled={sectionSaving} className="bg-[#981B1F] hover:bg-[#C3662D] text-white">
+                  {sectionSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save Section</>}
+                </Button>
+              </div>
+            )}
+          </div>
+        </form>
+      )}
+
       {/* Search and Filters Strip */}
       <div className="bg-white rounded-xl border border-slate-100 p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-2 w-full md:w-fit">
@@ -239,23 +314,23 @@ export default function LifeAtGdbList() {
               type="text"
               value={search}
               onChange={handleSearchChange}
-              placeholder="Search by title..."
+              placeholder="Search by alt text..."
               className="h-10 border-[#E6E6E6] bg-white pl-10 pr-3 text-sm"
             />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Media Type Filter */}
+          {/* Slider Filter */}
           <select
-            value={selectedMediaType}
-            onChange={handleMediaTypeFilterChange}
+            value={selectedSliderGroup}
+            onChange={handleSliderGroupFilterChange}
             className="border border-[#E6E6E6] rounded-lg p-2 text-sm focus:border-[#981B1F] focus:outline-none bg-white text-slate-700 min-w-[150px] cursor-pointer"
           >
-            <option value="">All Media Types</option>
-            {MEDIA_TYPES.map((opt) => (
+            <option value="">All Sliders</option>
+            {SLIDER_GROUPS.map((opt) => (
               <option key={opt} value={opt}>
-                {opt.charAt(0).toUpperCase() + opt.slice(1)}s
+                Slider {opt}
               </option>
             ))}
           </select>

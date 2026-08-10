@@ -7,6 +7,7 @@ import { Input } from "../../components/ui/input";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
 import { getUsers, updateUserStatus } from "../../services/user";
 import { usePermissionContext } from "../../context/PermissionContext";
+import { StatusActionButton } from "../../components/common/StatusControls";
 
 export default function UserManagement() {
   const { hasPermission } = usePermissionContext();
@@ -127,12 +128,12 @@ export default function UserManagement() {
               {params.value}
             </span>
             {hasPermission("user.update") && (
-              <button
-                onClick={() => handleToggleStatus(user)}
-                className="text-xs text-[#C3662D] hover:underline"
-              >
-                Toggle
-              </button>
+              <StatusActionButton
+                row={user}
+                entityName="user"
+                onConfirm={handleToggleStatus}
+                className="ml-1"
+              />
             )}
           </div>
         );

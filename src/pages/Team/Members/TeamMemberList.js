@@ -7,6 +7,7 @@ import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
 import { getMembers, toggleMemberStatus } from "../../../services/team/memberService";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 const GROUP_OPTIONS = ["Board of Directors", "Leadership"];
 const STATUS_OPTIONS = ["active", "inactive"];
@@ -170,17 +171,7 @@ export default function TeamMemberList() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span
-          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-            row.status === "active"
-              ? "bg-green-50 text-green-700 border border-green-100"
-              : "bg-red-50 text-red-700 border border-red-100"
-          }`}
-        >
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -211,14 +202,11 @@ export default function TeamMemberList() {
               >
                 <Edit2 className="h-4 w-4 text-[#C3662D]" />
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs text-[#C3662D] hover:bg-[#C3662D]/10 h-8"
-                onClick={() => handleToggleStatus(row)}
-              >
-                {row.status === "active" ? "Deactivate" : "Activate"}
-              </Button>
+              <StatusActionButton
+                row={row}
+                entityName="team member"
+                onConfirm={handleToggleStatus}
+              />
             </>
           )}
         </div>
