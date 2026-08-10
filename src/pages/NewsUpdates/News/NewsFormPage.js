@@ -50,8 +50,9 @@ export default function NewsFormPage() {
         const res = await getCategories({ limit: "all" });
         if (res.success && res.data) {
           setCategories(res.data);
-          if (!isEdit && !isView && res.data.length > 0) {
-            setForm((prev) => ({ ...prev, category_id: res.data[0].id }));
+          const firstActiveCategory = res.data.find((category) => category.status === "active");
+          if (!isEdit && !isView && firstActiveCategory) {
+            setForm((prev) => ({ ...prev, category_id: firstActiveCategory.id }));
           }
         }
       } catch (err) {
@@ -213,7 +214,13 @@ export default function NewsFormPage() {
                 <label className="text-sm font-semibold text-slate-600  block mb-1">Category Tab <span className="text-red-500">*</span></label>
                 <select name="category_id" value={form.category_id} onChange={handleChange} disabled={isView} aria-invalid={errors.category_id ? "true" : "false"} className={`w-full border ${errors.category_id ? "border-red-500 focus:border-red-500 focus:ring-red-500/15" : "border-[#E6E6E6] focus:border-[#981B1F] focus:ring-[#981B1F]/15"} text-[#111111] rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 transition bg-white    disabled:opacity-55`}>
                   <option value="">Select Category</option>
-                  {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.category_title}</option>)}
+                  {categories
+                    .filter((cat) => cat.status === "active" || Number(cat.id) === Number(form.category_id))
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.category_title}{cat.status === "inactive" ? " (Inactive)" : ""}
+                      </option>
+                    ))}
                 </select>
                 {errors.category_id && <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">{errors.category_id}</span>}
               </div>

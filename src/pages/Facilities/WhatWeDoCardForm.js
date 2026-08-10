@@ -75,6 +75,7 @@ export default function WhatWeDoCardForm() {
     event.preventDefault();
     const nextErrors = {};
     if (!form.card_title.trim()) nextErrors.card_title = "Card title is required";
+    if (!form.card_description.trim()) nextErrors.card_description = "Card description is required";
     if (!form.icon_url) nextErrors.icon_url = "Icon upload is required";
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
@@ -129,8 +130,16 @@ export default function WhatWeDoCardForm() {
               <Input name="card_title" value={form.card_title} onChange={handleChange} error={!!errors.card_title} errorMessage={errors.card_title} />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600 block mb-1">Card Description</label>
-              <Textarea name="card_description" value={form.card_description} onChange={handleChange} rows={4} />
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Card Description <span className="text-red-500">*</span></label>
+              <Textarea
+                name="card_description"
+                value={form.card_description}
+                onChange={handleChange}
+                rows={4}
+                required
+                error={!!errors.card_description}
+                errorMessage={errors.card_description}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600 block mb-1">Status</label>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Plus, Edit2, Eye, EyeOff, Save, Loader2, Search } from "lucide-react";
+import { Plus, Edit2, Save, Loader2, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
@@ -39,7 +39,6 @@ export default function CategoryList() {
   const [formErrors, setFormErrors] = useState({});
   const [form, setForm] = useState({
     category_title: "",
-    visibility: 1,
     sequence: 0,
     status: "active",
   });
@@ -102,31 +101,11 @@ export default function CategoryList() {
     }
   };
 
-  const handleToggleVisibility = async (row) => {
-    if (!canUpdate) return toast.error("You do not have permission to update visibility");
-    try {
-      const updatedVisibility = row.visibility === 1 ? 0 : 1;
-      const res = await updateCategory(row.id, {
-        category_title: row.category_title,
-        visibility: updatedVisibility,
-        sequence: row.sequence,
-        status: row.status,
-      });
-      if (res.success) {
-        toast.success(`Category is now ${updatedVisibility === 1 ? "Visible" : "Hidden"}`);
-        fetchCategoriesList();
-      }
-    } catch (err) {
-      toast.error("Failed to toggle visibility");
-    }
-  };
-
   const handleOpenModal = (item = null) => {
     if (item) {
       setEditingItem(item);
       setForm({
         category_title: item.category_title,
-        visibility: item.visibility,
         sequence: item.sequence,
         status: item.status,
       });
@@ -134,7 +113,6 @@ export default function CategoryList() {
       setEditingItem(null);
       setForm({
         category_title: "",
-        visibility: 1,
         sequence: 0,
         status: "active",
       });
@@ -147,7 +125,7 @@ export default function CategoryList() {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "sequence" || name === "visibility" ? Number(value) : value,
+      [name]: name === "sequence" ? Number(value) : value,
     }));
     if (formErrors[name]) {
       setFormErrors((prev) => {
@@ -193,26 +171,7 @@ export default function CategoryList() {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", sortable: true },
     { field: "category_title", headerName: "Category Title", sortable: true },
-    {
-      field: "visibility",
-      headerName: "Visibility",
-      sortable: true,
-      renderCell: ({ row }) => (
-        <span className="flex items-center gap-1">
-          {row.visibility === 1 ? (
-            <span className="inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-              <Eye size={12} className="mr-1" /> Show
-            </span>
-          ) : (
-            <span className="inline-flex items-center text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
-              <EyeOff size={12} className="mr-1" /> Hide
-            </span>
-          )}
-        </span>
-      ),
-    },
     { field: "sequence", headerName: "Sequence", sortable: true },
     {
       field: "status",
@@ -247,15 +206,6 @@ export default function CategoryList() {
                 title="Edit"
               >
                 <Edit2 className="h-4 w-4 text-[#C3662D]" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs text-[#C3662D] hover:bg-[#C3662D]/10 h-8"
-                onClick={() => handleToggleVisibility(row)}
-                title={row.visibility === 1 ? "Hide on website" : "Show on website"}
-              >
-                {row.visibility === 1 ? "Hide" : "Show"}
               </Button>
               <Button
                 size="sm"
@@ -380,24 +330,7 @@ export default function CategoryList() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Visibility */}
-                  <div>
-                    <label className="text-sm font-semibold text-slate-600  block mb-1">
-                      Visibility
-                    </label>
-                    <select
-                      name="visibility"
-                      value={form.visibility}
-                      onChange={handleFormChange}
-                      disabled={submitting}
-                      className="w-full border border-[#E6E6E6] text-[#111111] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white   "
-                    >
-                      <option value={1}>Show</option>
-                      <option value={0}>Hide</option>
-                    </select>
-                  </div>
-
+                <div>
                   {/* Status */}
                   <div>
                     <label className="text-sm font-semibold text-slate-600  block mb-1">
