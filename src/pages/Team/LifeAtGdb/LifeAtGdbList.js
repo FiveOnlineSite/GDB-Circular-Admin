@@ -51,18 +51,24 @@ export default function LifeAtGdbList() {
   const fetchLifeGallery = useCallback(async (params = {}) => {
     try {
       setLoading(true);
+      const nextSliderGroup = params.slider_group !== undefined ? params.slider_group : selectedSliderGroup;
+      const isSliderSequenceView = Boolean(nextSliderGroup);
       const res = await getLifeItems({
-        page: 1,
-        limit: 1000,
+        page: isSliderSequenceView ? 1 : params.page || pagination.current_page,
+        limit: isSliderSequenceView ? 1000 : params.limit || pagination.per_page,
         search: params.search !== undefined ? params.search : search,
-        slider_group: params.slider_group !== undefined ? params.slider_group : selectedSliderGroup,
+        slider_group: nextSliderGroup,
         status: params.status !== undefined ? params.status : selectedStatus,
       });
 
       if (res.success) {
         setRows(res.data || []);
         if (res.pagination) {
-          setPagination(res.pagination);
+          setPagination((prev) =>
+            isSliderSequenceView
+              ? { ...prev, current_page: 1, total: res.pagination.total, last_page: 1 }
+              : res.pagination,
+          );
         }
       } else {
         setRows([]);
@@ -73,7 +79,7 @@ export default function LifeAtGdbList() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedSliderGroup, selectedStatus]);
+  }, [pagination.current_page, pagination.per_page, search, selectedSliderGroup, selectedStatus]);
 
   useEffect(() => {
     fetchLifeGallery();

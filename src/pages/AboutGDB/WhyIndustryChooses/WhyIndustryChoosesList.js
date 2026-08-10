@@ -23,6 +23,8 @@ export default function WhyIndustryChoosesList() {
 
   const [itemsLoading, setItemsLoading] = useState(false);
   const [rows, setRows] = useState([]);
+  const activeItemsCount = rows.filter((row) => row.status === "active").length;
+  const hasReachedActiveLimit = activeItemsCount >= 6;
 
   const loadAll = async () => {
     try {
@@ -125,13 +127,22 @@ export default function WhyIndustryChoosesList() {
           <p className="text-slate-500 text-sm mt-1">Manage the reasons why the industry chooses GDB PCR</p>
         </div>
         {hasPermission("about", "industry.create") && (
-          <Button
-            onClick={() => navigate("/about-gdb/why-industry-chooses-gdb-pcr/create")}
-            className="bg-[#981B1F] hover:bg-[#7a1619] text-white gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Item
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              onClick={() => navigate("/about-gdb/why-industry-chooses-gdb-pcr/create")}
+              disabled={hasReachedActiveLimit}
+              title={hasReachedActiveLimit ? "Deactivate one active item before adding another." : "Add Item"}
+              className="bg-[#981B1F] hover:bg-[#7a1619] text-white gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Plus className="w-4 h-4" />
+              Add Item
+            </Button>
+            {hasReachedActiveLimit && (
+              <span className="text-xs font-medium text-slate-500">
+                Maximum 6 active items allowed.
+              </span>
+            )}
+          </div>
         )}
       </div>
 

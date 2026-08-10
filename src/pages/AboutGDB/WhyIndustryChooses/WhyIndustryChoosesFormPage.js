@@ -20,6 +20,8 @@ export default function WhyIndustryChoosesFormPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [maxSequence, setMaxSequence] = useState(0);
+  const [activeItemsCount, setActiveItemsCount] = useState(0);
+  const [originalStatus, setOriginalStatus] = useState("active");
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     stat_value: "",
@@ -28,6 +30,8 @@ export default function WhyIndustryChoosesFormPage() {
     sequence: 0,
     status: "active",
   });
+  const canSubmitActiveStatus =
+    form.status !== "active" || activeItemsCount < 6 || (isEdit && originalStatus === "active");
 
   useEffect(() => {
     const getMaxSequence = async () => {
@@ -36,6 +40,7 @@ export default function WhyIndustryChoosesFormPage() {
         if (Array.isArray(res.data)) {
           const max = res.data.reduce((a, b) => Math.max(a, b.sequence || 0), 0);
           setMaxSequence(max + 1);
+          setActiveItemsCount(res.data.filter((item) => item.status === "active").length);
         }
       } catch (err) {
         console.error(err);
@@ -63,6 +68,7 @@ export default function WhyIndustryChoosesFormPage() {
             sequence: d.sequence ?? 0,
             status: d.status || "active",
           });
+          setOriginalStatus(d.status || "active");
         } else {
           toast.error("Item not found");
           navigate("/about-gdb/why-industry-chooses-gdb-pcr");
@@ -97,6 +103,7 @@ export default function WhyIndustryChoosesFormPage() {
     const newErrors = {};
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.description.trim()) newErrors.description = "Description is required";
+    if (!canSubmitActiveStatus) newErrors.status = "Only 6 active items are allowed. Please create this as inactive or deactivate another item first.";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -205,6 +212,11 @@ export default function WhyIndustryChoosesFormPage() {
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
+              {errors.status && (
+                <span className="text-red-500 text-xs font-semibold mt-1 block">
+                  {errors.status}
+                </span>
+              )}
             </div>
           </div>
 
