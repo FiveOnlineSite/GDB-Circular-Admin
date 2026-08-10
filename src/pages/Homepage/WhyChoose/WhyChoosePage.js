@@ -6,8 +6,9 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 import {
-  getWhyChooseSection, updateWhyChooseSection,
+  getWhyChooseSection, updateWhyChooseSection, updateWhyChooseCard,
 } from "../../../services/homepage";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -58,6 +59,21 @@ export default function WhyChoosePage() {
     finally { setSectionSaving(false); }
   };
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateWhyChooseCard(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        loadAll();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const columns = [
     {
       field: "file_url",
@@ -85,26 +101,25 @@ export default function WhyChoosePage() {
     { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "status", headerName: "Status", sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions", headerName: "Actions", sortable: false, sticky: "right",
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("homepage", "whychoose.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/homepage-management/whychoose/cards/edit/${row.id}`)}
-              title="Edit"
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/homepage-management/whychoose/cards/edit/${row.id}`)}
+                title="Edit"
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="why choose card" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

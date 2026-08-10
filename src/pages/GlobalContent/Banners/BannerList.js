@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import { getBanners } from "../../../services/globalContent/banners";
+import { getBanners, updateBanner } from "../../../services/globalContent/banners";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 export default function BannerList() {
   const { hasPermission } = usePermissionContext();
@@ -29,6 +30,21 @@ export default function BannerList() {
 
   useEffect(() => { fetchData(); }, []);
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateBanner(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        fetchData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const columns = [
     { field: "page", headerName: "Page", sortable: true },
     { field: "title", headerName: "Title", sortable: true },
@@ -51,11 +67,7 @@ export default function BannerList() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -65,14 +77,17 @@ export default function BannerList() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("globalContent", "banner.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/global-content/banners/edit/${row.id}`)}
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/global-content/banners/edit/${row.id}`)}
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="banner" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

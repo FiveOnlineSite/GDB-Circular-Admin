@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { Plus, Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import { getSeoList } from "../../../services/globalContent/seo";
+import { getSeoList, updateSeo } from "../../../services/globalContent/seo";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 export default function SeoList() {
   const { hasPermission } = usePermissionContext();
@@ -46,6 +47,21 @@ export default function SeoList() {
     fetchData();
   }, [fetchData]);
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateSeo(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        fetchData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const columns = [
     {
       field: "page",
@@ -67,17 +83,7 @@ export default function SeoList() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            row.status === "active"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -87,14 +93,17 @@ export default function SeoList() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("globalContent", "seo.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/global-content/seo/edit/${row.id}`)}
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/global-content/seo/edit/${row.id}`)}
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="SEO entry" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

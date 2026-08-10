@@ -6,10 +6,12 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 import { 
   getWhyIndustryChoosesSection, 
   updateWhyIndustryChoosesSection, 
   getWhyIndustryChoosesItems, 
+  toggleWhyIndustryChoosesItemStatus,
 } from "../../../services/aboutGDB";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -80,39 +82,66 @@ export default function WhyIndustryChoosesList() {
     }
   };
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await toggleWhyIndustryChoosesItemStatus(row.id);
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        await loadAll();
+      } else {
+        toast.error(res.message || "Status update failed");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Status update failed");
+    }
+  };
+
   const columns = [
     { field: "stat_value", headerName: "Stat / Value", sortable: true, width: 120 },
     { field: "title", headerName: "Title", sortable: true, flex: 1 },
-    { field: "description", headerName: "Description", sortable: false, flex: 1 },
+    {
+      field: "description",
+      headerName: "Description",
+      sortable: false,
+      width: 420,
+      renderCell: ({ row }) => (
+        <span className="block max-w-[420px] whitespace-normal text-sm leading-5 text-slate-600">
+          {row.description || "—"}
+        </span>
+      ),
+    },
     { field: "sequence", headerName: "Seq", sortable: true, width: 60 },
     {
       field: "status",
       headerName: "Status",
       sortable: false,
       width: 100,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
       headerName: "Actions",
       sortable: false,
       sticky: "right",
-      width: 120,
+      width: 140,
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("about", "industry.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/about-gdb/why-industry-chooses-gdb-pcr/edit/${row.id}`)}
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/about-gdb/why-industry-chooses-gdb-pcr/edit/${row.id}`)}
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton
+                row={row}
+                entityName="industry item"
+                onConfirm={handleToggleStatus}
+              />
+            </>
           )}
         </div>
       ),

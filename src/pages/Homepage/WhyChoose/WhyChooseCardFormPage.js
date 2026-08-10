@@ -49,10 +49,24 @@ export default function WhyChooseCardFormPage() {
     }
   };
 
+  const handlePrimaryMediaChange = (url) => {
+    setForm((prev) => ({ ...prev, file_url: url }));
+    if (errors.file_url || (!url && errors.alt_text)) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.file_url;
+        if (!url) delete next.alt_text;
+        return next;
+      });
+    }
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const newErrors = {};
     if (!form.card_title.trim()) newErrors.card_title = "Card title is required";
+    if (!form.card_description.trim()) newErrors.card_description = "Card description is required";
+    if (!form.file_url) newErrors.file_url = "Video / Primary Media Upload is required";
     if (form.file_url && !form.alt_text.trim()) newErrors.alt_text = "Primary media alt text is required when media is uploaded";
     if (form.cover_image_url && !form.cover_image_alt.trim()) newErrors.cover_image_alt = "Cover image alt text is required when an image is uploaded";
 
@@ -63,7 +77,14 @@ export default function WhyChooseCardFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, alt_text: form.alt_text.trim(), cover_image_alt: form.cover_image_alt.trim(), sequence: Number(form.sequence) };
+      const payload = {
+        ...form,
+        card_title: form.card_title.trim(),
+        card_description: form.card_description.trim(),
+        alt_text: form.alt_text.trim(),
+        cover_image_alt: form.cover_image_alt.trim(),
+        sequence: Number(form.sequence),
+      };
       const res = isEdit ? await updateWhyChooseCard(id, payload) : await createWhyChooseCard(payload);
       if (res.success) { toast.success(isEdit ? "Card updated" : "Card created"); navigate("/homepage-management/whychoose"); }
       else toast.error(res.message || "Operation failed");
@@ -101,8 +122,16 @@ export default function WhyChooseCardFormPage() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600  block mb-1">Card Description</label>
-              <Textarea name="card_description" value={form.card_description} onChange={handle} rows={4} placeholder="Why this makes us unique..." />
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Card Description <span className="text-red-500">*</span></label>
+              <Textarea
+                name="card_description"
+                value={form.card_description}
+                onChange={handle}
+                rows={4}
+                placeholder="Why this makes us unique..."
+                error={!!errors.card_description}
+                errorMessage={errors.card_description}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
@@ -116,21 +145,24 @@ export default function WhyChooseCardFormPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-2">
-                Video / Primary Media Upload
+                Video / Primary Media Upload <span className="text-red-500">*</span>
               </label>
               <Upload
                 value={form.file_url}
-                onChange={(url) => {
-                  setForm((prev) => ({ ...prev, file_url: url }));
-                }}
+                onChange={handlePrimaryMediaChange}
                 mediaType="both"
                 accept="image/*,video/mp4,video/webm,video/quicktime"
                 maxSizeKB={500}
                 maxSizeMB={10}
               />
+              {errors.file_url && (
+                <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                  {errors.file_url}
+                </span>
+              )}
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-2">Primary Media Alt Text</label>
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Primary Media Alt Text <span className="text-red-500">*</span></label>
               <Input name="alt_text" value={form.alt_text} onChange={handle} placeholder="Describe the primary image or video" error={!!errors.alt_text} errorMessage={errors.alt_text} />
             </div>
           </div>

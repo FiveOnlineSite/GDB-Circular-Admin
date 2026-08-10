@@ -28,4 +28,5 @@ export const getWhyIndustryChoosesItems = () => api.get(`${base}/why-industry-ch
 export const getWhyIndustryChoosesItemById = (id) => api.get(`${base}/why-industry-chooses/items/${id}`).then(r => r.data);
 export const createWhyIndustryChoosesItem = (data) => api.post(`${base}/why-industry-chooses/items`, data).then(r => r.data);
 export const updateWhyIndustryChoosesItem = (id, data) => api.put(`${base}/why-industry-chooses/items/${id}`, data).then(r => r.data);
+export const toggleWhyIndustryChoosesItemStatus = (id) => api.patch(`${base}/why-industry-chooses/items/${id}/status`).then(r => r.data);
 export const deleteWhyIndustryChoosesItem = (id) => api.delete(`${base}/why-industry-chooses/items/${id}`).then(r => r.data);

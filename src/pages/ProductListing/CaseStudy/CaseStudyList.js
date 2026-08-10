@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit2, Search, X, Eye } from "lucide-react";
+import { Edit2, Search, X, Eye } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import { getCaseStudies } from "../../../services/productListing";
+import { getCaseStudies, updateCaseStudy } from "../../../services/productListing";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
@@ -33,6 +34,21 @@ export default function CaseStudyList() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateCaseStudy(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        fetchData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const selectStyle = "border border-[#E6E6E6] rounded-lg p-2.5 text-sm focus:border-[#981B1F] focus:outline-none bg-white   ";
 
   const columns = [
@@ -48,11 +64,7 @@ export default function CaseStudyList() {
     { field: "sequence", headerName: "Seq", sortable: true },
     {
       field: "status", headerName: "Status", sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "created_at", headerName: "Created", sortable: true,
@@ -72,15 +84,18 @@ export default function CaseStudyList() {
             <Eye className="h-4 w-4 text-[#981B1F]" />
           </Button>
           {hasPermission("product", "casestudy.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/product-listing/case-study/edit/${row.id}`)}
-              title="Edit"
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/product-listing/case-study/edit/${row.id}`)}
+                title="Edit"
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="case study" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),
@@ -94,11 +109,12 @@ export default function CaseStudyList() {
           <h1 className="text-2xl font-bold text-gray-900 ">Case Studies</h1>
           <p className="text-sm text-gray-500  mt-0.5">Manage customer case studies and success stories</p>
         </div>
+        {/* Add Case Study button hidden as requested.
         {hasPermission("product", "casestudy.create") && (
           <Button onClick={() => navigate("/product-listing/case-study/create")} style={{ backgroundColor: "#981B1F" }} className="text-white hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" />Add Case Study
           </Button>
-        )}
+        )} */}
       </div>
 
       {/* Filters */}
@@ -131,7 +147,7 @@ export default function CaseStudyList() {
         handlePageChange={p => setPagination(prev => ({ ...prev, current_page: p }))}
         handlePerPageChange={pp => setPagination(prev => ({ ...prev, per_page: pp, current_page: 1 }))}
         sequenceReorderScope="case_studies"
-        emptyMessage="No case studies found. Click 'Add Case Study' to create one."
+        emptyMessage="No case studies found."
       />
 
     </div>

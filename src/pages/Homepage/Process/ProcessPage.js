@@ -6,8 +6,9 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 import {
-  getProcessSection, updateProcessSection,
+  getProcessSection, updateProcessSection, updateProcessStep,
 } from "../../../services/homepage";
 import { usePermissionContext } from "../../../context/PermissionContext";
 
@@ -66,18 +67,30 @@ export default function ProcessPage() {
     }
   };
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateProcessStep(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        loadAll();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const columns = [
     {
       field: "file_url",
-      headerName: "Media",
+      headerName: "Image",
       sortable: false,
       renderCell: ({ row }) => {
         if (!row.file_url) return <span className="text-slate-400 text-xs">—</span>;
         const src = row.file_url.startsWith("data:") ? row.file_url : `${process.env.REACT_APP_API_URL || ""}${row.file_url}`;
-        const isVideo = row.file_url.match(/\.(mp4|webm)/) || row.file_url.includes("video");
-        return isVideo
-          ? <video src={src} className="h-10 w-16 object-cover rounded border" muted />
-          : <img src={src} alt={row.alt_text || ""} className="h-10 w-16 object-cover rounded border" />;
+        return <img src={src} alt={row.alt_text || row.step_title || ""} className="h-10 w-16 object-cover rounded border" />;
       },
     },
     { field: "step_title", headerName: "Step Title", sortable: true },
@@ -91,11 +104,7 @@ export default function ProcessPage() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -105,14 +114,17 @@ export default function ProcessPage() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("homepage", "process.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/homepage-management/process/steps/edit/${row.id}`)}
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/homepage-management/process/steps/edit/${row.id}`)}
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="process step" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

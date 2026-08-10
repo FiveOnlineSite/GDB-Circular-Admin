@@ -6,9 +6,11 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import ReusableDataTable from "../../components/common/ReusableDataTable";
+import { StatusActionButton, StatusBadge } from "../../components/common/StatusControls";
 import {
   getFacilitiesWhatWeDo,
   updateFacilitiesWhatWeDoSection,
+  updateFacilitiesWhatWeDoCard,
 } from "../../services/facilityService";
 import { usePermissionContext } from "../../context/PermissionContext";
 
@@ -67,6 +69,21 @@ export default function WhatWeDoPage() {
     }
   };
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateFacilitiesWhatWeDoCard(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        loadAll();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const columns = [
     {
       field: "icon_url",
@@ -101,11 +118,7 @@ export default function WhatWeDoPage() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -115,9 +128,12 @@ export default function WhatWeDoPage() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("facilities", "whatwedo.update") && (
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200" onClick={() => navigate(`/facilities/what-we-do/cards/edit/${row.id}`)}>
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200" onClick={() => navigate(`/facilities/what-we-do/cards/edit/${row.id}`)}>
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="facility service card" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

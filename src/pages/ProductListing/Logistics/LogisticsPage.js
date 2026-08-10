@@ -6,8 +6,10 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 import {
   getQualityAssuranceSection,
+  updateQualityAssuranceCard,
   updateQualityAssuranceSection,
 } from "../../../services/productListing";
 import { usePermissionContext } from "../../../context/PermissionContext";
@@ -68,6 +70,21 @@ export default function LogisticsPage() {
     }
   };
 
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateQualityAssuranceCard(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        load();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   const columns = [
     {
       field: "icon_url",
@@ -95,11 +112,7 @@ export default function LogisticsPage() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -109,15 +122,18 @@ export default function LogisticsPage() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("product", "quality.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/product-listing/quality-assurance/cards/edit/${row.id}`)}
-              title="Edit"
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/product-listing/quality-assurance/cards/edit/${row.id}`)}
+                title="Edit"
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="quality card" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

@@ -21,12 +21,18 @@ export const StatusBadge = ({ status }) => {
 
 const getItemLabel = (row, fallback) =>
   row?.card_title ||
+  row?.title ||
+  row?.step_title ||
   row?.product_name ||
   row?.material_name ||
   row?.facility_name ||
+  row?.question ||
+  row?.meta_title ||
+  row?.year ||
   row?.name ||
   row?.section_title ||
   row?.category_title ||
+  row?.page ||
   fallback;
 
 export const StatusActionButton = ({

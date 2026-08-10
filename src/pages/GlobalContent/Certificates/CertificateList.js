@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { Plus, Edit2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import ReusableDataTable from "../../../components/common/ReusableDataTable";
-import { getCertificates } from "../../../services/globalContent/certificates";
+import { getCertificates, updateCertificate } from "../../../services/globalContent/certificates";
 import { usePermissionContext } from "../../../context/PermissionContext";
+import { StatusActionButton, StatusBadge } from "../../../components/common/StatusControls";
 
 export default function CertificateList() {
   const { hasPermission } = usePermissionContext();
@@ -28,6 +29,21 @@ export default function CertificateList() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const handleToggleStatus = async (row) => {
+    try {
+      const res = await updateCertificate(row.id, {
+        ...row,
+        status: row.status === "active" ? "inactive" : "active",
+      });
+      if (res.success) {
+        toast.success(res.message || "Status updated successfully");
+        fetchData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
 
   const columns = [
     {
@@ -63,11 +79,7 @@ export default function CertificateList() {
       field: "status",
       headerName: "Status",
       sortable: false,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {row.status === "active" ? "Active" : "Inactive"}
-        </span>
-      ),
+      renderCell: ({ row }) => <StatusBadge status={row.status} />,
     },
     {
       field: "actions",
@@ -77,14 +89,17 @@ export default function CertificateList() {
       renderCell: ({ row }) => (
         <div className="flex items-center gap-2">
           {hasPermission("globalContent", "certificates.update") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-8 p-0 border-slate-200 text-slate-700"
-              onClick={() => navigate(`/global-content/certificates/edit/${row.id}`)}
-            >
-              <Edit2 className="h-4 w-4 text-[#C3662D]" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 border-slate-200 text-slate-700"
+                onClick={() => navigate(`/global-content/certificates/edit/${row.id}`)}
+              >
+                <Edit2 className="h-4 w-4 text-[#C3662D]" />
+              </Button>
+              <StatusActionButton row={row} entityName="certificate" onConfirm={handleToggleStatus} />
+            </>
           )}
         </div>
       ),

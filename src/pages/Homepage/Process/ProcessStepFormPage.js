@@ -61,10 +61,23 @@ export default function ProcessStepFormPage() {
     }
   };
 
+  const handleImageChange = (url) => {
+    setForm((prev) => ({ ...prev, file_url: url }));
+    if (errors.file_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.file_url;
+        return next;
+      });
+    }
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const newErrors = {};
     if (!form.step_title.trim()) newErrors.step_title = "Step title is required";
+    if (!form.step_description.trim()) newErrors.step_description = "Step description is required";
+    if (!form.file_url) newErrors.file_url = "Image upload is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -73,7 +86,13 @@ export default function ProcessStepFormPage() {
 
     try {
       setSubmitting(true);
-      const payload = { ...form, sequence: Number(form.sequence) };
+      const payload = {
+        ...form,
+        step_title: form.step_title.trim(),
+        step_description: form.step_description.trim(),
+        alt_text: form.alt_text.trim(),
+        sequence: Number(form.sequence),
+      };
       const res = isEdit ? await updateProcessStep(id, payload) : await createProcessStep(payload);
       if (res.success) { toast.success(isEdit ? "Step updated" : "Step created"); navigate("/homepage-management/process"); }
       else toast.error(res.message || "Operation failed");
@@ -117,8 +136,16 @@ export default function ProcessStepFormPage() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600  block mb-1">Step Description</label>
-              <Textarea name="step_description" value={form.step_description} onChange={handle} rows={4} placeholder="Describe this process step..." />
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Step Description <span className="text-red-500">*</span></label>
+              <Textarea
+                name="step_description"
+                value={form.step_description}
+                onChange={handle}
+                rows={4}
+                placeholder="Describe this process step..."
+                error={!!errors.step_description}
+                errorMessage={errors.step_description}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
@@ -138,22 +165,24 @@ export default function ProcessStepFormPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-2">
-                Image / Video Upload
+                Image Upload <span className="text-red-500">*</span>
               </label>
               <Upload
                 value={form.file_url}
-                onChange={(url) => {
-                  setForm((prev) => ({ ...prev, file_url: url }));
-                }}
-                mediaType="both"
-                accept="image/*,video/mp4,video/webm,video/quicktime"
+                onChange={handleImageChange}
+                mediaType="image"
+                accept="image/*"
                 maxSizeKB={500}
-                maxSizeMB={10}
               />
+              {errors.file_url && (
+                <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                  {errors.file_url}
+                </span>
+              )}
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-2">Alt Text</label>
-              <Input name="alt_text" value={form.alt_text} onChange={handle} placeholder="Image/video description" />
+              <Input name="alt_text" value={form.alt_text} onChange={handle} placeholder="Image description" />
             </div>
           </div>
         </div>

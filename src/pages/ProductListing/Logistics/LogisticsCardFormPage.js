@@ -65,10 +65,23 @@ export default function LogisticsCardFormPage() {
     }
   };
 
+  const handleIconChange = (url) => {
+    setForm((p) => ({ ...p, icon_url: url }));
+    if (errors.icon_url) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.icon_url;
+        return next;
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     if (!form.card_title.trim()) newErrors.card_title = "Card title is required";
+    if (!form.card_description.trim()) newErrors.card_description = "Card description is required";
+    if (!form.icon_url) newErrors.icon_url = "Icon / Image is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -123,8 +136,16 @@ export default function LogisticsCardFormPage() {
               <Input name="card_title" value={form.card_title} onChange={handle} placeholder="e.g. In-house Validation" error={!!errors.card_title} errorMessage={errors.card_title} />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-slate-600  block mb-1">Card Description</label>
-              <Textarea name="card_description" value={form.card_description} onChange={handle} rows={4} placeholder="Describe this quality assurance capability..." />
+              <label className="text-sm font-semibold text-slate-600  block mb-1">Card Description <span className="text-red-500">*</span></label>
+              <Textarea
+                name="card_description"
+                value={form.card_description}
+                onChange={handle}
+                rows={4}
+                placeholder="Describe this quality assurance capability..."
+                error={!!errors.card_description}
+                errorMessage={errors.card_description}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-1">Status</label>
@@ -137,8 +158,13 @@ export default function LogisticsCardFormPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
-              <label className="text-sm font-semibold text-slate-600  block mb-2">Icon / Image</label>
-              <Upload value={form.icon_url} onChange={(url) => setForm((p) => ({ ...p, icon_url: url }))} mediaType="image" accept="image/*" maxSizeKB={500} />
+              <label className="text-sm font-semibold text-slate-600  block mb-2">Icon / Image <span className="text-red-500">*</span></label>
+              <Upload value={form.icon_url} onChange={handleIconChange} mediaType="image" accept="image/*" maxSizeKB={500} />
+              {errors.icon_url && (
+                <span className="text-red-500 text-xs font-semibold mt-1.5 block text-left">
+                  {errors.icon_url}
+                </span>
+              )}
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-600  block mb-2">Icon Alt Text</label>
